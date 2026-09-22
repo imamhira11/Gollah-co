@@ -24,6 +24,16 @@
       color: #061910 !important;
       font-weight: 800 !important;
     }
+    .cat-active {
+      background-color: #1a2734 !important;
+      color: #00d672 !important;
+      font-weight: 700 !important;
+      border-left: 3px solid #00d672;
+    }
+    .cat-active .cat-badge {
+      background-color: #00d672 !important;
+      color: #061910 !important;
+    }
     @keyframes toastSlideIn {
       0% { opacity: 0; transform: translateY(15px) scale(0.96); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -39,26 +49,24 @@
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
     <div class="flex items-center gap-4 flex-1 max-w-xl">
-      <button onclick="toggleMobileSidebar()" class="text-slate-400 hover:text-white lg:hidden"><i data-lucide="menu" class="w-5 h-5"></i></button>
-      
       <!-- Brand Logo -->
-      <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('home')">
+      <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
           G
         </div>
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
 
-      <!-- Search Input -->
+      <!-- Live Search Input -->
       <div class="relative w-full max-w-xs hidden sm:block">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
-        <input type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+        <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
       </div>
     </div>
 
     <!-- Right Header Elements -->
     <div class="flex items-center gap-2.5">
-      <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer">
+      <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
         <span>Anti-Fraud Active</span>
       </div>
@@ -122,7 +130,7 @@
               <i data-lucide="life-buoy" class="w-4 h-4 text-blue-400"></i> Help & Support
             </button>
             <div id="auth-button-slot">
-              <!-- Dynamic Button Slot -->
+              <!-- Injected by Auth Engine -->
             </div>
           </div>
         </div>
@@ -138,9 +146,10 @@
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
 
-    <!-- LEFT SIDEBAR -->
+    <!-- LEFT SIDEBAR WITH ACTIVE LIVE FILTERS -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
+        <!-- Main Navigation Links -->
         <div class="flex flex-col gap-1">
           <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
             <i data-lucide="home" class="w-4 h-4"></i> Home
@@ -160,31 +169,44 @@
           </button>
         </div>
 
+        <!-- Fully Interactive Categories (No Broken Links) -->
         <div class="flex flex-col gap-1 text-xs">
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Featured</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>All</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Apps</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Games</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Surveys</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Sign ups</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
-          </div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
+          
+          <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
+          </button>
+
+          <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
+          </button>
+
+          <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
+          </button>
+
+          <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
+          </button>
+
+          <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
+          </button>
+
+          <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
+          </button>
+
+          <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
+          </button>
         </div>
       </div>
 
@@ -208,13 +230,13 @@
     <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll">
       
-      <!-- Anti-Fraud Security Notice Banner (Top of Stream) -->
+      <!-- Anti-Fraud Security Notice Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-blue-950/40 border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400 shrink-0"></i>
           <span><strong>Fair Play Policy:</strong> Strictly no VPNs, Proxies, or Emulators. Multi-accounting results in an immediate permanent ban.</span>
         </div>
-        <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Learn more</button>
+        <button onclick="openLegalModal('antifraud')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Learn more</button>
       </div>
 
       <!-- Main Dynamic Content -->
@@ -277,7 +299,7 @@
         </div>
       </div>
 
-      <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400 cursor-pointer" onclick="navigate('home')">
+      <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
         <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> 50% XP Boost Active</span>
         <i data-lucide="chevron-right" class="w-3 h-3"></i>
       </div>
@@ -324,7 +346,7 @@
 
   </div>
 
-  <!-- AUTH MODAL WITH USERNAME, PASSWORD TOGGLE & FRAUD WARNING -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -332,7 +354,6 @@
         <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- In-Modal Anti Fraud Reminder -->
       <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-[11px] text-rose-300 flex items-start gap-2">
         <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
         <span>VPN/Proxy strictly blocked. Only 1 account per device allowed.</span>
@@ -371,7 +392,7 @@
     </div>
   </div>
 
-  <!-- MEMOJI AVATAR SELECTOR MODAL (1.png to 17.png) -->
+  <!-- MEMOJI AVATAR SELECTOR MODAL -->
   <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -390,7 +411,7 @@
     </div>
   </div>
 
-  <!-- COMPREHENSIVE LEGAL & SUPPORT MODAL (Terms / Privacy / Anti-Fraud / Contact) -->
+  <!-- COMPREHENSIVE LEGAL & SUPPORT MODAL -->
   <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -400,9 +421,7 @@
         <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]">
-        <!-- Dynamic content injected here -->
-      </div>
+      <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
 
       <div class="pt-3 border-t border-[#202c38] flex justify-end">
         <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">
@@ -471,10 +490,63 @@
       closeAvatarModal();
     }
 
-    // 2. XP, Level & Ultra-Reliable Country Engine
+    // 2. Comprehensive Offer Database & Filter Engine
+    const ALL_OFFERS = [
+      // Featured
+      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', color: 'from-[#3b2a82] via-[#2a1e63] to-[#191140]' },
+      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', color: 'from-[#0e1620] via-[#152332] to-[#1e344a]' },
+      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', color: 'from-[#1f0f0b] via-[#3a1a12] to-[#59261a]' },
+      
+      // Apps
+      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium' },
+      { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile' },
+      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech' },
+      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social' },
+
+      // Games
+      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino' },
+      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino' },
+      { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60' },
+      { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15' },
+
+      // Surveys
+      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins' },
+      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins' },
+      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate' },
+
+      // GPT & Sign ups
+      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant' },
+      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia' },
+      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg' },
+      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify' }
+    ];
+
+    let currentCategory = 'featured';
+    let searchQuery = '';
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      const categories = ['featured', 'all', 'apps', 'games', 'surveys', 'gpt', 'signups'];
+      categories.forEach(c => {
+        const el = document.getElementById('cat-' + c);
+        if (el) {
+          if (c === cat) el.className = "cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+          else el.className = "w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+        }
+      });
+      if (currentTab !== 'home') navigate('home');
+      else renderHome();
+    }
+
+    function handleOfferSearch(q) {
+      searchQuery = q.toLowerCase().trim();
+      if (currentTab !== 'home') navigate('home');
+      else renderHome();
+    }
+
+    // 3. User, Auth, XP & Location Engine
     let currentUser = null;
     let userCoins = 0;
-    let userEarnedTotal = 0;
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
@@ -558,7 +630,6 @@
           const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
-            userEarnedTotal = coins;
             displayName = profile.username || displayName;
             userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
             if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
@@ -594,7 +665,6 @@
         `;
       } else {
         userCoins = 0;
-        userEarnedTotal = 0;
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-email-display').innerText = "Not logged in";
         document.getElementById('header-coins').innerText = "0";
@@ -671,13 +741,13 @@
       if (isSignupMode && (!username || username.length < 3)) return alert("Username must be at least 3 characters.");
 
       const submitBtn = document.getElementById('auth-submit-btn');
-      submitBtn.innerText = "Verifying IP Security...";
+      submitBtn.innerText = "Verifying Security...";
       submitBtn.disabled = true;
 
       try {
         if (isSignupMode) {
           const detectedCountry = await getUserCountry();
-          submitBtn.innerText = "Creating Verified Account...";
+          submitBtn.innerText = "Creating Account...";
 
           const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
           if (existingProfile) {
@@ -796,7 +866,7 @@
       popupTimer = setTimeout(() => card.classList.add('hidden'), 5000);
     }
 
-    // Interactive Legal & Policy Engine (Zero Broken Links)
+    // Legal Modals
     function openLegalModal(type) {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const titleEl = document.getElementById('legal-modal-title');
@@ -812,8 +882,6 @@
             <p>Users must be at least 13 years of age. Each person is strictly limited to <strong>ONE (1) account</strong>. Creating multiple accounts using identical IP addresses, physical devices, or spoofed credentials constitutes a breach of contract.</p>
             <h4 class="font-bold text-white text-sm">3. Virtual Currency & Rewards</h4>
             <p>Coins and XP are virtual platform points with no direct fiat cash value outside of our approved redemption shop. We reserve the right to review, withhold, or revoke coins obtained through invalid, fraudulent, or charged-back offer completions.</p>
-            <h4 class="font-bold text-white text-sm">4. Payouts & Verification</h4>
-            <p>Withdrawals in cryptocurrency (Litecoin, USDT, Bitcoin) are processed following standard compliance and anti-fraud verification checks. Requests may take 1 to 24 hours depending on network congestion.</p>
           </div>
         `;
       } else if (type === 'privacy') {
@@ -822,10 +890,8 @@
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Information We Collect</h4>
             <p>We collect your email address, chosen username, public IP address, browser user-agent, and country code to deliver accurate regional reward opportunities and prevent multi-account abuse.</p>
-            <h4 class="font-bold text-white text-sm">2. Offerwall & Advertising Partners</h4>
-            <p>When you interact with third-party offerwalls (such as Monlix, Lootably, BitLabs, TheoremReach), your anonymous user ID is forwarded via secure postbacks solely to credit your reward upon completion.</p>
-            <h4 class="font-bold text-white text-sm">3. Data Security & Retention</h4>
-            <p>All sensitive transactions and account credentials are stored using industry-standard encrypted Supabase infrastructure with SSL 256-bit data transmission. We never sell your personal data to unauthorized third parties.</p>
+            <h4 class="font-bold text-white text-sm">2. Offerwall Partners</h4>
+            <p>When you interact with third-party offerwalls, your anonymous user ID is forwarded via secure postbacks solely to credit your reward upon completion.</p>
           </div>
         `;
       } else if (type === 'antifraud') {
@@ -837,16 +903,14 @@
               <li><strong>No Virtual Private Networks (VPN) or Proxies:</strong> All VPN, Tor, SSH tunneling, or data center IP proxies are strictly prohibited.</li>
               <li><strong>No Android/iOS Emulators:</strong> Running apps on Bluestacks, Nox, LDPlayer, or virtual machines will trigger an immediate permanent device ban.</li>
               <li><strong>No Automated Clickers or Bots:</strong> Any script, browser extension, or auto-clicker used to simulate survey or task activity results in total asset forfeiture.</li>
-              <li><strong>Fraudulent Chargebacks:</strong> Offerwall providers report all reversed/fake leads. Fraudulent accounts are blacklisted across the entire publisher network.</li>
             </ul>
           </div>
-          <p class="text-[11px] text-slate-400">Our automated detection engine inspects TCP/IP headers, WebRTC leaks, and hardware fingerprint metrics on every transaction.</p>
         `;
       } else if (type === 'contact') {
         titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Help & Publisher Support`;
         bodyEl.innerHTML = `
           <div class="space-y-3">
-            <p>Need help with a missing offer credit, business partnership, or publisher network inquiries? Reach out directly to our 24/7 dedicated support desk.</p>
+            <p>Need help with a missing offer credit or partnership inquiries? Contact our 24/7 support desk.</p>
             <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
               <div class="flex items-center gap-2">
                 <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
@@ -854,17 +918,11 @@
                 <span class="text-emerald-400 font-mono">support@gollah.co</span>
               </div>
               <div class="flex items-center gap-2">
-                <i data-lucide="message-square" class="w-4 h-4 text-blue-400"></i>
-                <span class="font-bold text-white">Discord Community:</span>
-                <span class="text-blue-400 font-mono">discord.gg/gollah</span>
-              </div>
-              <div class="flex items-center gap-2">
                 <i data-lucide="briefcase" class="w-4 h-4 text-purple-400"></i>
-                <span class="font-bold text-white">Publisher & Advertising Desk:</span>
+                <span class="font-bold text-white">Publisher Inquiries:</span>
                 <span class="text-purple-400 font-mono">partnerships@gollah.co</span>
               </div>
             </div>
-            <p class="text-[11px] text-slate-400">Average response time for ticket resolutions is under 6 hours.</p>
           </div>
         `;
       }
@@ -884,109 +942,150 @@
         const el = document.getElementById('nav-' + v);
         if (el) el.className = (v === view) ? "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition" : "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
       });
-      if (view === 'home' || view === 'premium') renderHome();
+      if (view === 'home') renderHome();
+      else if (view === 'premium') { currentCategory = 'all'; renderHome(); }
       else if (view === 'profile') renderProfile();
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
       if (window.lucide) lucide.createIcons();
     }
 
+    // Dynamic Filtered Home Rendering
     function renderHome() {
       const container = document.getElementById('app-content');
+      
+      // Filter offers based on active category & search query
+      let filtered = ALL_OFFERS;
+      if (currentCategory === 'featured') {
+        filtered = ALL_OFFERS.filter(o => o.featured);
+      } else if (currentCategory !== 'all') {
+        filtered = ALL_OFFERS.filter(o => o.category === currentCategory);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(o => 
+          o.name.toLowerCase().includes(searchQuery) || 
+          o.provider.toLowerCase().includes(searchQuery) ||
+          o.category.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      const categoryTitleMap = {
+        'featured': '🔥 Featured Tasks & Surveys',
+        'all': '⚡ All Active Rewarded Tasks',
+        'apps': '📱 Best Mobile Apps',
+        'games': '🎮 High-Paying Game Quests',
+        'surveys': '📝 Fast Rewarded Surveys',
+        'gpt': '💡 GPT Tasks & Quizzes',
+        'signups': '✍️ High-Reward Sign Ups'
+      };
+
+      const title = categoryTitleMap[currentCategory] || 'Active Offers';
+
+      let offersHTML = '';
+      filtered.forEach(o => {
+        offersHTML += `
+          <div onclick="claimTask(${o.coins}, '${o.name}')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-lg group">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-xs text-[#00d672] group-hover:bg-[#00d672] group-hover:text-black transition">
+                ${o.icon}
+              </div>
+              <span class="text-[10px] bg-[#1a2530] text-slate-400 px-2 py-0.5 rounded font-mono font-semibold">${o.provider}</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white block truncate mb-1">${o.name}</h4>
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${o.tag || o.category}</span>
+            </div>
+            <div class="pt-3 mt-3 border-t border-[#1d2a37] flex items-center justify-between">
+              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ${o.coins.toLocaleString()}</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">+${Math.floor(o.coins / 1000)} XP</span>
+            </div>
+          </div>
+        `;
+      });
+
+      if (filtered.length === 0) {
+        offersHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 flex flex-col items-center gap-2">
+            <i data-lucide="inbox" class="w-8 h-8 text-slate-600"></i>
+            <p class="text-xs">No active offers match your search or filter.</p>
+            <button onclick="filterCategory('all'); document.getElementById('offer-search-input').value=''; searchQuery='';" class="text-xs text-[#00d672] underline font-bold mt-1">Reset Filters</button>
+          </div>
+        `;
+      }
+
       container.innerHTML = `
+        <!-- Live Ticker Bar -->
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">an hour ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">1602</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">2 mins ago</span></div>
+            <span class="text-white font-bold text-xs ml-2">1,602</span>
           </div>
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">an hour ago</span></div>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">14 mins ago</span></div>
             <span class="text-white font-bold text-xs ml-2">632</span>
           </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div onclick="claimTask(2500, 'TheoremReach Surveys')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
-            <div>
-              <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
-              <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <span class="text-xs font-bold text-white">TheoremReach Sur...</span>
-              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ∞</span>
-            </div>
-          </div>
-
-          <div onclick="claimTask(1138, 'Neverwinter Game')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
-            <div class="flex justify-center items-center h-20">
-              <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <div><span class="text-xs font-bold text-white block">Neverwinter</span><span class="text-[10px] text-slate-400">Lootably</span></div>
-              <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 1,138</span>
-            </div>
-          </div>
-
-          <div onclick="claimTask(43500, 'RAID Shadow Legends')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
-            <div class="flex justify-center items-center h-20">
-              <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <div><span class="text-xs font-bold text-white block">RAID Shadow Lege...</span><span class="text-[10px] text-slate-400">Adgate</span></div>
-              <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 43,500</span>
-            </div>
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">₮</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">USDT</span><span class="text-slate-500 text-[10px]">22 mins ago</span></div>
+            <span class="text-white font-bold text-xs ml-2">5,000</span>
           </div>
         </div>
 
+        <!-- Featured Big Spotlight Cards (shown on 'featured' or 'all') -->
+        ${(currentCategory === 'featured' || currentCategory === 'all') && !searchQuery ? `
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div onclick="claimTask(2500, 'TheoremReach Surveys')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
+              <div>
+                <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
+                <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <span class="text-xs font-bold text-white">TheoremReach Surveys</span>
+                <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● 2,500</span>
+              </div>
+            </div>
+
+            <div onclick="claimTask(1138, 'Neverwinter Game')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
+              <div class="flex justify-center items-center h-20">
+                <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <div><span class="text-xs font-bold text-white block">Neverwinter</span><span class="text-[10px] text-slate-400">Lootably</span></div>
+                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 1,138</span>
+              </div>
+            </div>
+
+            <div onclick="claimTask(43500, 'RAID Shadow Legends')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
+              <div class="flex justify-center items-center h-20">
+                <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <div><span class="text-xs font-bold text-white block">RAID Shadow Legends</span><span class="text-[10px] text-slate-400">Adgate</span></div>
+                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 43,500</span>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Active Filtered Category Stream -->
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> Premium Tasks
+              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> ${title}
             </h2>
-            <span class="text-xs text-slate-400 hover:text-white cursor-pointer">View all ›</span>
+            <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div onclick="claimTask(19136, 'Swagbucks')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-blue-400 text-sm">SB</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Swagbuck...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 19,136</span>
-            </div>
-
-            <div onclick="claimTask(25600, 'Slotastic')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xs">Slotastic</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Slotastic [...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 25,600</span>
-            </div>
-
-            <div onclick="claimTask(25600, 'Grande Vegas')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-xs">Vegas</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Grande Ve...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 25,600</span>
-            </div>
-
-            <div onclick="claimTask(64, 'Test Your Knowledge')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-xs">Edge</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Test Your ...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 64</span>
-            </div>
-
-            <div onclick="claimTask(4480, 'SiriusXM')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">Sirius</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">SiriusXM</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 4,480</span>
-            </div>
-
-            <div onclick="claimTask(1024, 'Apple Watch Quiz')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-xs">Watch</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Apple Wat...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 1,024</span>
-            </div>
+          <!-- Dynamic Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${offersHTML}
           </div>
         </div>
       `;
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderProfile() {
