@@ -597,9 +597,24 @@
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
-          const st = (n.status || '').toLowerCase();
-          const isComplete = st === 'complete' || st === 'completed';
           
+          // Cross-check real withdrawal status if this notification is a cashout
+          let currentStatus = (n.status || '').toLowerCase();
+          if (n.title && n.title.includes('Cashout')) {
+            const matchedW = userWithdrawals.find(w => n.message && n.message.includes(w.amount));
+            if (matchedW && (matchedW.status || '').toUpperCase() === 'COMPLETED') {
+              currentStatus = 'completed';
+            }
+          }
+
+          const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
+          
+          // Fix message text dynamically if completed
+          let displayMessage = n.message;
+          if (isComplete && displayMessage.includes('Status: PENDING')) {
+            displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
+          }
+
           item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
           item.innerHTML = `
             <div class="flex-1 flex flex-col gap-0.5">
@@ -607,7 +622,7 @@
                 <span class="font-bold text-white text-xs">${n.title}</span>
                 <span class="text-[10px] text-slate-500">• ${n.time}</span>
               </div>
-              <p class="text-xs text-slate-300 leading-snug">${n.message}</p>
+              <p class="text-xs text-slate-300 leading-snug">${displayMessage}</p>
             </div>
             
             <div class="shrink-0 pt-0.5">
