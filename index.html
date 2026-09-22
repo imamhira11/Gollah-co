@@ -129,9 +129,6 @@
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
               <span id="dropdown-notif-pill" class="bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">1</span>
             </button>
-            <button onclick="openAvatarModal()" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
-              <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Memoji Face
-            </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
             </button>
@@ -589,7 +586,7 @@
       closeAvatarModal();
     }
 
-    // Web Audio Synthesizer: Sharp "Taak" Mechanical Sound
+    // Web Audio Synthesizer: Sharp "Taak" Mechanical Sound (Exclusively for Cashout)
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -599,14 +596,14 @@
       return audioCtx;
     }
 
-    function playTaakSound(variant = 'normal') {
+    function playTaakSound() {
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(variant === 'cashout' ? 920 : 880, now);
+        osc.frequency.setValueAtTime(920, now);
         osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
@@ -857,7 +854,6 @@
       const offer = ALL_OFFERS.find(o => o.id === offerId);
       if (!offer) return;
 
-      playTaakSound();
       activeOfferData = offer;
       document.getElementById('modal-offer-title').innerText = offer.name;
       document.getElementById('modal-offer-provider').innerText = `Provided by ${offer.provider}`;
@@ -880,7 +876,6 @@
       
       const offer = activeOfferData;
       closeOfferModal();
-      playTaakSound();
 
       addNotification({
         title: `${offer.name} Clicked`,
@@ -902,7 +897,6 @@
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
       }
 
-      playTaakSound('complete');
       addNotification({
         title: `${offerName} Complete!`,
         message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
@@ -917,18 +911,17 @@
       });
     };
 
-    let selectedCashoutCrypto = 'Binance Pay';
-    let selectedCashoutIcon = 'B';
+    let selectedCashoutCrypto = 'Litecoin (LTC)';
+    let selectedCashoutIcon = 'Ł';
     let cashoutMinCoins = 300;
 
-    function openCustomCashoutModal(crypto, minLimit = 300, icon = 'B') {
+    function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
       if (!currentUser) {
         alert("Please login to request cashouts!");
         openAuthModal(false);
         return;
       }
 
-      playTaakSound();
       selectedCashoutCrypto = crypto;
       selectedCashoutIcon = icon;
       cashoutMinCoins = minLimit;
@@ -964,7 +957,6 @@
     }
 
     function setCashoutMax() {
-      playTaakSound();
       document.getElementById('cashout-amount-input').value = userCoins;
       calculateEstimatedCrypto();
     }
@@ -1053,8 +1045,8 @@
         // Close Modal Immediately
         closeCashoutModal();
 
-        // 1. Play the crisp mechanical Taak sound
-        playTaakSound('cashout');
+        // Play the crisp mechanical Taak sound ONLY on cashout submission
+        playTaakSound();
 
         // 2. Add Notification (persisted to localStorage & Supabase)
         addNotification({
@@ -1100,7 +1092,6 @@
         await fetchUserWithdrawals();
       }
 
-      playTaakSound('complete');
       triggerDollahFloatingToast({
         time: 'just now',
         title: `Withdrawal Paid!`,
@@ -1740,23 +1731,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Binance Pay Card -->
-          <div onclick="openCustomCashoutModal('Binance Pay', 300, 'B')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
-                B
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-sm">Binance Pay (UID / Email / BEP20)</h3>
-                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins • Instant Zero Fee</span>
-              </div>
-            </div>
-            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
-              Withdraw
-            </button>
-          </div>
-
-          <!-- Litecoin Card -->
+          <!-- Litecoin Card (Left Side) -->
           <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
@@ -1765,6 +1740,22 @@
               <div>
                 <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
                 <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins • Direct Wallet</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+
+          <!-- Binance Pay Card (Right Side) -->
+          <div onclick="openCustomCashoutModal('Binance Pay', 300, 'B')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+                B
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Binance Pay (UID / Email / BEP20)</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins • Instant Zero Fee</span>
               </div>
             </div>
             <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
@@ -1797,7 +1788,6 @@
       const input = document.getElementById('chat-input');
       const val = input.value.trim();
       if (!val) return;
-      playTaakSound();
       const stream = document.getElementById('chat-stream');
       const sender = currentUser ? (document.getElementById('profile-username-display').innerText) : "Guest";
       const msg = document.createElement('div');
