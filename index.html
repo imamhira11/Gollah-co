@@ -597,7 +597,8 @@
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
-          const isComplete = (n.status || '').toLowerCase() === 'complete' || (n.status || '').toLowerCase() === 'completed';
+          const st = (n.status || '').toLowerCase();
+          const isComplete = st === 'complete' || st === 'completed';
           
           item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
           item.innerHTML = `
@@ -614,13 +615,11 @@
                 <div class="w-5 h-5 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/30" title="Complete">
                   ✓
                 </div>
-              ` : (n.status === 'click' ? `
-                <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs" title="Tracking">
+              ` : `
+                <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs" title="Pending">
                   <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                 </div>
-              ` : `
-                <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80 mt-1" title="Pending"></div>
-              `)}
+              `}
             </div>
           `;
           list.appendChild(item);
@@ -951,7 +950,7 @@
             method: d.method,
             amount: d.coins_amount,
             address: d.destination_address,
-            status: d.status
+            status: (d.status || 'PENDING').toUpperCase()
           }));
           saveWithdrawalsToStorage();
           if (currentTab === 'profile') renderProfile();
@@ -967,7 +966,7 @@
       addNotification({
         title: `Withdrawal Complete!`,
         message: `Your cashout has been confirmed and broadcasted to the blockchain.`,
-        status: 'complete'
+        status: 'completed'
       });
 
       triggerDollahFloatingToast({
@@ -1519,7 +1518,7 @@
                 🟡
               </div>
               <div>
-                <h3 class="font-bold text-sm text-white">Binance Pay</h3>
+                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
                 <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
               </div>
             </div>
