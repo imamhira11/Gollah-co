@@ -78,14 +78,17 @@
       <!-- Profile Avatar Button -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl">
-          <img id="header-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=GollahGuest" class="w-6 h-6 rounded-lg bg-[#202c38]" />
+          <img id="header-avatar-img" src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Sunglasses.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
         <!-- Dynamic Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
-          <div class="flex flex-col items-center text-center">
-            <img id="dropdown-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=GollahGuest" class="w-12 h-12 rounded-xl border border-[#00d672] bg-[#0b1116] mb-2" />
+          <div class="flex flex-col items-center text-center relative">
+            <div class="relative group cursor-pointer" onclick="openAvatarModal()">
+              <img id="dropdown-avatar-img" src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Sunglasses.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] bg-[#0b1116] mb-1 p-0.5 object-cover" />
+              <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[9px] text-white font-bold">Edit</div>
+            </div>
             <span id="profile-level-badge" class="text-[10px] bg-slate-700 text-white font-black px-1.5 py-0.2 rounded">Lvl 1</span>
             <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
             <span id="profile-email-display" class="text-[11px] font-mono text-slate-400 mt-0.5 truncate max-w-[200px]">Not logged in</span>
@@ -102,11 +105,14 @@
           </div>
 
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
+            <button onclick="openAvatarModal()" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300">
+              <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Avatar
+            </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300">
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
             </button>
             <div id="auth-button-slot">
-              <!-- Injected dynamically -->
+              <!-- Injected via Auth State -->
             </div>
           </div>
         </div>
@@ -266,7 +272,7 @@
 
   </div>
 
-  <!-- AUTH MODAL WITH USERNAME & PASSWORD SHOW/HIDE TOGGLE -->
+  <!-- AUTH MODAL WITH USERNAME & PASSWORD SHOW/HIDE -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -275,19 +281,16 @@
       </div>
       
       <div class="flex flex-col gap-3">
-        <!-- Username Input (Visible only in Signup Mode) -->
         <div id="auth-username-container" class="hidden">
           <label class="text-[11px] text-slate-400 block mb-1">Username</label>
           <input id="auth-username-input" type="text" placeholder="e.g. Kaallu99" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
         </div>
 
-        <!-- Email Input -->
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Email Address</label>
           <input id="auth-email-input" type="email" placeholder="name@example.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
         </div>
 
-        <!-- Password Input with Show/Hide Eye Toggle -->
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Password</label>
           <div class="relative flex items-center">
@@ -310,6 +313,28 @@
     </div>
   </div>
 
+  <!-- MEMOJI FACE AVATAR SELECTOR MODAL (EXACT MATCH TO USER SCREENSHOT) -->
+  <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div>
+          <h3 class="font-black text-base text-white flex items-center gap-1.5">😊 Complete Your Profile</h3>
+          <p class="text-xs text-slate-400">Select your favorite Memoji Avatar</p>
+        </div>
+        <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Avatar Grid (Scrollable) -->
+      <div id="avatar-grid-list" class="grid grid-cols-5 sm:grid-cols-6 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="pt-2 border-t border-[#202c38] flex justify-end">
+        <button onclick="closeAvatarModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // 1. Supabase Initialization
     const SUPABASE_URL = "https://rcsrazcvehnjgflkcslo.supabase.co";
@@ -328,14 +353,72 @@
       console.warn("Supabase init error:", e);
     }
 
+    // 2. High-Quality 3D Memoji Avatar Catalog (Matching Screenshot)
+    const memojiAvatars = [
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1528892952291-009c663ce843?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80"
+    ];
+
     let currentUser = null;
     let userCoins = 0;
+    let selectedAvatar = memojiAvatars[0];
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
     let profileFilter = 'on-hold';
 
-    // 2. Auth State Engine
+    // Populate Avatar Grid
+    function renderAvatarGrid() {
+      const container = document.getElementById('avatar-grid-list');
+      if (!container) return;
+      container.innerHTML = '';
+      memojiAvatars.forEach((url) => {
+        const div = document.createElement('div');
+        div.className = "w-14 h-14 rounded-full overflow-hidden border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-105 p-0.5 bg-[#1f2c38]";
+        div.onclick = () => chooseAvatar(url);
+        div.innerHTML = `<img src="${url}" class="w-full h-full rounded-full object-cover" />`;
+        container.appendChild(div);
+      });
+    }
+
+    function openAvatarModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      renderAvatarGrid();
+      document.getElementById('avatar-modal').classList.remove('hidden');
+    }
+
+    function closeAvatarModal() {
+      document.getElementById('avatar-modal').classList.add('hidden');
+    }
+
+    async function chooseAvatar(url) {
+      selectedAvatar = url;
+      document.getElementById('header-avatar-img').src = url;
+      document.getElementById('dropdown-avatar-img').src = url;
+
+      if (db && currentUser) {
+        await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+      }
+      closeAvatarModal();
+    }
+
+    // 3. Auth State Watcher
     async function initAuth() {
       if (!db) return;
       try {
@@ -346,7 +429,7 @@
           syncUserSession(session ? session.user : null);
         });
       } catch (err) {
-        console.error("Session check error:", err);
+        console.error("Session init error:", err);
       }
     }
 
@@ -357,11 +440,16 @@
       if (user) {
         let coins = 0;
         let displayName = user.email.split('@')[0];
+        let avatarUrl = selectedAvatar;
+
         try {
-          const { data: profile } = await db.from('profiles').select('coins, username, level').eq('id', user.id).single();
+          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
             displayName = profile.username || displayName;
+            if (profile.avatar_url && profile.avatar_url.startsWith('http')) {
+              avatarUrl = profile.avatar_url;
+            }
             document.getElementById('profile-level-badge').innerText = "Lvl " + (profile.level || 1);
           }
         } catch (e) {
@@ -369,11 +457,12 @@
         }
 
         userCoins = coins;
+        selectedAvatar = avatarUrl;
         document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-        document.getElementById('header-avatar-img').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${user.id}`;
-        document.getElementById('dropdown-avatar-img').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${user.id}`;
+        document.getElementById('header-avatar-img').src = avatarUrl;
+        document.getElementById('dropdown-avatar-img').src = avatarUrl;
         
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -386,8 +475,8 @@
         document.getElementById('profile-email-display').innerText = "Not logged in";
         document.getElementById('profile-level-badge').innerText = "Lvl 1";
         document.getElementById('header-coins').innerText = "0";
-        document.getElementById('header-avatar-img').src = `https://api.dicebear.com/7.x/bottts/svg?seed=GollahGuest`;
-        document.getElementById('dropdown-avatar-img').src = `https://api.dicebear.com/7.x/bottts/svg?seed=GollahGuest`;
+        document.getElementById('header-avatar-img').src = memojiAvatars[0];
+        document.getElementById('dropdown-avatar-img').src = memojiAvatars[0];
         
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -408,7 +497,6 @@
 
     function closeAuthModal() {
       document.getElementById('auth-modal').classList.add('hidden');
-      // Reset password field to hidden
       isPasswordVisible = false;
       document.getElementById('auth-pass-input').type = 'password';
       const icon = document.getElementById('pass-toggle-icon');
@@ -436,7 +524,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Password Show / Hide Functionality
     function togglePasswordVisibility() {
       const passInput = document.getElementById('auth-pass-input');
       const icon = document.getElementById('pass-toggle-icon');
@@ -482,39 +569,44 @@
 
       try {
         if (isSignupMode) {
-          // 1. Double check duplicate user security via Supabase profiles
+          // Check username availability
           const { data: existingProfile } = await db.from('profiles').select('id, username').eq('username', username).maybeSingle();
           if (existingProfile) {
-            alert("This username is already taken! Please choose another username.");
+            alert("This username is already taken! Please choose another.");
             submitBtn.disabled = false;
             updateAuthModalUI();
             return;
           }
+
+          // Random default Memoji face from list
+          const randomMemoji = memojiAvatars[Math.floor(Math.random() * memojiAvatars.length)];
 
           const { data, error } = await db.auth.signUp({ 
             email, 
             password,
             options: {
               data: {
-                user_name: username
+                user_name: username,
+                avatar_url: randomMemoji
               }
             }
           });
           
           if (error) {
             if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("unique")) {
-              alert("An account with this email already exists! Please click Login instead.");
+              alert("An account with this email already exists! Please click Login.");
             } else {
               alert("Signup Error: " + error.message);
             }
           } else {
-            // Check if identities is empty (Supabase returns empty identities array when user already exists)
             if (data.user && data.user.identities && data.user.identities.length === 0) {
               alert("An account with this email already exists! Please click Login.");
             } else {
               alert("Account created successfully! Welcome to Gollah, " + username);
               closeAuthModal();
               syncUserSession(data.user);
+              // Open Avatar picker right after signup
+              setTimeout(() => openAvatarModal(), 600);
             }
           }
         } else {
@@ -544,7 +636,7 @@
       alert("Signed out successfully.");
     }
 
-    // Synthesizer Audio
+    // Audio Engine
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
