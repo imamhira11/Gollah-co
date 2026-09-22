@@ -689,7 +689,7 @@
       list.innerHTML = '';
 
       if (userNotifications.length === 0) {
-        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No task notifications yet.</div>`;
+        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
@@ -975,6 +975,13 @@
         userWithdrawals.unshift(newRecord);
         saveWithdrawalsToStorage();
 
+        // ADD WITHDRAWAL TO NOTIFICATIONS MODAL & BACKUP
+        addNotification({
+          title: `${selectedCashoutCrypto} Cashout`,
+          message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 10)}... Status: PENDING.`,
+          status: 'click'
+        });
+
         if (db) {
           await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
           const { data, error } = await db.from('withdrawals').insert({
@@ -1031,6 +1038,12 @@
       if (!db || !currentUser) return;
       await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
       await fetchUserWithdrawals();
+
+      addNotification({
+        title: `Withdrawal Complete!`,
+        message: `Your cashout has been confirmed and broadcasted to the blockchain.`,
+        status: 'complete'
+      });
 
       triggerDollahFloatingToast({
         time: 'just now',
