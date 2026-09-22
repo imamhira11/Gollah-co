@@ -24,12 +24,12 @@
       color: #061910 !important;
       font-weight: 800 !important;
     }
-    @keyframes slideFeed {
-      0% { opacity: 0; transform: translateY(6px); }
-      100% { opacity: 1; transform: translateY(0); }
+    @keyframes toastSlideIn {
+      0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .feed-animated {
-      animation: slideFeed 0.35s ease-out;
+    .toast-animate-in {
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
@@ -120,7 +120,7 @@
   <div class="flex-1 flex w-full overflow-hidden">
 
     <!-- LEFT SIDEBAR -->
-    <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none">
+    <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-1">
           <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
@@ -173,19 +173,19 @@
         </div>
       </div>
 
-      <!-- BOTTOM LIVE DYNAMIC ROTATING FEED (Auto-updates every 3.5s) -->
-      <div id="live-bottom-card" class="bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-lg feed-animated cursor-pointer transition">
+      <!-- SOUND NOTIFICATION POPUP CARD (Appears upon Cashout or Offer Completion) -->
+      <div id="live-bottom-card" class="hidden bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-2xl transition cursor-pointer">
         <div class="flex items-center gap-2">
           <div id="feed-icon" class="w-8 h-8 rounded-lg bg-[#1a2532] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</div>
           <div class="flex flex-col">
-            <span id="feed-time" class="text-[9px] text-slate-500">seconds ago</span>
-            <span id="feed-title" class="text-[11px] font-bold text-white">LTC</span>
-            <span id="feed-subtitle" class="text-[9px] text-slate-400">Pending approval</span>
+            <span id="feed-time" class="text-[9px] text-slate-500">just now</span>
+            <span id="feed-title" class="text-[11px] font-bold text-white">LTC Cashout</span>
+            <span id="feed-subtitle" class="text-[9px] text-slate-400">Withdrawal Processed</span>
           </div>
         </div>
         <div class="text-right">
-          <span id="feed-badge" class="text-[9px] bg-purple-500/20 text-purple-300 font-bold px-1.5 py-0.2 rounded block mb-0.5">PENDING</span>
-          <span id="feed-coins" class="text-[11px] font-bold text-amber-400">● 111,087</span>
+          <span id="feed-badge" class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded block mb-0.5">COMPLETE</span>
+          <span id="feed-coins" class="text-[11px] font-bold text-amber-400">● 25,000</span>
         </div>
       </div>
     </aside>
@@ -267,6 +267,100 @@
     let currentTab = 'home';
     let profileFilter = 'on-hold';
 
+    // --- Web Audio Synthetic Chime Sound (Zero external audio lag / No blocked files) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playRewardSound(type = 'coin') {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        if (type === 'coin') {
+          // Sweet double bell chime (Offer completion)
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+
+          osc1.type = 'sine';
+          osc2.type = 'triangle';
+
+          osc1.frequency.setValueAtTime(987.77, now); // B5
+          osc1.frequency.setValueAtTime(1318.51, now + 0.1); // E6
+
+          osc2.frequency.setValueAtTime(987.77, now);
+          osc2.frequency.setValueAtTime(1318.51, now + 0.1);
+
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+          osc1.connect(gainNode);
+          osc2.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.55);
+          osc2.stop(now + 0.55);
+        } else {
+          // Cashout cash register / payout ping
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.setValueAtTime(880, now + 0.08); // A5
+          osc.frequency.setValueAtTime(1760, now + 0.18); // A6
+
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.65);
+        }
+      } catch (e) {
+        console.warn("Audio play prevented:", e);
+      }
+    }
+
+    // --- Dynamic Slide-in Notification Popup with Sound ---
+    let popupTimer = null;
+    function triggerActionPopup(data, soundType = 'coin') {
+      const card = document.getElementById('live-bottom-card');
+      if (!card) return;
+
+      // Play Sound
+      playRewardSound(soundType);
+
+      // Populate Data
+      document.getElementById('feed-icon').innerText = data.icon || 'Ł';
+      document.getElementById('feed-time').innerText = data.time || 'just now';
+      document.getElementById('feed-title').innerText = data.title;
+      document.getElementById('feed-subtitle').innerText = data.subtitle;
+      
+      const badgeEl = document.getElementById('feed-badge');
+      badgeEl.innerText = data.badge;
+      badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${data.badgeClass || 'bg-emerald-500/20 text-emerald-400'}`;
+
+      document.getElementById('feed-coins').innerText = `● ${data.coins}`;
+
+      // Reset and Animate
+      card.classList.remove('hidden');
+      card.classList.remove('toast-animate-in');
+      void card.offsetWidth; // retrigger reflow
+      card.classList.add('toast-animate-in');
+
+      // Auto Hide after 5 seconds
+      clearTimeout(popupTimer);
+      popupTimer = setTimeout(() => {
+        card.classList.add('hidden');
+      }, 5000);
+    }
+
     function navigate(view) {
       currentTab = view;
       document.getElementById('profile-dropdown').classList.add('hidden');
@@ -290,7 +384,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // HOME VIEW (Exact Match to Screenshot 1)
+    // HOME VIEW (Exact Screenshot 1)
     function renderHome() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
@@ -333,7 +427,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
+          <div onclick="claimTask(2500, 'TheoremReach Surveys')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div>
               <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
               <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
@@ -344,7 +438,7 @@
             </div>
           </div>
 
-          <div class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
+          <div onclick="claimTask(1138, 'Neverwinter Game')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div class="flex justify-center items-center h-20">
               <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
             </div>
@@ -357,7 +451,7 @@
             </div>
           </div>
 
-          <div class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
+          <div onclick="claimTask(43500, 'RAID Shadow Legends')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div class="flex justify-center items-center h-20">
               <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
             </div>
@@ -380,7 +474,7 @@
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div onclick="claimTask(19136)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(19136, 'Swagbucks')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-blue-400 text-sm">SB</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">Swagbuck...</span>
@@ -389,7 +483,7 @@
               <span class="text-amber-400 font-bold text-xs">● 19,136</span>
             </div>
 
-            <div onclick="claimTask(25600)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(25600, 'Slotastic')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xs">Slotastic</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">Slotastic [...</span>
@@ -398,7 +492,7 @@
               <span class="text-amber-400 font-bold text-xs">● 25,600</span>
             </div>
 
-            <div onclick="claimTask(25600)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(25600, 'Grande Vegas')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-xs">Vegas</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">Grande Ve...</span>
@@ -407,7 +501,7 @@
               <span class="text-amber-400 font-bold text-xs">● 25,600</span>
             </div>
 
-            <div onclick="claimTask(64)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(64, 'Test Your Knowledge')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-xs">Edge</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">Test Your ...</span>
@@ -416,7 +510,7 @@
               <span class="text-amber-400 font-bold text-xs">● 64</span>
             </div>
 
-            <div onclick="claimTask(4480)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(4480, 'SiriusXM')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">Sirius</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">SiriusXM</span>
@@ -425,7 +519,7 @@
               <span class="text-amber-400 font-bold text-xs">● 4,480</span>
             </div>
 
-            <div onclick="claimTask(1024)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
+            <div onclick="claimTask(1024, 'Apple Watch Quiz')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-xs">Watch</div>
               <div>
                 <span class="text-xs font-bold text-white block truncate w-24">Apple Wat...</span>
@@ -438,7 +532,7 @@
       `;
     }
 
-    // PROFILE VIEW (Exact Match to Screenshot 2)
+    // PROFILE VIEW (Screenshot 2 Match)
     function renderProfile() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
@@ -496,7 +590,7 @@
               <span class="col-span-2 text-slate-400">Torox</span>
               <span class="col-span-2 text-amber-400 font-bold">● 75,000</span>
               <span class="col-span-2 text-slate-500">17h ago</span>
-              <span class="col-span-2 text-right"><button class="bg-[#00d672] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
+              <span class="col-span-2 text-right"><button onclick="claimTask(75000, 'Animals & Coins Early Release')" class="bg-[#00d672] hover:bg-[#00be64] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
             </div>
 
             <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
@@ -504,7 +598,7 @@
               <span class="col-span-2 text-slate-400">Torox</span>
               <span class="col-span-2 text-amber-400 font-bold">● 125,000</span>
               <span class="col-span-2 text-slate-500">10d ago</span>
-              <span class="col-span-2 text-right"><button class="bg-[#00d672] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
+              <span class="col-span-2 text-right"><button onclick="claimTask(125000, 'Animals & Coins Early Release')" class="bg-[#00d672] hover:bg-[#00be64] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
             </div>
 
             <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
@@ -512,23 +606,7 @@
               <span class="col-span-2 text-slate-400">Torox</span>
               <span class="col-span-2 text-amber-400 font-bold">● 20,000</span>
               <span class="col-span-2 text-slate-500">12d ago</span>
-              <span class="col-span-2 text-right"><button class="bg-[#00d672] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
-            </div>
-
-            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
-              <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
-              <span class="col-span-2 text-slate-400">Torox</span>
-              <span class="col-span-2 text-amber-400 font-bold">● 50,000</span>
-              <span class="col-span-2 text-slate-500">13d ago</span>
-              <span class="col-span-2 text-right"><button class="bg-[#00d672] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
-            </div>
-
-            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
-              <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
-              <span class="col-span-2 text-slate-400">Torox</span>
-              <span class="col-span-2 text-amber-400 font-bold">● 25,000</span>
-              <span class="col-span-2 text-slate-500">16d ago</span>
-              <span class="col-span-2 text-right"><button class="bg-[#00d672] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
+              <span class="col-span-2 text-right"><button onclick="claimTask(20000, 'Domino Dreams Early Release')" class="bg-[#00d672] hover:bg-[#00be64] text-black text-[11px] font-bold px-2 py-1 rounded-lg">Early Release</button></span>
             </div>
           </div>
         </div>
@@ -541,23 +619,24 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // SHOP / CASHOUT VIEW
     function renderShop() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
         <h2 class="text-sm font-bold text-white mb-2">Withdraw Options</h2>
         <div class="grid grid-cols-3 gap-3">
-          <div onclick="alert('Withdraw placed')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672]">
-            <span class="text-2xl text-blue-400">Ł</span>
+          <div onclick="executeWithdraw('Litecoin (LTC)', 1000, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
+            <span class="text-2xl text-blue-400 font-black">Ł</span>
             <span class="font-bold text-xs text-white">Litecoin</span>
-            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins</span>
+            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Instant)</span>
           </div>
-          <div onclick="alert('Withdraw placed')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672]">
-            <span class="text-2xl text-emerald-400">₮</span>
+          <div onclick="executeWithdraw('Tether USDT', 5000, '₮')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
+            <span class="text-2xl text-emerald-400 font-black">₮</span>
             <span class="font-bold text-xs text-white">USDT</span>
             <span class="text-[10px] text-slate-400">Min 5,000 Coins</span>
           </div>
-          <div onclick="alert('Withdraw placed')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672]">
-            <span class="text-2xl text-amber-400">₿</span>
+          <div onclick="executeWithdraw('Bitcoin (BTC)', 15000, '₿')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
+            <span class="text-2xl text-amber-400 font-black">₿</span>
             <span class="font-bold text-xs text-white">Bitcoin</span>
             <span class="text-[10px] text-slate-400">Min 15,000 Coins</span>
           </div>
@@ -586,11 +665,41 @@
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
-    function claimTask(amount) {
-      let coins = parseInt(document.getElementById('header-coins').innerText.replace(',', '')) || 0;
+    // --- Action: Offer Completed -> Sounds Bell & Pops Up Notification ---
+    function claimTask(amount, taskName = 'Task Offer') {
+      let coins = parseInt(document.getElementById('header-coins').innerText.replace(/,/g, '')) || 0;
       coins += amount;
       document.getElementById('header-coins').innerText = coins.toLocaleString();
-      alert(`+${amount.toLocaleString()} Coins added to wallet!`);
+
+      triggerActionPopup({
+        icon: '✓',
+        title: taskName,
+        subtitle: 'Reward Verified',
+        badge: 'COMPLETE',
+        badgeClass: 'bg-emerald-500/20 text-emerald-400',
+        coins: amount.toLocaleString()
+      }, 'coin');
+    }
+
+    // --- Action: Cashout / Withdraw -> Sounds Cash Register & Pops Up Notification ---
+    function executeWithdraw(crypto, minAmount, icon = 'Ł') {
+      let coins = parseInt(document.getElementById('header-coins').innerText.replace(/,/g, '')) || 0;
+      if (coins < minAmount) {
+        alert(`Insufficient coins. Minimum withdrawal is ${minAmount.toLocaleString()} coins.`);
+        return;
+      }
+
+      coins -= minAmount;
+      document.getElementById('header-coins').innerText = coins.toLocaleString();
+
+      triggerActionPopup({
+        icon: icon,
+        title: `${crypto} Payout`,
+        subtitle: 'Pending Approval',
+        badge: 'PENDING',
+        badgeClass: 'bg-purple-500/20 text-purple-300',
+        coins: minAmount.toLocaleString()
+      }, 'cashout');
     }
 
     function sendLiveChat() {
@@ -611,38 +720,18 @@
       stream.scrollTop = stream.scrollHeight;
     }
 
-    // --- DYNAMIC LIVE BOTTOM FEED ENGINE (Auto Rotation Every 3.5 Seconds) ---
-    const liveFeeds = [
-      { icon: "Ł", time: "seconds ago", title: "LTC", subtitle: "Pending approval", badge: "PENDING", badgeClass: "bg-purple-500/20 text-purple-300", coins: "111,087" },
-      { icon: "✓", time: "an hour ago", title: "Finance Quiz", subtitle: "Complete", badge: "COMPLETE", badgeClass: "bg-emerald-500/20 text-emerald-400", coins: "1,050" },
-      { icon: "🎮", time: "17h ago", title: "Animals & Coins", subtitle: "Torox Task", badge: "ON-HOLD", badgeClass: "bg-amber-500/20 text-amber-400", coins: "75,000" },
-      { icon: "Ł", time: "just now", title: "LTC Sent", subtitle: "Instant Payout", badge: "SENT", badgeClass: "bg-emerald-500/20 text-emerald-400", coins: "2,573" },
-      { icon: "🎯", time: "12d ago", title: "Domino Dreams", subtitle: "Completed", badge: "COMPLETE", badgeClass: "bg-blue-500/20 text-blue-400", coins: "20,000" }
+    // Periodic Realistic Public Events with Audio Simulation (Every 18 seconds)
+    const simulatedGlobalFeed = [
+      { icon: 'Ł', title: 'LTC Instant Sent', subtitle: 'User_4918 Cashout', badge: 'SENT', badgeClass: 'bg-emerald-500/20 text-emerald-400', coins: '14,200', type: 'cashout' },
+      { icon: '🎮', title: 'Animals & Coins', subtitle: 'Completed Lvl 68', badge: 'COMPLETE', badgeClass: 'bg-blue-500/20 text-blue-400', coins: '25,000', type: 'coin' },
+      { icon: 'Ł', title: 'LTC Cashout', subtitle: 'Pending Approval', badge: 'PENDING', badgeClass: 'bg-purple-500/20 text-purple-300', coins: '111,087', type: 'cashout' }
     ];
-    let feedIndex = 0;
-
+    let simIdx = 0;
     setInterval(() => {
-      feedIndex = (feedIndex + 1) % liveFeeds.length;
-      const item = liveFeeds[feedIndex];
-      const card = document.getElementById('live-bottom-card');
-      
-      if (card) {
-        card.classList.remove('feed-animated');
-        void card.offsetWidth; // retrigger animation
-        card.classList.add('feed-animated');
-
-        document.getElementById('feed-icon').innerText = item.icon;
-        document.getElementById('feed-time').innerText = item.time;
-        document.getElementById('feed-title').innerText = item.title;
-        document.getElementById('feed-subtitle').innerText = item.subtitle;
-        
-        const badgeEl = document.getElementById('feed-badge');
-        badgeEl.innerText = item.badge;
-        badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${item.badgeClass}`;
-        
-        document.getElementById('feed-coins').innerText = `● ${item.coins}`;
-      }
-    }, 3500);
+      const item = simulatedGlobalFeed[simIdx];
+      simIdx = (simIdx + 1) % simulatedGlobalFeed.length;
+      triggerActionPopup(item, item.type);
+    }, 18000);
 
     renderHome();
     if (window.lucide) lucide.createIcons();
