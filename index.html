@@ -293,7 +293,7 @@
     </div>
   </div>
 
-  <!-- NOTIFICATIONS MODAL (Task and Completion ONLY, NO Withdraw spam) -->
+  <!-- NOTIFICATIONS MODAL -->
   <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -528,31 +528,42 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // NOTIFICATIONS ENGINE (Tasks & Postbacks Only)
-    function loadUserNotificationsFromStorage() {
+    // PERSISTENT NOTIFICATIONS & WITHDRAWALS ENGINE
+    function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
-        const localKey = `gollah_notifications_${currentUser.id}`;
-        const stored = localStorage.getItem(localKey);
-        if (stored) {
-          userNotifications = JSON.parse(stored);
+        const notifStored = localStorage.getItem(`gollah_notifications_${currentUser.id}`);
+        if (notifStored) {
+          userNotifications = JSON.parse(notifStored);
         } else {
           userNotifications = [
             { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
           ];
-          saveUserNotificationsToStorage();
+          saveNotificationsToStorage();
+        }
+
+        const withStored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+        if (withStored) {
+          userWithdrawals = JSON.parse(withStored);
         }
       } catch (e) {
         userNotifications = [];
+        userWithdrawals = [];
       }
       updateNotificationsBadge();
     }
 
-    function saveUserNotificationsToStorage() {
+    function saveNotificationsToStorage() {
       if (!currentUser) return;
       try {
-        const localKey = `gollah_notifications_${currentUser.id}`;
-        localStorage.setItem(localKey, JSON.stringify(userNotifications));
+        localStorage.setItem(`gollah_notifications_${currentUser.id}`, JSON.stringify(userNotifications));
+      } catch (e) {}
+    }
+
+    function saveWithdrawalsToStorage() {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(`gollah_withdrawals_${currentUser.id}`, JSON.stringify(userWithdrawals));
       } catch (e) {}
     }
 
@@ -577,7 +588,7 @@
         time: 'just now',
         isRead: false
       });
-      saveUserNotificationsToStorage();
+      saveNotificationsToStorage();
       updateNotificationsBadge();
     }
 
@@ -622,7 +633,7 @@
       }
 
       userNotifications.forEach(n => n.isRead = true);
-      saveUserNotificationsToStorage();
+      saveNotificationsToStorage();
       updateNotificationsBadge();
 
       document.getElementById('notifications-modal').classList.remove('hidden');
@@ -635,7 +646,7 @@
 
     function clearAllNotifications() {
       userNotifications = [];
-      saveUserNotificationsToStorage();
+      saveNotificationsToStorage();
       updateNotificationsBadge();
       openNotificationsModal();
     }
@@ -832,7 +843,7 @@
       }
     }
 
-    // PURE WITHDRAWAL: Saves to `withdrawals` table ONLY (Keeps notifications clean!)
+    // PURE WITHDRAWAL: Saves to Supabase withdrawals table & Local Backup
     async function submitCustomWithdrawal() {
       if (!currentUser) return;
       const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
@@ -874,9 +885,9 @@
         };
 
         userWithdrawals.unshift(newRecord);
-        saveUserWithdrawalsToStorage();
+        saveWithdrawalsToStorage();
 
-        // Save directly into the withdrawals table
+        // Sync directly into Supabase database
         if (db) {
           await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
           const { data, error } = await db.from('withdrawals').insert({
@@ -889,7 +900,7 @@
 
           if (!error && data) {
             userWithdrawals[0] = data;
-            saveUserWithdrawalsToStorage();
+            saveWithdrawalsToStorage();
           }
         }
 
@@ -911,30 +922,19 @@
       }
     }
 
-    function saveUserWithdrawalsToStorage() {
-      if (!currentUser) return;
-      try {
-        localStorage.setItem(`gollah_withdrawals_${currentUser.id}`, JSON.stringify(userWithdrawals));
-      } catch (e) {}
-    }
-
-    function loadUserWithdrawalsFromStorage() {
+    async function fetchUserWithdrawals() {
       if (!currentUser) return;
       try {
         const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
         if (stored) userWithdrawals = JSON.parse(stored);
       } catch (e) {}
-    }
 
-    async function fetchUserWithdrawals() {
-      if (!currentUser) return;
-      loadUserWithdrawalsFromStorage();
       if (!db) return;
       try {
         const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
         if (!error && data && data.length > 0) {
           userWithdrawals = data;
-          saveUserWithdrawalsToStorage();
+          saveWithdrawalsToStorage();
           if (currentTab === 'profile') renderProfile();
         }
       } catch (e) {}
@@ -1056,7 +1056,7 @@
         document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
         updateLevelAndXpUI(userCoins);
-        loadUserNotificationsFromStorage();
+        loadUserDataFromStorage();
         fetchUserWithdrawals();
 
         authSlot.innerHTML = `
