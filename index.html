@@ -49,7 +49,6 @@
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
     <div class="flex items-center gap-4 flex-1 max-w-xl">
-      <!-- Brand Logo -->
       <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
           G
@@ -57,7 +56,6 @@
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
 
-      <!-- Live Search Input -->
       <div class="relative w-full max-w-xs hidden sm:block">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
@@ -71,7 +69,6 @@
         <span>Network Verified</span>
       </div>
 
-      <!-- Coin Pill Counter -->
       <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
         <span id="header-coins">0</span>
@@ -82,21 +79,18 @@
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
-      <!-- Profile Avatar Button with Notification Badge -->
+      <!-- Profile Avatar Button with Red Notification Badge -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
-          <span id="header-notif-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">1</span>
+          <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
         </button>
 
-        <!-- Dynamic Profile Dropdown (Dollah.co style) -->
+        <!-- Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
-            <div class="relative group cursor-pointer" onclick="openAvatarModal()">
-              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-              <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
-            </div>
+            <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
             <div class="flex items-center gap-1.5 mt-0.5">
               <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
               <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
@@ -108,7 +102,7 @@
             </div>
           </div>
 
-          <!-- XP & Level Progress Bar -->
+          <!-- XP Bar -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
               <span id="xp-text">0 / 10 XP</span>
@@ -123,11 +117,10 @@
             </div>
           </div>
 
-          <!-- Menu Options -->
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
             <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
-              <span id="dropdown-notif-pill" class="bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">1</span>
+              <span id="dropdown-notif-pill" class="hidden bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">0</span>
             </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
@@ -144,7 +137,6 @@
 
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
-
     <!-- LEFT SIDEBAR -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
@@ -169,37 +161,30 @@
 
         <div class="flex flex-col gap-1 text-xs">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
-          
           <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
           </button>
-
           <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
           </button>
-
           <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
           </button>
-
           <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
           </button>
-
           <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
           </button>
-
           <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
           </button>
-
           <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
@@ -208,24 +193,18 @@
       </div>
     </aside>
 
-    <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
+    <!-- CENTER FLUID STREAM -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
-      
-      <!-- Top Announcement Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-          <span><strong>Fast Rewards:</strong> Litecoin & Binance Pay cashouts available with a low minimum of only 300 Coins!</span>
+          <span><strong>Quality Assurance:</strong> Verified reward delivery system with instant postbacks and 300 Coin min cashout!</span>
         </div>
         <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
       </div>
 
-      <!-- Main Dynamic Content -->
-      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1">
-        <!-- Injected via Router -->
-      </main>
+      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
 
-      <!-- PUBLISHER-GRADE ENTERPRISE FOOTER -->
       <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
         <div class="max-w-6xl mx-auto flex flex-col gap-6">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -257,13 +236,10 @@
               <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
               <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
             </div>
-            <p class="text-[11px] text-slate-400">
-              © 2026 Gollah Inc. All rights reserved.
-            </p>
+            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
           </div>
         </div>
       </footer>
-
     </div>
 
     <!-- RIGHT CHAT SIDEBAR -->
@@ -290,7 +266,7 @@
             <span class="font-bold text-[#00d672]">The KHALID</span>
             <span class="text-[10px] text-slate-600">05:53 am</span>
           </div>
-          <p class="text-slate-300 text-xs">hello 😊 LTC and Binance received fast</p>
+          <p class="text-slate-300 text-xs">hello 😊 LTC received fast</p>
         </div>
       </div>
 
@@ -299,10 +275,9 @@
         <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
       </div>
     </aside>
-
   </div>
 
-  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP -->
+  <!-- FLOATING TOAST -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -318,7 +293,7 @@
     </div>
   </div>
 
-  <!-- NOTIFICATIONS MODAL -->
+  <!-- NOTIFICATIONS MODAL (Task and Completion ONLY, NO Withdraw spam) -->
   <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -338,24 +313,23 @@
     </div>
   </div>
 
-  <!-- IN-APP CASHOUT MODAL (NO BROWSER PROMPT, TYPE CUSTOM COINS, MIN 300) -->
+  <!-- IN-APP CASHOUT MODAL -->
   <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <div class="flex items-center gap-3">
-          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-lg">
-            B
+          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
+            Ł
           </div>
           <div>
-            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw via Binance</h3>
-            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Payout</span>
+            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw Crypto</h3>
+            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Processing</span>
           </div>
         </div>
         <button onclick="closeCashoutModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="flex flex-col gap-3">
-        <!-- Coin Amount Input -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="text-[11px] font-bold text-slate-300">Amount to Withdraw (Coins)</label>
@@ -367,14 +341,13 @@
           </div>
           <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400">
             <span>Estimated payout:</span>
-            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.30 USDT</span>
+            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.00 LTC</span>
           </div>
         </div>
 
-        <!-- Address/ID Input -->
         <div>
-          <label id="cashout-address-label" class="text-[11px] font-bold text-slate-300 block mb-1">Binance Pay ID, Email, or BEP20 Address</label>
-          <input id="cashout-address-input" type="text" placeholder="e.g. 123456789 or user@binance.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+          <label id="cashout-address-label" class="text-[11px] font-bold text-slate-300 block mb-1">Destination Address / UID</label>
+          <input id="cashout-address-input" type="text" placeholder="Enter address or ID" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
         </div>
       </div>
 
@@ -492,32 +465,11 @@
     </div>
   </div>
 
-  <!-- MEMOJI AVATAR SELECTOR MODAL (17 PNG ASSETS) -->
-  <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div>
-          <h3 class="font-black text-base text-white flex items-center gap-1.5">😊 Choose Your Face</h3>
-          <p class="text-xs text-slate-400">Select your custom 3D Memoji avatar</p>
-        </div>
-        <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]"></div>
-
-      <div class="pt-2 border-t border-[#202c38] flex justify-end">
-        <button onclick="closeAvatarModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Done</button>
-      </div>
-    </div>
-  </div>
-
   <!-- LEGAL & SUPPORT MODAL -->
   <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">
-          Information
-        </h3>
+        <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">Information</h3>
         <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
@@ -528,7 +480,7 @@
   </div>
 
   <script>
-    // Supabase Initialization
+    // 1. Supabase Initialization
     const SUPABASE_URL = "https://rcsrazcvehnjgflkcslo.supabase.co";
     const SUPABASE_KEY = "sb_publishable_KyWxNv1LHTxkTeuXVgkNuA_1jOf7oTp";
     let db = null;
@@ -542,160 +494,66 @@
       console.warn("Supabase local active");
     }
 
-    // Dynamic Avatars Engine (17 Assets)
-    const TOTAL_AVATARS = 17;
-    const avatarList = [];
-    for (let i = 1; i <= TOTAL_AVATARS; i++) {
-      avatarList.push(`avatars/${i}.png`);
-    }
-
-    let selectedAvatar = avatarList[0];
-
-    function renderAvatarGrid() {
-      const container = document.getElementById('avatar-grid-list');
-      if (!container) return;
-      container.innerHTML = '';
-      
-      avatarList.forEach((url) => {
-        const div = document.createElement('div');
-        div.className = "w-14 h-14 rounded-full overflow-hidden border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-105 p-0.5 bg-[#141d26] flex items-center justify-center";
-        div.onclick = () => chooseAvatar(url);
-        div.innerHTML = `<img src="${url}" class="w-full h-full rounded-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />`;
-        container.appendChild(div);
-      });
-    }
-
-    function openAvatarModal() {
-      document.getElementById('profile-dropdown').classList.add('hidden');
-      renderAvatarGrid();
-      document.getElementById('avatar-modal').classList.remove('hidden');
-    }
-
-    function closeAvatarModal() {
-      document.getElementById('avatar-modal').classList.add('hidden');
-    }
-
-    async function chooseAvatar(url) {
-      selectedAvatar = url;
-      document.getElementById('header-avatar-img').src = url;
-      document.getElementById('dropdown-avatar-img').src = url;
-
-      if (db && currentUser) {
-        await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
-      }
-      closeAvatarModal();
-    }
-
-    // Web Audio Synthesizer: Sharp "Taak" Mechanical Sound (Exclusively for Cashout)
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-
-    function getAudioContext() {
-      if (!audioCtx) audioCtx = new AudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      return audioCtx;
-    }
-
-    function playTaakSound() {
-      try {
-        const ctx = getAudioContext();
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(920, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.055);
-      } catch (e) {}
-    }
-
+    // 2. Comprehensive Offer Database
     const ALL_OFFERS = [
-      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete high-paying profile surveys with honest feedback.', link: 'https://theoremreach.com' },
-      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter, create character and reach Level 10.', link: 'https://lootably.com' },
-      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days of registration.', link: 'https://adgatemedia.com' },
-      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app, earn at least 500 SB to unlock reward.', link: 'https://torox.io' },
+      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
+      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
+      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
+      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
       { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
-      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut, order physical card and make first purchase.', link: 'https://monlix.com' },
-      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'First time user: Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
-      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times inside Vegas slots.', link: 'https://adgatemedia.com' },
-      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days of install.', link: 'https://monlix.com' },
+      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
+      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
+      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
+      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
       { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
       { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
-      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Qualify and answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
-      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey without rushing.', link: 'https://cpx-research.com' },
-      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey to receive verified completion.', link: 'https://inbrain.ai' },
-      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on the 10-question general trivia quiz.', link: 'https://adscendmedia.com' },
-      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass the quiz with 100% score to receive instant payout.', link: 'https://torox.io' },
-      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone number and email.', link: 'https://coinbase.com' },
-      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete basic KYC verification.', link: 'https://binance.com' }
+      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
+      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
+      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
+      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' },
+      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass quiz with 100% score.', link: 'https://torox.io' },
+      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone.', link: 'https://coinbase.com' },
+      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete verification.', link: 'https://binance.com' }
     ];
 
     let activeOfferData = null;
     let currentCategory = 'featured';
     let searchQuery = '';
-
     let userNotifications = [];
     let userWithdrawals = [];
-    let withdrawalSubFilter = 'all'; // 'all', 'pending', 'completed'
+    let currentUser = null;
+    let userCoins = 0;
+    let isSignupMode = false;
+    let isPasswordVisible = false;
+    let currentTab = 'home';
+    let profileFilter = 'all';
 
-    function loadCachedNotifications() {
-      const storageKey = currentUser ? ('gollah_notifs_' + currentUser.id) : 'gollah_notifs_guest';
+    // NOTIFICATIONS ENGINE (Tasks & Postbacks Only)
+    function loadUserNotificationsFromStorage() {
+      if (!currentUser) return;
       try {
-        const cached = localStorage.getItem(storageKey);
-        if (cached) {
-          userNotifications = JSON.parse(cached);
+        const localKey = `gollah_notifications_${currentUser.id}`;
+        const stored = localStorage.getItem(localKey);
+        if (stored) {
+          userNotifications = JSON.parse(stored);
         } else {
           userNotifications = [
-            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your Binance or LTC wallet.', time: 'just now', status: 'system', isRead: false }
+            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
           ];
-          localStorage.setItem(storageKey, JSON.stringify(userNotifications));
+          saveUserNotificationsToStorage();
         }
       } catch (e) {
-        userNotifications = [
-          { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your Binance or LTC wallet.', time: 'just now', status: 'system', isRead: false }
-        ];
+        userNotifications = [];
       }
       updateNotificationsBadge();
     }
 
-    function saveCachedNotifications() {
-      const storageKey = currentUser ? ('gollah_notifs_' + currentUser.id) : 'gollah_notifs_guest';
+    function saveUserNotificationsToStorage() {
+      if (!currentUser) return;
       try {
-        localStorage.setItem(storageKey, JSON.stringify(userNotifications));
+        const localKey = `gollah_notifications_${currentUser.id}`;
+        localStorage.setItem(localKey, JSON.stringify(userNotifications));
       } catch (e) {}
-    }
-
-    async function fetchUserNotificationsFromDB() {
-      if (!currentUser) {
-        loadCachedNotifications();
-        return;
-      }
-
-      loadCachedNotifications();
-
-      if (!db) return;
-      try {
-        const { data, error } = await db.from('user_notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
-          userNotifications = data.map(row => ({
-            id: row.id,
-            title: row.title,
-            message: row.message,
-            time: row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now',
-            status: row.type || 'system',
-            isRead: row.is_read || false
-          }));
-          saveCachedNotifications();
-          updateNotificationsBadge();
-        }
-      } catch (e) {
-        console.warn("Notifications DB fetch error:", e);
-      }
     }
 
     function updateNotificationsBadge() {
@@ -712,46 +570,30 @@
       }
     }
 
-    async function addNotification(notif) {
-      const newNotifItem = {
+    function addNotification(notif) {
+      userNotifications.unshift({
         id: 'n_' + Date.now(),
         ...notif,
         time: 'just now',
         isRead: false
-      };
-      userNotifications.unshift(newNotifItem);
-      saveCachedNotifications();
+      });
+      saveUserNotificationsToStorage();
       updateNotificationsBadge();
-
-      if (db && currentUser) {
-        try {
-          await db.from('user_notifications').insert({
-            user_id: currentUser.id,
-            title: notif.title,
-            message: notif.message,
-            type: notif.status || 'system',
-            is_read: false
-          });
-        } catch (e) {
-          console.warn("Failed to persist notification to DB:", e);
-        }
-      }
     }
 
-    async function openNotificationsModal() {
+    function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
       list.innerHTML = '';
 
       if (userNotifications.length === 0) {
-        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
+        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No task notifications yet.</div>`;
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
           const isComplete = (n.status === 'complete');
           
           item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
-          
           item.innerHTML = `
             <div class="flex-1 flex flex-col gap-0.5">
               <div class="flex items-center gap-1.5">
@@ -767,7 +609,7 @@
                   ✓
                 </div>
               ` : (n.status === 'click' ? `
-                <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs" title="Tracking Active">
+                <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs" title="Tracking">
                   <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                 </div>
               ` : `
@@ -780,14 +622,8 @@
       }
 
       userNotifications.forEach(n => n.isRead = true);
-      saveCachedNotifications();
+      saveUserNotificationsToStorage();
       updateNotificationsBadge();
-
-      if (db && currentUser) {
-        try {
-          await db.from('user_notifications').update({ is_read: true }).eq('user_id', currentUser.id);
-        } catch (e) {}
-      }
 
       document.getElementById('notifications-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -797,15 +633,10 @@
       document.getElementById('notifications-modal').classList.add('hidden');
     }
 
-    async function clearAllNotifications() {
+    function clearAllNotifications() {
       userNotifications = [];
-      saveCachedNotifications();
+      saveUserNotificationsToStorage();
       updateNotificationsBadge();
-      if (db && currentUser) {
-        try {
-          await db.from('user_notifications').delete().eq('user_id', currentUser.id);
-        } catch (e) {}
-      }
       openNotificationsModal();
     }
 
@@ -815,6 +646,34 @@
       alert("User ID copied to clipboard!");
     }
 
+    // AUDIO: "Taak" Sound exclusively for Cashout confirmation
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playCashoutTaakSound() {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.055);
+      } catch (e) {}
+    }
+
+    // Floating Action Toast Popup
     let floatingToastTimer = null;
     function triggerDollahFloatingToast(data) {
       const card = document.getElementById('dollah-floating-card');
@@ -844,6 +703,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // Offer Details Modal
     function openOfferModal(offerId) {
       if (!currentUser) {
         alert("Please login first to view and start offers!");
@@ -860,7 +720,7 @@
       document.getElementById('modal-offer-icon').innerText = offer.icon;
       document.getElementById('modal-offer-coins').innerText = `● ${offer.coins.toLocaleString()}`;
       document.getElementById('modal-offer-xp').innerText = `+${Math.floor(offer.coins / 1000)} XP`;
-      document.getElementById('modal-offer-instruction').innerText = offer.instruction || 'Complete all required steps on advertiser site.';
+      document.getElementById('modal-offer-instruction').innerText = offer.instruction || 'Complete required steps on advertiser site.';
 
       document.getElementById('offer-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -873,13 +733,12 @@
 
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
-      
       const offer = activeOfferData;
       closeOfferModal();
 
       addNotification({
         title: `${offer.name} Clicked`,
-        message: `Task opened via ${offer.provider}. Tracking active. Coins (● ${offer.coins.toLocaleString()}) credit upon completion verification.`,
+        message: `Task opened via ${offer.provider}. Tracking active. Reward credits upon verified completion.`,
         status: 'click'
       });
 
@@ -911,6 +770,7 @@
       });
     };
 
+    // 3. CASHOUT & WITHDRAWALS ENGINE
     let selectedCashoutCrypto = 'Litecoin (LTC)';
     let selectedCashoutIcon = 'Ł';
     let cashoutMinCoins = 300;
@@ -927,27 +787,26 @@
       cashoutMinCoins = minLimit;
 
       document.getElementById('cashout-modal-title').innerText = `Withdraw ${crypto}`;
-      const iconBox = document.getElementById('cashout-icon-box');
-      iconBox.innerText = icon;
-      if (crypto.includes('Binance')) {
-        iconBox.className = "w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-lg";
-        document.getElementById('cashout-address-label').innerText = "Binance Pay ID, Email, or BEP20 Address";
-        document.getElementById('cashout-address-input').placeholder = "e.g. 123456789 or user@binance.com";
-      } else {
-        iconBox.className = "w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg";
-        document.getElementById('cashout-address-label').innerText = "Litecoin (LTC) Wallet Address";
-        document.getElementById('cashout-address-input').placeholder = "e.g. LfK4x... or ltc1q...";
-      }
-
+      document.getElementById('cashout-icon-box').innerText = icon;
       document.getElementById('cashout-current-balance').innerText = userCoins.toLocaleString();
       
       const amtInput = document.getElementById('cashout-amount-input');
       amtInput.value = userCoins >= minLimit ? minLimit : userCoins;
       amtInput.min = minLimit;
 
-      document.getElementById('cashout-address-input').value = '';
-      calculateEstimatedCrypto();
+      const addrLabel = document.getElementById('cashout-address-label');
+      const addrInput = document.getElementById('cashout-address-input');
+      addrInput.value = '';
 
+      if (crypto.includes('Binance')) {
+        addrLabel.innerText = "Binance Pay ID / Binance Email / BEP20";
+        addrInput.placeholder = "Enter Binance Pay ID, UID, or BEP20 Address";
+      } else {
+        addrLabel.innerText = "Destination Litecoin (LTC) Address";
+        addrInput.placeholder = "Enter your LTC wallet address";
+      }
+
+      calculateEstimatedCrypto();
       document.getElementById('cashout-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
@@ -964,17 +823,16 @@
     function calculateEstimatedCrypto() {
       const val = parseInt(document.getElementById('cashout-amount-input').value) || 0;
       const el = document.getElementById('cashout-estimated-crypto');
-      
       if (selectedCashoutCrypto.includes('Litecoin')) {
         const estLTC = (val / 1000 * 0.012).toFixed(6);
         el.innerText = `${estLTC} LTC`;
       } else {
         const estUSDT = (val / 1000).toFixed(2);
-        el.innerText = `${estUSDT} USDT via Binance Pay`;
+        el.innerText = `${estUSDT} USDT (Binance Pay)`;
       }
     }
 
-    // Handles Confirm & Cashout: Plays Pop Sound and Triggers Pending Popup
+    // PURE WITHDRAWAL: Saves to `withdrawals` table ONLY (Keeps notifications clean!)
     async function submitCustomWithdrawal() {
       if (!currentUser) return;
       const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
@@ -986,12 +844,12 @@
       }
 
       if (amount > userCoins) {
-        alert(`Insufficient coins. You only have ${userCoins.toLocaleString()} coins.`);
+        alert(`Insufficient coins. You have ${userCoins.toLocaleString()} coins.`);
         return;
       }
 
       if (!address || address.length < 5) {
-        alert("Please enter a valid wallet address, Binance Pay ID, or email.");
+        alert("Please enter a valid wallet address or Binance ID.");
         return;
       }
 
@@ -1000,10 +858,12 @@
       submitBtn.disabled = true;
 
       try {
+        playCashoutTaakSound();
+
         userCoins -= amount;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
 
-        const pendingWithdrawal = {
+        const newRecord = {
           id: 'w_' + Date.now(),
           user_id: currentUser.id,
           method: selectedCashoutCrypto,
@@ -1013,49 +873,28 @@
           created_at: new Date().toISOString()
         };
 
-        // Immediately unshift to in-memory state and localStorage so user always sees it
-        userWithdrawals.unshift(pendingWithdrawal);
-        try {
-          localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
-        } catch (e) {}
+        userWithdrawals.unshift(newRecord);
+        saveUserWithdrawalsToStorage();
 
+        // Save directly into the withdrawals table
         if (db) {
-          try {
-            await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-            const { data: newW } = await db.from('withdrawals').insert({
-              user_id: currentUser.id,
-              method: selectedCashoutCrypto,
-              amount: amount,
-              address: address,
-              status: 'PENDING'
-            }).select().single();
+          await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+          const { data, error } = await db.from('withdrawals').insert({
+            user_id: currentUser.id,
+            method: selectedCashoutCrypto,
+            amount: amount,
+            address: address,
+            status: 'PENDING'
+          }).select().single();
 
-            if (newW) {
-              // Replace mock id with real DB row
-              userWithdrawals[0] = newW;
-              try {
-                localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
-              } catch (e) {}
-            }
-          } catch (dbErr) {
-            console.warn("DB insert error, stored locally:", dbErr);
+          if (!error && data) {
+            userWithdrawals[0] = data;
+            saveUserWithdrawalsToStorage();
           }
         }
 
-        // Close Modal Immediately
         closeCashoutModal();
 
-        // Play the crisp mechanical Taak sound ONLY on cashout submission
-        playTaakSound();
-
-        // 2. Add Notification (persisted to localStorage & Supabase)
-        addNotification({
-          title: `${selectedCashoutCrypto} Cashout Requested`,
-          message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 12)}... Status: PENDING.`,
-          status: 'click'
-        });
-
-        // 3. Trigger Dedicated Dollah.co Pending Floating Toast
         triggerDollahFloatingToast({
           time: 'just now',
           title: `${selectedCashoutCrypto} Cashout`,
@@ -1072,25 +911,39 @@
       }
     }
 
-    // Webhook simulation for complete withdrawal
-    window.completeUserWithdrawal = async function(withdrawalId) {
+    function saveUserWithdrawalsToStorage() {
       if (!currentUser) return;
-      
-      const target = userWithdrawals.find(w => w.id === withdrawalId || w.id === 'w_' + withdrawalId);
-      if (target) {
-        target.status = 'COMPLETED';
-      } else if (userWithdrawals.length > 0) {
-        userWithdrawals[0].status = 'COMPLETED';
-      }
-
       try {
-        localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
+        localStorage.setItem(`gollah_withdrawals_${currentUser.id}`, JSON.stringify(userWithdrawals));
       } catch (e) {}
+    }
 
-      if (db) {
-        await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
-        await fetchUserWithdrawals();
-      }
+    function loadUserWithdrawalsFromStorage() {
+      if (!currentUser) return;
+      try {
+        const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+        if (stored) userWithdrawals = JSON.parse(stored);
+      } catch (e) {}
+    }
+
+    async function fetchUserWithdrawals() {
+      if (!currentUser) return;
+      loadUserWithdrawalsFromStorage();
+      if (!db) return;
+      try {
+        const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          userWithdrawals = data;
+          saveUserWithdrawalsToStorage();
+          if (currentTab === 'profile') renderProfile();
+        }
+      } catch (e) {}
+    }
+
+    window.completeUserWithdrawal = async function(withdrawalId) {
+      if (!db || !currentUser) return;
+      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
+      await fetchUserWithdrawals();
 
       triggerDollahFloatingToast({
         time: 'just now',
@@ -1098,14 +951,6 @@
         status: 'Complete',
         coins: 'Approved'
       });
-
-      addNotification({
-        title: `Withdrawal Complete!`,
-        message: `Your cashout has been broadcasted and confirmed on blockchain.`,
-        status: 'complete'
-      });
-
-      if (currentTab === 'profile') renderProfile();
     };
 
     function filterCategory(cat) {
@@ -1127,13 +972,6 @@
       if (currentTab !== 'home') navigate('home');
       else renderHome();
     }
-
-    let currentUser = null;
-    let userCoins = 0;
-    let isSignupMode = false;
-    let isPasswordVisible = false;
-    let currentTab = 'home';
-    let profileFilter = 'withdrawals';
 
     function updateLevelAndXpUI(earnedCoins) {
       const totalXp = Math.floor(earnedCoins / 1000);
@@ -1186,32 +1024,7 @@
         db.auth.onAuthStateChange((_event, session) => {
           syncUserSession(session ? session.user : null);
         });
-      } catch (err) {
-        console.error("Session check:", err);
-      }
-    }
-
-    async function fetchUserWithdrawals() {
-      if (!currentUser) return;
-      // Load cache first
-      try {
-        const cached = localStorage.getItem('gollah_withdrawals_' + currentUser.id);
-        if (cached) userWithdrawals = JSON.parse(cached);
-      } catch (e) {}
-
-      if (!db) return;
-      try {
-        const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
-          userWithdrawals = data;
-          try {
-            localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
-          } catch (e) {}
-        }
-        if (currentTab === 'profile') renderProfile();
-      } catch (e) {
-        console.warn("Withdrawals fetch:", e);
-      }
+      } catch (err) {}
     }
 
     async function syncUserSession(user) {
@@ -1221,7 +1034,7 @@
       if (user) {
         let coins = 0;
         let displayName = user.email.split('@')[0];
-        let avatarUrl = avatarList[0];
+        let avatarUrl = 'avatars/1.png';
         let userCountry = user.user_metadata?.country || 'GLOBAL';
 
         try {
@@ -1230,16 +1043,11 @@
             coins = profile.coins || 0;
             displayName = profile.username || displayName;
             userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
-            if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
-              avatarUrl = profile.avatar_url;
-            }
+            if (profile.avatar_url) avatarUrl = profile.avatar_url;
           }
-        } catch (e) {
-          console.warn("Profile fetch:", e);
-        }
+        } catch (e) {}
 
         userCoins = coins;
-        selectedAvatar = avatarUrl;
         document.getElementById('header-avatar-img').src = avatarUrl;
         document.getElementById('dropdown-avatar-img').src = avatarUrl;
         document.getElementById('profile-username-display').innerText = displayName;
@@ -1248,7 +1056,7 @@
         document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
         updateLevelAndXpUI(userCoins);
-        fetchUserNotificationsFromDB();
+        loadUserNotificationsFromStorage();
         fetchUserWithdrawals();
 
         authSlot.innerHTML = `
@@ -1258,16 +1066,17 @@
         `;
       } else {
         userCoins = 0;
+        userNotifications = [];
         userWithdrawals = [];
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
         document.getElementById('header-coins').innerText = "0";
         document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
-        document.getElementById('header-avatar-img').src = avatarList[0];
-        document.getElementById('dropdown-avatar-img').src = avatarList[0];
+        document.getElementById('header-avatar-img').src = 'avatars/1.png';
+        document.getElementById('dropdown-avatar-img').src = 'avatars/1.png';
         
         updateLevelAndXpUI(0);
-        loadCachedNotifications();
+        updateNotificationsBadge();
 
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -1326,7 +1135,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // MULTIPLE ACCOUNT FRIENDLY REGISTRATION (No IP/Device restrictions)
     async function submitAuthForm() {
       const email = document.getElementById('auth-email-input').value.trim();
       const password = document.getElementById('auth-pass-input').value.trim();
@@ -1343,21 +1151,19 @@
       try {
         if (isSignupMode) {
           const detectedCountry = await getUserCountry();
-
           let finalUsername = username;
           const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
           if (existingProfile) {
             finalUsername = `${username}_${Math.floor(Math.random() * 899 + 100)}`;
           }
 
-          const randomAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
           const { data, error } = await db.auth.signUp({ 
             email, 
             password,
             options: {
               data: {
                 user_name: finalUsername,
-                avatar_url: randomAvatar,
+                avatar_url: 'avatars/1.png',
                 country: detectedCountry
               }
             }
@@ -1370,16 +1176,14 @@
               await db.from('profiles').upsert({
                 id: data.user.id,
                 username: finalUsername,
-                avatar_url: randomAvatar,
+                avatar_url: 'avatars/1.png',
                 country: detectedCountry,
                 coins: 0,
                 level: 1
               });
             }
-
             closeAuthModal();
             syncUserSession(data.user);
-            setTimeout(() => openAvatarModal(), 600);
           }
         } else {
           submitBtn.innerText = "Signing in...";
@@ -1416,11 +1220,7 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Terms of Use</h4>
-            <p>Welcome to Gollah Rewards ("Gollah"). By using this platform, you agree to adhere to all terms, advertising rules, and rewarded task policies.</p>
-            <h4 class="font-bold text-white text-sm">2. Rewards & Verification</h4>
-            <p>Virtual currency (Coins) and experience points (XP) are awarded solely upon validated advertiser conversion confirmed through our postback API.</p>
-            <h4 class="font-bold text-white text-sm">3. Payout Processing</h4>
-            <p>Crypto withdrawals (Litecoin, Binance Pay) are reviewed by automated safety protocols prior to blockchain broadcast.</p>
+            <p>By using this platform, you agree to adhere to all terms, advertising rules, and task policies.</p>
           </div>
         `;
       } else if (type === 'privacy') {
@@ -1428,7 +1228,7 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
-            <p>We process standard account credentials strictly for user authentication, offer delivery, and verified coin credits.</p>
+            <p>Account credentials are strictly processed for authentication, offer delivery, and verified coin credits.</p>
           </div>
         `;
       } else if (type === 'antifraud') {
@@ -1480,7 +1280,6 @@
 
     function renderHome() {
       const container = document.getElementById('app-content');
-      
       let filtered = ALL_OFFERS;
       if (currentCategory === 'featured') {
         filtered = ALL_OFFERS.filter(o => o.featured);
@@ -1531,7 +1330,6 @@
       });
 
       container.innerHTML = `
-        <!-- Live Ticker Bar -->
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
@@ -1539,49 +1337,12 @@
             <span class="text-white font-bold text-xs ml-2">805</span>
           </div>
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">B</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">Binance</span><span class="text-slate-500 text-[10px]">12m ago</span></div>
+            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">🟡</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">Binance</span><span class="text-slate-500 text-[10px]">14m ago</span></div>
             <span class="text-white font-bold text-xs ml-2">1,500</span>
           </div>
         </div>
 
-        <!-- Featured Spotlight Cards -->
-        ${(currentCategory === 'featured' || currentCategory === 'all') && !searchQuery ? `
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onclick="openOfferModal('f1')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div>
-                <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
-                <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <span class="text-xs font-bold text-white">TheoremReach Surveys</span>
-                <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● 2,500</span>
-              </div>
-            </div>
-
-            <div onclick="openOfferModal('f2')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div class="flex justify-center items-center h-20">
-                <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <div><span class="text-xs font-bold text-white block">Neverwinter</span><span class="text-[10px] text-slate-400">Lootably</span></div>
-                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 1,138</span>
-              </div>
-            </div>
-
-            <div onclick="openOfferModal('f3')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div class="flex justify-center items-center h-20">
-                <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <div><span class="text-xs font-bold text-white block">RAID Shadow Legends</span><span class="text-[10px] text-slate-400">Adgate</span></div>
-                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 43,500</span>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- Active Filtered Category Stream -->
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-white flex items-center gap-2">
@@ -1598,98 +1359,53 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function setWithdrawalSubFilter(filter) {
-      withdrawalSubFilter = filter;
-      renderProfile();
-    }
-
+    // PROFILE VIEW: Shows real pending/completed rows with sub-filters
     function renderProfile() {
       const container = document.getElementById('app-content');
 
+      let displayedWithdrawals = userWithdrawals;
+      if (profileFilter === 'pending') {
+        displayedWithdrawals = userWithdrawals.filter(w => w.status === 'PENDING');
+      } else if (profileFilter === 'completed') {
+        displayedWithdrawals = userWithdrawals.filter(w => w.status === 'COMPLETED');
+      }
+
       let listHTML = '';
-      if (profileFilter === 'withdrawals') {
-        let filteredWithdrawals = userWithdrawals;
-        if (withdrawalSubFilter === 'pending') {
-          filteredWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
-        } else if (withdrawalSubFilter === 'completed') {
-          filteredWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
-        }
-
-        const pendingCount = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING').length;
-        const completedCount = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED').length;
-
-        const filterTabsHTML = `
-          <div class="flex items-center gap-2 mb-3">
-            <button onclick="setWithdrawalSubFilter('all')" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition ${withdrawalSubFilter === 'all' ? 'bg-[#1e2a36] text-white border border-[#00d672]' : 'bg-[#10171e] text-slate-400 hover:text-white'}">
-              All (${userWithdrawals.length})
-            </button>
-            <button onclick="setWithdrawalSubFilter('pending')" class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${withdrawalSubFilter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50' : 'bg-[#10171e] text-slate-400 hover:text-amber-400'}">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              Pending (${pendingCount})
-            </button>
-            <button onclick="setWithdrawalSubFilter('completed')" class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${withdrawalSubFilter === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'bg-[#10171e] text-slate-400 hover:text-emerald-400'}">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Completed (${completedCount})
-            </button>
-          </div>
-        `;
-
-        if (filteredWithdrawals.length === 0) {
-          listHTML = `
-            ${filterTabsHTML}
-            <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
-              <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
-              No ${withdrawalSubFilter === 'all' ? '' : withdrawalSubFilter} cashout requests found.
-            </div>
-          `;
-        } else {
-          listHTML = `
-            ${filterTabsHTML}
-            <div class="flex flex-col gap-2">
-              ${filteredWithdrawals.map(w => {
-                const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
-                const iconSymbol = (w.method || '').includes('Binance') ? 'B' : 'Ł';
-                const iconColor = (w.method || '').includes('Binance') ? 'text-amber-400' : 'text-blue-400';
-                const formattedDate = w.created_at ? new Date(w.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now';
-
-                return `
-                  <div class="grid grid-cols-12 items-center bg-[#121b24] border ${isCompleted ? 'border-[#1d2a37]' : 'border-amber-500/30'} p-3.5 rounded-xl text-xs">
-                    <div class="col-span-5 sm:col-span-4 font-bold text-white flex items-center gap-2">
-                      <span class="w-7 h-7 rounded-lg bg-[#1f2c3a] flex items-center justify-center text-xs font-bold ${iconColor} shrink-0">${iconSymbol}</span> 
-                      <div>
-                        <span class="block truncate">${w.method}</span>
-                        <span class="text-[10px] text-slate-500 font-normal font-mono block">${formattedDate}</span>
-                      </div>
-                    </div>
-                    <span class="col-span-3 text-amber-400 font-bold">● ${parseInt(w.amount).toLocaleString()}</span>
-                    <span class="col-span-2 sm:col-span-3 text-slate-400 text-[11px] font-mono truncate" title="${w.address || ''}">${w.address || 'Verified ID'}</span>
-                    <span class="col-span-2 text-right">
-                      <span class="text-[10px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'}">
-                        ${isCompleted ? '✓ PAID' : '● PENDING'}
-                      </span>
-                    </span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          `;
-        }
-      } else {
+      if (displayedWithdrawals.length === 0) {
         listHTML = `
-          <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs">
-            <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
-            <span class="col-span-2 text-slate-400">Torox</span>
-            <span class="col-span-2 text-amber-400 font-bold">● 75,000</span>
-            <span class="col-span-2 text-slate-500">10m ago</span>
-            <span class="col-span-2 text-right"><span class="text-blue-400 font-semibold text-[11px]">Tracking Active</span></span>
+          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
+            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
           </div>
         `;
+      } else {
+        listHTML = displayedWithdrawals.map(w => {
+          const isCompleted = w.status === 'COMPLETED';
+          const isBinance = (w.method || '').includes('Binance');
+          return `
+            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
+              <span class="col-span-4 font-bold text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
+                  ${isBinance ? '🟡' : 'Ł'}
+                </span> 
+                ${w.method}
+              </span>
+              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
+              <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
+              <span class="col-span-2 text-right">
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
+                  ${w.status}
+                </span>
+              </span>
+            </div>
+          `;
+        }).join('');
       }
 
       container.innerHTML = `
         <div class="flex flex-col gap-5">
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Transactions
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
           </h2>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1698,12 +1414,17 @@
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
           </div>
 
-          <div class="flex items-center gap-4 text-xs font-semibold border-b border-[#1d2a37] pb-2">
-            <button onclick="changeProfileFilter('withdrawals')" class="${profileFilter === 'withdrawals' ? 'bg-[#00d672] text-black font-bold px-2.5 py-1 rounded-lg' : 'text-slate-400'}">Withdrawals</button>
-            <button onclick="changeProfileFilter('earnings')" class="${profileFilter === 'earnings' ? 'bg-[#00d672] text-black font-bold px-2.5 py-1 rounded-lg' : 'text-slate-400'}">Earnings / In-Progress</button>
+          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Withdrawals History:</span>
+              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
+              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
+              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
+            </div>
+            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
           </div>
 
-          <div>
+          <div class="flex flex-col gap-2">
             ${listHTML}
           </div>
         </div>
@@ -1714,16 +1435,16 @@
     function changeProfileFilter(filter) {
       profileFilter = filter;
       renderProfile();
-      if (window.lucide) lucide.createIcons();
     }
 
+    // SHOP VIEW: LTC on Left, Binance Pay on Right (Min 300 Coins)
     function renderShop() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="text-base font-bold text-white">Withdraw Options</h2>
-            <p class="text-xs text-slate-400">Cash out coins directly to Litecoin or Binance Pay.</p>
+            <p class="text-xs text-slate-400">Cash out coins directly to your personal crypto wallet.</p>
           </div>
           <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
             Min 300 Coins
@@ -1731,7 +1452,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Litecoin Card (Left Side) -->
+          <!-- 1. Litecoin (LTC) on the Left -->
           <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
@@ -1739,7 +1460,7 @@
               </div>
               <div>
                 <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
-                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins • Direct Wallet</span>
+                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
               </div>
             </div>
             <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
@@ -1747,15 +1468,15 @@
             </button>
           </div>
 
-          <!-- Binance Pay Card (Right Side) -->
-          <div onclick="openCustomCashoutModal('Binance Pay', 300, 'B')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+          <!-- 2. Binance Pay on the Right -->
+          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
-                B
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
+                🟡
               </div>
               <div>
-                <h3 class="font-bold text-white text-sm">Binance Pay (UID / Email / BEP20)</h3>
-                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins • Instant Zero Fee</span>
+                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
+                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
               </div>
             </div>
             <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
@@ -1803,9 +1524,7 @@
       stream.scrollTop = stream.scrollHeight;
     }
 
-    // Initial setup
     renderHome();
-    loadCachedNotifications();
     initAuth();
     if (window.lucide) lucide.createIcons();
   </script>
