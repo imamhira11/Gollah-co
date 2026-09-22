@@ -79,7 +79,7 @@
       </button>
 
       <div class="relative">
-        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
+        <button onclick="toggleProfileDropdown(event)" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative cursor-pointer">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
           <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
@@ -269,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST (Longer Duration) -->
+  <!-- FLOATING TOAST -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -506,26 +506,21 @@
       if (currentTab === 'home') renderHome();
     }
 
-    // 2. Comprehensive Offer Database
+    // 2. Comprehensive Offer Database (Complete Offerwall List)
     const ALL_OFFERS = [
-      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
-      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
-      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
-      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
-      { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
-      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
-      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
-      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
-      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
-      { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
-      { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
-      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
-      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
-      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
-      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' },
-      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass quiz with 100% score.', link: 'https://torox.io' },
-      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone.', link: 'https://coinbase.com' },
-      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete verification.', link: 'https://binance.com' }
+      { id: 't1', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: true, icon: 'TC', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
+      { id: 't2', name: 'Swagbucks Mobile App', provider: 'Torox', coins: 19136, category: 'apps', featured: true, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
+      { id: 'l1', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
+      { id: 'l2', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: true, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
+      { id: 'ag1', name: 'RAID Shadow Legends', provider: 'AdGate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
+      { id: 'ag2', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: true, icon: 'SL', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
+      { id: 'm1', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: true, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
+      { id: 'm2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: true, icon: 'GV', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
+      { id: 'cpx1', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: true, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
+      { id: 'bl1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: true, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
+      { id: 'ib1', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: true, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
+      { id: 'tr1', name: 'TheoremReach Surveys', provider: 'TheoremReach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
+      { id: 'ads1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: true, icon: 'QZ', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' }
     ];
 
     let activeOfferData = null;
@@ -601,6 +596,7 @@
     function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
+      if (!list) return;
       list.innerHTML = '';
 
       if (userNotifications.length === 0) {
@@ -674,7 +670,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO 1: Pending Submit Pop Sound
+    // SOUND 1: Pending Submit Pop Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playPendingTaakSound() {
@@ -701,7 +697,7 @@
       } catch (e) {}
     }
 
-    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
+    // SOUND 2: Completed Custom Audio ("cashout.mp3")
     function playCompletedCustomAudio() {
       try {
         const audio = new Audio('cashout.mp3');
@@ -736,8 +732,8 @@
       card.classList.add('toast-animate-in');
 
       clearTimeout(floatingToastTimer);
-      // LONGER DURATION: Toast stays visible for 10 seconds (10000ms)
-      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 10000);
+      // EXTENDED DURATION: 20 seconds (20000ms)
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 20000);
       if (window.lucide) lucide.createIcons();
     }
 
@@ -1364,6 +1360,24 @@
       document.getElementById('legal-modal').classList.add('hidden');
     }
 
+    function toggleProfileDropdown(event) {
+      if (event) event.stopPropagation();
+      const dropdown = document.getElementById('profile-dropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('hidden');
+      }
+    }
+
+    window.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('profile-dropdown');
+      const avatarBtn = document.querySelector('header button');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        if (!dropdown.contains(e.target) && (!avatarBtn || !avatarBtn.contains(e.target))) {
+          dropdown.classList.add('hidden');
+        }
+      }
+    });
+
     function navigate(view) {
       currentTab = view;
       document.getElementById('profile-dropdown').classList.add('hidden');
@@ -1381,6 +1395,8 @@
 
     function renderHome() {
       const container = document.getElementById('app-content');
+      if (!container) return;
+
       let filtered = ALL_OFFERS;
       if (currentCategory === 'featured') {
         filtered = ALL_OFFERS.filter(o => o.featured);
@@ -1430,7 +1446,6 @@
         `;
       });
 
-      // Render live ticker items dynamically from liveTickerItems array
       let tickerHTML = '';
       liveTickerItems.forEach(t => {
         tickerHTML += `
@@ -1461,135 +1476,6 @@
         </div>
       `;
       if (window.lucide) lucide.createIcons();
-    }
-
-    function renderProfile() {
-      const container = document.getElementById('app-content');
-
-      let displayedWithdrawals = userWithdrawals;
-      if (profileFilter === 'pending') {
-        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
-      } else if (profileFilter === 'completed') {
-        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
-      }
-
-      let listHTML = '';
-      if (displayedWithdrawals.length === 0) {
-        listHTML = `
-          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
-            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
-            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
-          </div>
-        `;
-      } else {
-        listHTML = displayedWithdrawals.map(w => {
-          const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
-          const isBinance = (w.method || '').includes('Binance');
-          return `
-            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
-              <span class="col-span-4 font-bold text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
-                  ${isBinance ? '🟡' : 'Ł'}
-                </span> 
-                ${w.method}
-              </span>
-              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
-              <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
-              <span class="col-span-2 text-right">
-                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
-                  ${w.status}
-                </span>
-              </span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      container.innerHTML = `
-        <div class="flex flex-col gap-5">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
-          </h2>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
-          </div>
-
-          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">Withdrawals History:</span>
-              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
-              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
-              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
-            </div>
-            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            ${listHTML}
-          </div>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function changeProfileFilter(filter) {
-      profileFilter = filter;
-      renderProfile();
-    }
-
-    function renderShop() {
-      const container = document.getElementById('app-content');
-      container.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-base font-bold text-white">Withdraw Options</h2>
-            <p class="text-xs text-slate-400">Cash out coins directly to your personal crypto wallet.</p>
-          </div>
-          <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
-            Min 300 Coins
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
-                Ł
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
-                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
-              </div>
-            </div>
-            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
-              Withdraw
-            </button>
-          </div>
-
-          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
-                🟡
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
-                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
-              </div>
-            </div>
-            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
-              Withdraw
-            </button>
-          </div>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function toggleProfileDropdown() {
-      document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
     renderHome();
