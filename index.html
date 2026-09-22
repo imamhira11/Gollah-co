@@ -1379,6 +1379,31 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    function filterByProvider(providerName) {
+      searchQuery = providerName.toLowerCase();
+      const searchInput = document.getElementById('offer-search-input');
+      if (searchInput) searchInput.value = providerName;
+      currentCategory = 'all';
+      const categories = ['featured', 'all', 'apps', 'games', 'surveys', 'gpt', 'signups'];
+      categories.forEach(c => {
+        const el = document.getElementById('cat-' + c);
+        if (el) {
+          if (c === 'all') el.className = "cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+          else el.className = "w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+        }
+      });
+      if (currentTab !== 'home') navigate('home');
+      else renderHome();
+    }
+
+    function scrollProvidersCarousel(direction) {
+      const track = document.getElementById('providers-carousel');
+      if (!track) return;
+      // Scroll by ~1 card width (180px + gap)
+      const scrollAmount = 200;
+      track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+
     function renderHome() {
       const container = document.getElementById('app-content');
       let filtered = ALL_OFFERS;
@@ -1442,9 +1467,61 @@
         `;
       });
 
+      // Providers section (Lootably, Monlix, Adgate, OfferToro, etc.)
+      const providers = [
+        { name: 'Lootably', label: 'Lootably', bg: 'bg-[#2a1f4d]', text: 'text-white', badge: '+50%', badgeBg: 'bg-violet-500', logo: 'L' },
+        { name: 'Monlix', label: 'Monlix', bg: 'bg-[#00c853]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: 'X' },
+        { name: 'Adgate', label: 'Adgate', bg: 'bg-[#29b6f6]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: '◆' },
+        { name: 'OfferToro', label: 'OfferToro', bg: 'bg-[#7c4dff]', text: 'text-white', badge: null, badgeBg: '', logo: 'OT' },
+        { name: 'Torox', label: 'Torox', bg: 'bg-[#ff6d00]', text: 'text-white', badge: null, badgeBg: '', logo: 'TX' },
+        { name: 'BitLabs', label: 'BitLabs', bg: 'bg-[#1e88e5]', text: 'text-white', badge: null, badgeBg: '', logo: 'BL' },
+        { name: 'CPX', label: 'CPX Research', bg: 'bg-[#00897b]', text: 'text-white', badge: null, badgeBg: '', logo: 'CPX' },
+        { name: 'MobiVortex', label: 'MobiVortex', bg: 'bg-[#e91e63]', text: 'text-white', badge: null, badgeBg: '', logo: 'MV' },
+        { name: 'Offery', label: 'Offery', bg: 'bg-[#9c27b0]', text: 'text-white', badge: null, badgeBg: '', logo: 'OF' },
+        { name: 'Bitlab', label: 'Bitlab', bg: 'bg-[#3f51b5]', text: 'text-white', badge: null, badgeBg: '', logo: 'Bt' },
+        { name: 'Tplayed', label: 'Tplayed', bg: 'bg-[#00bcd4]', text: 'text-white', badge: null, badgeBg: '', logo: 'TP' },
+        { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
+        { name: 'Clickwall', label: 'Clickwall', bg: 'bg-[#ff5722]', text: 'text-white', badge: null, badgeBg: '', logo: 'CW' },
+        { name: 'Pixylabs', label: 'Pixylabs', bg: 'bg-[#607d8b]', text: 'text-white', badge: null, badgeBg: '', logo: 'PX' },
+        { name: 'Pubscale', label: 'Pubscale', bg: 'bg-[#795548]', text: 'text-white', badge: null, badgeBg: '', logo: 'PS' }
+      ];
+
+      let providersHTML = '';
+      providers.forEach(p => {
+        const badgeHTML = p.badge
+          ? `<span class="absolute top-0 right-0 ${p.badgeBg} text-white text-[11px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-2xl shadow-md">${p.badge}</span>`
+          : '';
+        providersHTML += `
+          <div onclick="filterByProvider('${p.name}')" class="relative shrink-0 w-[180px] h-[200px] ${p.bg} rounded-3xl flex flex-col items-center justify-center cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl overflow-hidden border border-white/10 shadow-lg" style="scroll-snap-align: start;">
+            ${badgeHTML}
+            <span class="text-4xl font-black ${p.text} mb-3 tracking-tight drop-shadow">${p.logo}</span>
+            <span class="text-sm font-bold ${p.text} text-center px-3 leading-tight">${p.label}</span>
+          </div>
+        `;
+      });
+
       container.innerHTML = `
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
           ${tickerHTML}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="boxes" class="w-4 h-4 text-slate-400"></i> Providers
+            </h3>
+            <div class="flex items-center gap-2">
+              <button onclick="scrollProvidersCarousel(-1)" class="w-8 h-8 rounded-xl bg-[#1a2530] border border-[#2a3848] hover:bg-[#00d672] hover:text-black hover:border-[#00d672] text-slate-300 flex items-center justify-center transition shadow">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button onclick="scrollProvidersCarousel(1)" class="w-8 h-8 rounded-xl bg-[#1a2530] border border-[#2a3848] hover:bg-[#00d672] hover:text-black hover:border-[#00d672] text-slate-300 flex items-center justify-center transition shadow">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div id="providers-carousel" class="flex items-center gap-4 overflow-x-auto custom-scroll pb-2 scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+            ${providersHTML}
+          </div>
         </div>
 
         <div class="flex flex-col gap-3">
