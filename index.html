@@ -269,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST (Longer Duration: 20 seconds) -->
+  <!-- FLOATING TOAST (Duration: 20 seconds) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -489,7 +489,7 @@
       console.warn("Supabase local active");
     }
 
-    // Live Ticker State for Home Screen (Dollah.co style offerwall grid & live stream integration)
+    // Live Ticker State for Home Screen
     let liveTickerItems = [
       { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
       { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
@@ -1356,6 +1356,7 @@
         `;
       }
 
+      document.getElementById('legal-modal').classList.add('hidden'); // Fixed modal display bug
       document.getElementById('legal-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
