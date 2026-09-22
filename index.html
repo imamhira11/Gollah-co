@@ -35,11 +35,11 @@
       color: #061910 !important;
     }
     @keyframes toastSlideIn {
-      0% { opacity: 0; transform: translateY(15px) scale(0.96); }
+      0% { opacity: 0; transform: translateY(25px) scale(0.95); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .toast-animate-in {
-      animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
   </style>
@@ -82,14 +82,16 @@
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
-      <!-- Profile Avatar Button -->
+      <!-- Profile Avatar Button with Notification Badge -->
       <div class="relative">
-        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl">
+        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
+          <!-- Dollah-style Red Notification Pill on Avatar -->
+          <span id="header-notif-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">1</span>
         </button>
 
-        <!-- Dynamic Profile Dropdown -->
+        <!-- Dynamic Profile Dropdown (Dollah.co style) -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
@@ -101,7 +103,10 @@
               <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
             </div>
             <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
-            <span id="profile-email-display" class="text-[11px] font-mono text-slate-400 mt-0.5 truncate max-w-[200px]">Not logged in</span>
+            <div class="flex items-center gap-1 bg-[#0b1116] px-2 py-0.5 rounded-lg border border-[#1e2a36] mt-0.5">
+              <span id="profile-user-id-snippet" class="text-[10px] font-mono text-slate-400">UID: guest</span>
+              <i data-lucide="copy" class="w-3 h-3 text-slate-500 cursor-pointer hover:text-white" onclick="copyUserId()"></i>
+            </div>
           </div>
 
           <!-- XP & Level Progress Bar -->
@@ -113,18 +118,19 @@
             <div class="w-full bg-[#202c38] h-2 rounded-full overflow-hidden">
               <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500"></div>
             </div>
-            <div class="flex justify-between text-[9px] text-slate-500 mt-1">
-              <span>1,000 Coins = 1 XP</span>
-              <span id="xp-needed">10 XP to Lvl 2</span>
-            </div>
           </div>
 
+          <!-- Menu Options -->
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
+            <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
+              <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
+              <span id="dropdown-notif-pill" class="bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">1</span>
+            </button>
             <button onclick="openAvatarModal()" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Memoji Face
             </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
-              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
+              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
             </button>
             <button onclick="openLegalModal('contact')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="life-buoy" class="w-4 h-4 text-blue-400"></i> Help & Support
@@ -134,11 +140,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="flex items-center gap-1.5">
-        <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold flex items-center justify-center">24</span>
-        <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[11px] font-bold flex items-center justify-center">7</span>
       </div>
     </div>
   </header>
@@ -207,26 +208,10 @@
           </button>
         </div>
       </div>
-
-      <!-- SOUND NOTIFICATION POPUP CARD -->
-      <div id="live-bottom-card" class="hidden bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-2xl transition cursor-pointer">
-        <div class="flex items-center gap-2">
-          <div id="feed-icon" class="w-8 h-8 rounded-lg bg-[#1a2532] text-slate-300 font-bold flex items-center justify-center text-xs">🎮</div>
-          <div class="flex flex-col">
-            <span id="feed-time" class="text-[9px] text-slate-500">just now</span>
-            <span id="feed-title" class="text-[11px] font-bold text-white">Offer Completed</span>
-            <span id="feed-subtitle" class="text-[9px] text-slate-400">Reward Added</span>
-          </div>
-        </div>
-        <div class="text-right">
-          <span id="feed-badge" class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded block mb-0.5">COMPLETE</span>
-          <span id="feed-coins" class="text-[11px] font-bold text-amber-400">● 25,000</span>
-        </div>
-      </div>
     </aside>
 
     <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
-    <div class="flex-1 flex flex-col overflow-y-auto custom-scroll">
+    <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
       
       <!-- Anti-Fraud Security Notice Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-blue-950/40 border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
@@ -261,9 +246,6 @@
               </span>
               <span class="bg-[#121c25] text-blue-400 px-2.5 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1.5">
                 <i data-lucide="lock" class="w-3 h-3"></i> SSL 256-Bit Encrypted
-              </span>
-              <span class="bg-[#121c25] text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
-                <i data-lucide="zap" class="w-3 h-3"></i> Instant Postbacks
               </span>
             </div>
           </div>
@@ -305,30 +287,6 @@
       <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
         <div>
           <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-slate-400">ElectrifyingNeutr</span>
-            <span class="text-[10px] text-slate-600">04:20 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">any good mobile offer working now?</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-emerald-400">laznamahfuz</span>
-            <span class="text-[10px] text-slate-600">07:41 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">how can i earn money?</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-purple-400">tauhid1002</span>
-            <span class="text-[10px] text-slate-600">04:23 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">Make Money fast with Neverwinter game offer</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
             <span class="font-bold text-[#00d672]">The KHALID</span>
             <span class="text-[10px] text-slate-600">05:53 am</span>
           </div>
@@ -342,6 +300,102 @@
       </div>
     </aside>
 
+  </div>
+
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP (CONFETTI / STATUS / COINS) -->
+  <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
+    <div class="flex items-center justify-between mb-1.5">
+      <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
+      <div id="floating-status-pill" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+        <i data-lucide="check" class="w-3 h-3"></i>
+      </div>
+    </div>
+    <h4 id="floating-offer-title" class="text-sm font-bold text-white block truncate">Animals And Coins</h4>
+    <p id="floating-offer-status" class="text-xs text-slate-400 mb-2">Complete</p>
+    <div class="flex items-center justify-between pt-1 border-t border-[#1f2c3a]">
+      <span class="text-[11px] text-slate-500 font-bold">Reward</span>
+      <span id="floating-offer-coins" class="text-sm font-black text-amber-400 flex items-center gap-1">● 2,500</span>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS MODAL (Dollah-style Alert Center) -->
+  <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
+          <h3 class="font-bold text-base text-white">Notifications & Alerts</h3>
+        </div>
+        <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- List of notifications -->
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
+        <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
+        <button onclick="closeNotificationsModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-4 py-1.5 rounded-xl transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL-WORLD OFFER DETAILS MODAL -->
+  <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-start border-b border-[#202c38] pb-4">
+        <div class="flex items-center gap-3">
+          <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#1e2c3a] flex items-center justify-center font-black text-emerald-400 text-sm">
+            OFFER
+          </div>
+          <div>
+            <h3 id="modal-offer-title" class="font-bold text-base text-white">Offer Name</h3>
+            <span id="modal-offer-provider" class="text-xs text-slate-400">Provider</span>
+          </div>
+        </div>
+        <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="bg-[#0e1620] border border-[#1e2c3a] rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] text-slate-400 block mb-0.5">Total Reward Payout</span>
+          <div class="flex items-center gap-2">
+            <span id="modal-offer-coins" class="text-xl font-black text-amber-400">● 0</span>
+            <span id="modal-offer-xp" class="text-xs bg-[#00d672]/20 text-[#00d672] font-bold px-2 py-0.5 rounded">+0 XP</span>
+          </div>
+        </div>
+        <span class="text-[11px] bg-blue-500/20 text-blue-300 font-bold px-2.5 py-1 rounded-lg">VERIFIED OFFER</span>
+      </div>
+
+      <div class="flex flex-col gap-2 text-xs">
+        <span class="font-bold text-slate-300">Task Instructions:</span>
+        <div class="bg-[#111922] border border-[#1d2a37] rounded-xl p-3 flex flex-col gap-2 text-slate-300">
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+            <span>Click <strong>"Start Offer Now"</strong> below to open the official advertiser tracking page.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+            <span id="modal-offer-instruction">Complete the required actions (install app, reach level, or answer survey questions).</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+            <span>Coins credit automatically once the advertiser confirms completion via postback.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3">
+        <button onclick="closeOfferModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="modal-offer-launch-btn" onclick="launchOfferTracking()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
+          <span>Start Offer Now</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- AUTH MODAL -->
@@ -409,67 +463,7 @@
     </div>
   </div>
 
-  <!-- REAL-WORLD OFFER DETAILS MODAL (Launch Task, Steps, Requirements) -->
-  <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
-      <div class="flex justify-between items-start border-b border-[#202c38] pb-4">
-        <div class="flex items-center gap-3">
-          <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#1e2c3a] flex items-center justify-center font-black text-emerald-400 text-sm">
-            OFFER
-          </div>
-          <div>
-            <h3 id="modal-offer-title" class="font-bold text-base text-white">Offer Name</h3>
-            <span id="modal-offer-provider" class="text-xs text-slate-400">Provider</span>
-          </div>
-        </div>
-        <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <!-- Offer Reward Box -->
-      <div class="bg-[#0e1620] border border-[#1e2c3a] rounded-2xl p-4 flex items-center justify-between">
-        <div>
-          <span class="text-[11px] text-slate-400 block mb-0.5">Total Reward Payout</span>
-          <div class="flex items-center gap-2">
-            <span id="modal-offer-coins" class="text-xl font-black text-amber-400">● 0</span>
-            <span id="modal-offer-xp" class="text-xs bg-[#00d672]/20 text-[#00d672] font-bold px-2 py-0.5 rounded">+0 XP</span>
-          </div>
-        </div>
-        <span class="text-[11px] bg-blue-500/20 text-blue-300 font-bold px-2.5 py-1 rounded-lg">VERIFIED OFFER</span>
-      </div>
-
-      <!-- Instructions List -->
-      <div class="flex flex-col gap-2 text-xs">
-        <span class="font-bold text-slate-300">Task Instructions:</span>
-        <div class="bg-[#111922] border border-[#1d2a37] rounded-xl p-3 flex flex-col gap-2 text-slate-300">
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
-            <span>Click <strong>"Start Offer Now"</strong> below to open the official advertiser tracking page.</span>
-          </div>
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
-            <span id="modal-offer-instruction">Complete the required actions (install app, reach level, or answer survey questions).</span>
-          </div>
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
-            <span>Do not use VPNs or Ad-blockers during task completion. Coins credit automatically upon completion.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="pt-2 flex items-center gap-3">
-        <button onclick="closeOfferModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-3 rounded-xl text-xs transition">
-          Cancel
-        </button>
-        <button id="modal-offer-launch-btn" onclick="launchOfferTracking()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
-          <span>Start Offer Now</span>
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPREHENSIVE LEGAL & SUPPORT MODAL -->
+  <!-- LEGAL & SUPPORT MODAL -->
   <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -478,13 +472,9 @@
         </h3>
         <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
       <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
-
       <div class="pt-3 border-t border-[#202c38] flex justify-end">
-        <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">
-          I Understand & Close
-        </button>
+        <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">I Understand & Close</button>
       </div>
     </div>
   </div>
@@ -550,29 +540,20 @@
 
     // 2. Comprehensive Offer Database & Real Tracking Engine
     const ALL_OFFERS = [
-      // Featured
       { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete high-paying profile surveys with honest feedback.', link: 'https://theoremreach.com' },
       { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter, create character and reach Level 10.', link: 'https://lootably.com' },
       { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days of registration.', link: 'https://adgatemedia.com' },
-      
-      // Apps
       { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app, earn at least 500 SB to unlock reward.', link: 'https://torox.io' },
       { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
       { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut, order physical card and make first purchase.', link: 'https://monlix.com' },
       { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'First time user: Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
-
-      // Games
       { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times inside Vegas slots.', link: 'https://adgatemedia.com' },
       { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days of install.', link: 'https://monlix.com' },
       { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
       { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
-
-      // Surveys
       { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Qualify and answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
       { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey without rushing.', link: 'https://cpx-research.com' },
       { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey to receive verified completion.', link: 'https://inbrain.ai' },
-
-      // GPT & Sign ups
       { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on the 10-question general trivia quiz.', link: 'https://adscendmedia.com' },
       { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass the quiz with 100% score to receive instant payout.', link: 'https://torox.io' },
       { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone number and email.', link: 'https://coinbase.com' },
@@ -583,7 +564,119 @@
     let currentCategory = 'featured';
     let searchQuery = '';
 
-    // Open Real Offer Details Modal (DO NOT ADD COINS DIRECTLY)
+    // Notifications Storage & History
+    let userNotifications = [
+      { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete your first offer to unlock crypto withdrawals.', time: '1h ago', type: 'system', isRead: false }
+    ];
+
+    // Withdrawals In-Memory History (Synced with DB)
+    let userWithdrawals = [];
+
+    function updateNotificationsBadge() {
+      const unreadCount = userNotifications.filter(n => !n.isRead).length;
+      const headerBadge = document.getElementById('header-notif-badge');
+      const dropdownPill = document.getElementById('dropdown-notif-pill');
+
+      if (unreadCount > 0) {
+        if (headerBadge) { headerBadge.innerText = unreadCount; headerBadge.classList.remove('hidden'); }
+        if (dropdownPill) { dropdownPill.innerText = unreadCount; dropdownPill.classList.remove('hidden'); }
+      } else {
+        if (headerBadge) headerBadge.classList.add('hidden');
+        if (dropdownPill) dropdownPill.classList.add('hidden');
+      }
+    }
+
+    function addNotification(notif) {
+      userNotifications.unshift({
+        id: 'n_' + Date.now(),
+        ...notif,
+        time: 'just now',
+        isRead: false
+      });
+      updateNotificationsBadge();
+    }
+
+    function openNotificationsModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      const list = document.getElementById('notifications-list');
+      list.innerHTML = '';
+
+      if (userNotifications.length === 0) {
+        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
+      } else {
+        userNotifications.forEach(n => {
+          const item = document.createElement('div');
+          item.className = `p-3 rounded-xl border ${n.isRead ? 'bg-[#0f1720] border-[#1c2734]' : 'bg-[#182330] border-[#00d672]/30'} flex flex-col gap-1`;
+          item.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-xs">${n.title}</span>
+              <span class="text-[10px] text-slate-500">${n.time}</span>
+            </div>
+            <p class="text-xs text-slate-300">${n.message}</p>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      // Mark all as read
+      userNotifications.forEach(n => n.isRead = true);
+      updateNotificationsBadge();
+
+      document.getElementById('notifications-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeNotificationsModal() {
+      document.getElementById('notifications-modal').classList.add('hidden');
+    }
+
+    function clearAllNotifications() {
+      userNotifications = [];
+      updateNotificationsBadge();
+      openNotificationsModal();
+    }
+
+    function copyUserId() {
+      if (!currentUser) return;
+      navigator.clipboard.writeText(currentUser.id);
+      alert("User ID copied to clipboard!");
+    }
+
+    // Dollah-style Floating Action Toast Popup
+    let floatingToastTimer = null;
+    function triggerDollahFloatingToast(data) {
+      const card = document.getElementById('dollah-floating-card');
+      if (!card) return;
+      playSound(data.sound || 'coin');
+
+      document.getElementById('floating-time').innerText = data.time || 'just now';
+      document.getElementById('floating-offer-title').innerText = data.title;
+      document.getElementById('floating-offer-status').innerText = data.status || 'Complete';
+      document.getElementById('floating-offer-coins').innerText = `● ${data.coins}`;
+
+      const pill = document.getElementById('floating-status-pill');
+      if (data.status === 'In-Progress' || data.status === 'Tracking') {
+        pill.className = "w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center";
+        pill.innerHTML = `<i data-lucide="loader" class="w-3 h-3 animate-spin"></i>`;
+      } else if (data.status === 'Pending Cashout') {
+        pill.className = "w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center";
+        pill.innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i>`;
+      } else {
+        pill.className = "w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
+        pill.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i>`;
+      }
+
+      card.classList.remove('hidden');
+      card.classList.remove('toast-animate-in');
+      void card.offsetWidth;
+      card.classList.add('toast-animate-in');
+
+      clearTimeout(floatingToastTimer);
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 6000);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Open Real Offer Details Modal
     function openOfferModal(offerId) {
       if (!currentUser) {
         alert("Please login first to view and start offers!");
@@ -611,25 +704,31 @@
       activeOfferData = null;
     }
 
-    // Launch Advertiser Tracking Window & Set Offer "In-Progress"
+    // Launch Tracking (DOES NOT CHEAT COINS, RECORDS IN-PROGRESS & TOAST)
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
       
       const offer = activeOfferData;
       closeOfferModal();
 
-      // Notification: Started & In-Progress (NO DIRECT COIN CHEAT)
-      triggerActionPopup({
-        icon: '🚀',
-        title: `${offer.name} Started`,
-        subtitle: 'Tracking activated... Pending completion',
-        badge: 'IN-PROGRESS',
-        badgeClass: 'bg-blue-500/20 text-blue-300',
-        coins: offer.coins.toLocaleString()
-      }, 'coin');
+      // 1. Trigger Dollah.co Bottom Corner Notification
+      triggerDollahFloatingToast({
+        time: 'just now',
+        title: offer.name,
+        status: 'Tracking Initialized',
+        coins: offer.coins.toLocaleString(),
+        sound: 'coin'
+      });
 
-      // Open Advertiser Landing / Offerwall Link in new tab with user tracking parameter
-      const trackingUrl = `${offer.link}?uid=${currentUser.id}&subid=gollah`;
+      // 2. Add to Notification Log
+      addNotification({
+        title: `${offer.name} Clicked`,
+        message: `Task opened via ${offer.provider}. Reward (● ${offer.coins.toLocaleString()}) will credit upon advertiser postback verification.`,
+        type: 'offer'
+      });
+
+      // 3. Open advertiser link with tracking query params
+      const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
       window.open(trackingUrl, '_blank');
     }
 
@@ -659,7 +758,7 @@
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
-    let profileFilter = 'on-hold';
+    let profileFilter = 'withdrawals';
 
     function updateLevelAndXpUI(earnedCoins) {
       const totalXp = Math.floor(earnedCoins / 1000);
@@ -673,12 +772,10 @@
       const xpText = document.getElementById('xp-text');
       const nextLevelText = document.getElementById('xp-next-level');
       const progressBar = document.getElementById('xp-progress-bar');
-      const xpNeeded = document.getElementById('xp-needed');
 
       if (xpText) xpText.innerText = `${xpInCurrentLevel} / 10 XP`;
       if (nextLevelText) nextLevelText.innerText = `Lvl ${currentLevel + 1}`;
       if (progressBar) progressBar.style.width = `${progressPercent}%`;
-      if (xpNeeded) xpNeeded.innerText = `${10 - xpInCurrentLevel} XP to Lvl ${currentLevel + 1}`;
 
       return currentLevel;
     }
@@ -700,14 +797,6 @@
         }
       } catch (e) {}
 
-      try {
-        const r3 = await fetch('https://ipapi.co/json/');
-        if (r3.ok) {
-          const d3 = await r3.json();
-          if (d3 && d3.country_code) return d3.country_code;
-        }
-      } catch (e) {}
-
       return 'BD';
     }
 
@@ -722,6 +811,19 @@
         });
       } catch (err) {
         console.error("Session check:", err);
+      }
+    }
+
+    async function fetchUserWithdrawals() {
+      if (!db || !currentUser) return;
+      try {
+        const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        if (!error && data) {
+          userWithdrawals = data;
+          if (currentTab === 'profile') renderProfile();
+        }
+      } catch (e) {
+        console.warn("Withdrawals fetch:", e);
       }
     }
 
@@ -744,13 +846,6 @@
             if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
               avatarUrl = profile.avatar_url;
             }
-
-            if (!profile.country || profile.country === 'Unknown') {
-              getUserCountry().then(c => {
-                db.from('profiles').update({ country: c }).eq('id', user.id);
-                document.getElementById('profile-country-badge').innerText = `🚩 ${c}`;
-              });
-            }
           }
         } catch (e) {
           console.warn("Profile fetch:", e);
@@ -761,11 +856,13 @@
         document.getElementById('header-avatar-img').src = avatarUrl;
         document.getElementById('dropdown-avatar-img').src = avatarUrl;
         document.getElementById('profile-username-display').innerText = displayName;
-        document.getElementById('profile-email-display').innerText = user.email;
+        document.getElementById('profile-user-id-snippet').innerText = `UID: ${user.id.substring(0, 8)}...`;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
         document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
         updateLevelAndXpUI(userCoins);
+        updateNotificationsBadge();
+        fetchUserWithdrawals();
 
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -774,14 +871,16 @@
         `;
       } else {
         userCoins = 0;
+        userWithdrawals = [];
         document.getElementById('profile-username-display').innerText = "Guest User";
-        document.getElementById('profile-email-display').innerText = "Not logged in";
+        document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
         document.getElementById('header-coins').innerText = "0";
         document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
         document.getElementById('header-avatar-img').src = avatarList[0];
         document.getElementById('dropdown-avatar-img').src = avatarList[0];
         
         updateLevelAndXpUI(0);
+        updateNotificationsBadge();
 
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -893,7 +992,7 @@
               });
             }
 
-            alert(`Welcome to Gollah, ${username}! (${detectedCountry} region saved)`);
+            alert(`Welcome to Gollah, ${username}!`);
             closeAuthModal();
             syncUserSession(data.user);
             setTimeout(() => openAvatarModal(), 600);
@@ -923,7 +1022,7 @@
       alert("Signed out successfully.");
     }
 
-    // Audio & Action Popup
+    // Audio Synthesizer
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playSound(type = 'coin') {
@@ -950,31 +1049,6 @@
       } catch (e) {}
     }
 
-    let popupTimer = null;
-    function triggerActionPopup(data, soundType = 'coin') {
-      const card = document.getElementById('live-bottom-card');
-      if (!card) return;
-      playSound(soundType);
-
-      document.getElementById('feed-icon').innerText = data.icon || '✓';
-      document.getElementById('feed-time').innerText = data.time || 'just now';
-      document.getElementById('feed-title').innerText = data.title;
-      document.getElementById('feed-subtitle').innerText = data.subtitle;
-      
-      const badgeEl = document.getElementById('feed-badge');
-      badgeEl.innerText = data.badge;
-      badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${data.badgeClass || 'bg-emerald-500/20 text-emerald-400'}`;
-      document.getElementById('feed-coins').innerText = `● ${data.coins}`;
-
-      card.classList.remove('hidden');
-      card.classList.remove('toast-animate-in');
-      void card.offsetWidth;
-      card.classList.add('toast-animate-in');
-
-      clearTimeout(popupTimer);
-      popupTimer = setTimeout(() => card.classList.add('hidden'), 5000);
-    }
-
     // Legal Modals
     function openLegalModal(type) {
       document.getElementById('profile-dropdown').classList.add('hidden');
@@ -986,11 +1060,9 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Acceptance of Terms</h4>
-            <p>By accessing or registering an account on Gollah Rewards ("Gollah", "we", "us"), you agree to comply with and be bound by these Terms of Service.</p>
+            <p>By accessing or registering an account on Gollah Rewards, you agree to comply with our platform policies.</p>
             <h4 class="font-bold text-white text-sm">2. One Account Policy</h4>
-            <p>Users must be at least 13 years of age. Each person is strictly limited to <strong>ONE (1) account</strong>.</p>
-            <h4 class="font-bold text-white text-sm">3. Rewards & Verification</h4>
-            <p>Coins and XP credit only after advertiser confirms completed actions via verified postback.</p>
+            <p>Each person is strictly limited to <strong>ONE (1) account</strong>. Multi-accounting is subject to permanent termination.</p>
           </div>
         `;
       } else if (type === 'privacy') {
@@ -998,7 +1070,7 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Information We Collect</h4>
-            <p>We collect email address, username, public IP address, and country code to prevent fraud and multi-account abuse.</p>
+            <p>We store email address, username, IP location, and transaction logs securely to verify reward delivery.</p>
           </div>
         `;
       } else if (type === 'antifraud') {
@@ -1007,22 +1079,20 @@
           <div class="space-y-3 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl">
             <h4 class="font-bold text-rose-400 text-sm">STRICT ZERO-TOLERANCE RULES</h4>
             <ul class="list-disc pl-5 space-y-1.5 text-slate-200">
-              <li><strong>No Virtual Private Networks (VPN) or Proxies</strong></li>
-              <li><strong>No Android/iOS Emulators (Bluestacks, LDPlayer)</strong></li>
-              <li><strong>No Automated Clickers or Bots</strong></li>
+              <li>No Virtual Private Networks (VPN) or Proxies</li>
+              <li>No Android/iOS Emulators (Bluestacks, LDPlayer)</li>
+              <li>No Automated Clickers or Bots</li>
             </ul>
           </div>
         `;
       } else if (type === 'contact') {
         titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Help & Publisher Support`;
         bodyEl.innerHTML = `
-          <div class="space-y-3">
-            <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
-              <div class="flex items-center gap-2">
-                <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
-                <span class="font-bold text-white">Official Support Email:</span>
-                <span class="text-emerald-400 font-mono">support@gollah.co</span>
-              </div>
+          <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
+              <span class="font-bold text-white">Support Email:</span>
+              <span class="text-emerald-400 font-mono">support@gollah.co</span>
             </div>
           </div>
         `;
@@ -1051,7 +1121,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Dynamic Filtered Home Rendering
+    // Dynamic Filtered Home
     function renderHome() {
       const container = document.getElementById('app-content');
       
@@ -1104,66 +1174,15 @@
         `;
       });
 
-      if (filtered.length === 0) {
-        offersHTML = `
-          <div class="col-span-full py-12 text-center text-slate-500 flex flex-col items-center gap-2">
-            <i data-lucide="inbox" class="w-8 h-8 text-slate-600"></i>
-            <p class="text-xs">No active offers match your search or filter.</p>
-            <button onclick="filterCategory('all'); document.getElementById('offer-search-input').value=''; searchQuery='';" class="text-xs text-[#00d672] underline font-bold mt-1">Reset Filters</button>
-          </div>
-        `;
-      }
-
       container.innerHTML = `
         <!-- Live Ticker Bar -->
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">2 mins ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">1,602</span>
-          </div>
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">14 mins ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">632</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">10m ago</span></div>
+            <span class="text-white font-bold text-xs ml-2">805</span>
           </div>
         </div>
-
-        <!-- Featured Big Spotlight Cards -->
-        ${(currentCategory === 'featured' || currentCategory === 'all') && !searchQuery ? `
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onclick="openOfferModal('f1')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div>
-                <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
-                <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <span class="text-xs font-bold text-white">TheoremReach Surveys</span>
-                <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● 2,500</span>
-              </div>
-            </div>
-
-            <div onclick="openOfferModal('f2')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div class="flex justify-center items-center h-20">
-                <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <div><span class="text-xs font-bold text-white block">Neverwinter</span><span class="text-[10px] text-slate-400">Lootably</span></div>
-                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 1,138</span>
-              </div>
-            </div>
-
-            <div onclick="openOfferModal('f3')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden group">
-              <div class="flex justify-center items-center h-20">
-                <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <div><span class="text-xs font-bold text-white block">RAID Shadow Legends</span><span class="text-[10px] text-slate-400">Adgate</span></div>
-                <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 43,500</span>
-              </div>
-            </div>
-          </div>
-        ` : ''}
 
         <!-- Active Filtered Category Stream -->
         <div class="flex flex-col gap-3">
@@ -1174,7 +1193,6 @@
             <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
           </div>
 
-          <!-- Dynamic Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             ${offersHTML}
           </div>
@@ -1183,46 +1201,74 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // Dynamic Profile View with Pending/Completed Withdrawals
     function renderProfile() {
       const container = document.getElementById('app-content');
+
+      let listHTML = '';
+      if (profileFilter === 'withdrawals') {
+        if (userWithdrawals.length === 0) {
+          listHTML = `
+            <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+              <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
+              No withdrawal history found. Cashout via Shop to see status here.
+            </div>
+          `;
+        } else {
+          listHTML = userWithdrawals.map(w => {
+            const isCompleted = w.status === 'COMPLETED';
+            return `
+              <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs">
+                <span class="col-span-4 font-bold text-white flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-[#1f2c3a] flex items-center justify-center text-xs text-blue-400">Ł</span> 
+                  ${w.method}
+                </span>
+                <span class="col-span-3 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
+                <span class="col-span-3 text-slate-400 text-[11px] truncate">${w.address || 'Address on file'}</span>
+                <span class="col-span-2 text-right">
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400 animate-pulse'}">
+                    ${w.status}
+                  </span>
+                </span>
+              </div>
+            `;
+          }).join('');
+        }
+      } else {
+        listHTML = `
+          <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs">
+            <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
+            <span class="col-span-2 text-slate-400">Torox</span>
+            <span class="col-span-2 text-amber-400 font-bold">● 75,000</span>
+            <span class="col-span-2 text-slate-500">10m ago</span>
+            <span class="col-span-2 text-right"><span class="text-blue-400 font-semibold text-[11px]">Tracking...</span></span>
+          </div>
+        `;
+      }
+
       container.innerHTML = `
         <div class="flex flex-col gap-5">
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Transactions
           </h2>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Account Standing</span><span class="text-xs font-bold text-emerald-400">Verified Clean</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Referral Earnings</span><span class="text-base font-bold text-white">0</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Users Referred</span><span class="text-base font-bold text-white">0</span></div>
           </div>
 
           <div class="flex items-center gap-4 text-xs font-semibold border-b border-[#1d2a37] pb-2">
-            <button onclick="changeProfileFilter('earnings')" class="${profileFilter === 'earnings' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Earnings</button>
-            <button onclick="changeProfileFilter('withdrawals')" class="${profileFilter === 'withdrawals' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Withdrawals</button>
-            <button onclick="changeProfileFilter('progress')" class="${profileFilter === 'progress' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">In-Progress</button>
-            <button onclick="changeProfileFilter('on-hold')" class="${profileFilter === 'on-hold' ? 'bg-[#00d672] text-black font-bold px-2 py-0.5 rounded-lg' : 'text-slate-400'}">On-Hold</button>
-            <button onclick="changeProfileFilter('tickets')" class="${profileFilter === 'tickets' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Tickets</button>
-          </div>
-
-          <div class="grid grid-cols-12 text-xs font-semibold text-slate-500 px-3">
-            <span class="col-span-4">Name</span><span class="col-span-2">Provider</span><span class="col-span-2">Reward</span><span class="col-span-2">Time</span><span class="col-span-2 text-right">Support</span>
+            <button onclick="changeProfileFilter('withdrawals')" class="${profileFilter === 'withdrawals' ? 'bg-[#00d672] text-black font-bold px-2.5 py-1 rounded-lg' : 'text-slate-400'}">Withdrawals</button>
+            <button onclick="changeProfileFilter('earnings')" class="${profileFilter === 'earnings' ? 'bg-[#00d672] text-black font-bold px-2.5 py-1 rounded-lg' : 'text-slate-400'}">Earnings / In-Progress</button>
           </div>
 
           <div class="flex flex-col gap-2">
-            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
-              <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
-              <span class="col-span-2 text-slate-400">Torox</span>
-              <span class="col-span-2 text-amber-400 font-bold">● 75,000</span>
-              <span class="col-span-2 text-slate-500">17h ago</span>
-              <span class="col-span-2 text-right"><span class="text-blue-400 font-semibold text-[11px]">Tracking...</span></span>
-            </div>
+            ${listHTML}
           </div>
         </div>
       `;
+      if (window.lucide) lucide.createIcons();
     }
 
     function changeProfileFilter(filter) {
@@ -1238,18 +1284,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div onclick="executeWithdraw('Litecoin (LTC)', 1000, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
             <span class="text-2xl text-blue-400 font-black">Ł</span>
-            <span class="font-bold text-xs text-white">Litecoin</span>
-            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Instant)</span>
+            <span class="font-bold text-xs text-white">Litecoin (LTC)</span>
+            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Fast)</span>
           </div>
           <div onclick="executeWithdraw('Tether USDT', 5000, '₮')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
             <span class="text-2xl text-emerald-400 font-black">₮</span>
-            <span class="font-bold text-xs text-white">USDT</span>
+            <span class="font-bold text-xs text-white">USDT (TRC20)</span>
             <span class="text-[10px] text-slate-400">Min 5,000 Coins</span>
-          </div>
-          <div onclick="executeWithdraw('Bitcoin (BTC)', 15000, '₿')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-amber-400 font-black">₿</span>
-            <span class="font-bold text-xs text-white">Bitcoin</span>
-            <span class="text-[10px] text-slate-400">Min 15,000 Coins</span>
           </div>
         </div>
       `;
@@ -1261,8 +1302,8 @@
         <h2 class="text-sm font-bold text-white mb-2">Daily Leaderboard ($50 Prize Pool)</h2>
         <div class="flex flex-col gap-2">
           <div class="flex items-center justify-between p-3 bg-[#121b24] border border-[#1d2a37] rounded-xl text-xs">
-            <span class="font-bold text-amber-400">1. TopEarner</span>
-            <span class="font-bold text-white">● 25,000</span>
+            <span class="font-bold text-amber-400">1. Shoheb</span>
+            <span class="font-bold text-white">● 3,803</span>
           </div>
         </div>
       `;
@@ -1272,6 +1313,7 @@
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
+    // REAL WITHDRAWAL LIFECYCLE: Deduct coins -> Add to Withdrawals Table as PENDING -> Trigger Dollah Toast
     async function executeWithdraw(crypto, minAmount, icon = 'Ł') {
       if (!currentUser) {
         alert("Please login to request cashouts!");
@@ -1284,22 +1326,63 @@
         return;
       }
 
+      const address = prompt(`Enter your ${crypto} wallet address:`);
+      if (!address || address.trim().length < 5) return alert("Valid address is required.");
+
       userCoins -= minAmount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
 
+      // Database Record
       if (db) {
         await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+        const { data: newW } = await db.from('withdrawals').insert({
+          user_id: currentUser.id,
+          method: crypto,
+          amount: minAmount,
+          address: address.trim(),
+          status: 'PENDING'
+        }).select().single();
+
+        if (newW) userWithdrawals.unshift(newW);
       }
 
-      triggerActionPopup({
-        icon: icon,
+      // Add to Notification Center
+      addNotification({
+        title: `${crypto} Cashout Requested`,
+        message: `● ${minAmount.toLocaleString()} coins submitted for security review. Status: PENDING.`,
+        type: 'withdraw'
+      });
+
+      // Bottom Toast (Dollah.co style)
+      triggerDollahFloatingToast({
+        time: 'just now',
         title: `${crypto} Cashout`,
-        subtitle: 'Pending Security Verification',
-        badge: 'PENDING',
-        badgeClass: 'bg-purple-500/20 text-purple-300',
-        coins: minAmount.toLocaleString()
-      }, 'cashout');
+        status: 'Pending Cashout',
+        coins: minAmount.toLocaleString(),
+        sound: 'cashout'
+      });
     }
+
+    // Simulated / Admin Webhook function to Approve Withdrawals
+    window.completeUserWithdrawal = async function(withdrawalId) {
+      if (!db || !currentUser) return;
+      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
+      await fetchUserWithdrawals();
+
+      triggerDollahFloatingToast({
+        time: 'just now',
+        title: `Withdrawal Paid!`,
+        status: 'Complete',
+        coins: 'Approved',
+        sound: 'coin'
+      });
+
+      addNotification({
+        title: `Withdrawal Completed`,
+        message: `Your payout has been broadcasted to the blockchain!`,
+        type: 'withdraw'
+      });
+    };
 
     function sendLiveChat() {
       const input = document.getElementById('chat-input');
