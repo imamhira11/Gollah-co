@@ -49,6 +49,7 @@
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
     <div class="flex items-center gap-4 flex-1 max-w-xl">
+      <!-- Brand Logo -->
       <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
           G
@@ -56,18 +57,21 @@
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
 
+      <!-- Live Search Input -->
       <div class="relative w-full max-w-xs hidden sm:block">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
       </div>
     </div>
 
+    <!-- Right Header Elements -->
     <div class="flex items-center gap-2.5">
       <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
         <span>Network Verified</span>
       </div>
 
+      <!-- Coin Pill Counter -->
       <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
         <span id="header-coins">0</span>
@@ -78,6 +82,7 @@
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
+      <!-- Profile Avatar Button with Notification Badge -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
@@ -85,6 +90,7 @@
           <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
         </button>
 
+        <!-- Dynamic Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
@@ -102,6 +108,7 @@
             </div>
           </div>
 
+          <!-- XP & Level Progress Bar -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
               <span id="xp-text">0 / 10 XP</span>
@@ -116,6 +123,7 @@
             </div>
           </div>
 
+          <!-- Menu Options -->
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
             <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
@@ -139,6 +147,8 @@
 
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
+
+    <!-- LEFT SIDEBAR (Rank removed, all other items intact) -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-1">
@@ -151,10 +161,6 @@
           <button onclick="navigate('shop')" id="nav-shop" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
             <i data-lucide="shopping-bag" class="w-4 h-4"></i> Shop
           </button>
-          <button onclick="navigate('ranking')" id="nav-ranking" class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
-            <span class="flex items-center gap-3"><i data-lucide="trophy" class="w-4 h-4"></i> Rank</span>
-            <span class="bg-[#6366f1] text-[10px] text-white font-bold px-1.5 py-0.2 rounded">$50</span>
-          </button>
           <button onclick="navigate('profile')" id="nav-profile" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
             <i data-lucide="user" class="w-4 h-4"></i> Profile
           </button>
@@ -162,30 +168,37 @@
 
         <div class="flex flex-col gap-1 text-xs">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
+          
           <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
           </button>
+
           <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
           </button>
+
           <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
           </button>
+
           <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
           </button>
+
           <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
           </button>
+
           <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
           </button>
+
           <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
@@ -194,8 +207,10 @@
       </div>
     </aside>
 
-    <!-- CENTER FLUID STREAM -->
+    <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
+      
+      <!-- Top Announcement Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
@@ -204,8 +219,12 @@
         <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
       </div>
 
-      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
+      <!-- Main Dynamic Content -->
+      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1">
+        <!-- Injected via Router -->
+      </main>
 
+      <!-- PUBLISHER-GRADE ENTERPRISE FOOTER -->
       <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
         <div class="max-w-6xl mx-auto flex flex-col gap-6">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -237,10 +256,13 @@
               <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
               <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
             </div>
-            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400">
+              © 2026 Gollah Inc. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
+
     </div>
 
     <!-- RIGHT CHAT SIDEBAR -->
@@ -276,9 +298,10 @@
         <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
       </div>
     </aside>
+
   </div>
 
-  <!-- FLOATING TOAST -->
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -314,7 +337,7 @@
     </div>
   </div>
 
-  <!-- IN-APP CASHOUT MODAL -->
+  <!-- REAL IN-APP CASHOUT MODAL -->
   <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -596,7 +619,7 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // PERSISTENT STORAGE & NOTIFICATIONS ENGINE
+    // PERSISTENT STORAGE ENGINE
     function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
@@ -1099,7 +1122,7 @@
         syncUserSession(session ? session.user : null);
 
         db.auth.onAuthStateChange((_event, session) => {
-          syncUserSession(session ? session.user : null);
+          syncUserSession(session ? session.session?.user || session.user : null);
         });
       } catch (err) {}
     }
@@ -1291,7 +1314,7 @@
             showAuthError(error.message);
           } else {
             closeAuthModal();
-            syncUserSession(data.user);
+            syncUserSession(data.user?.user || data.user || data.session?.user);
           }
         }
       } catch (err) {
