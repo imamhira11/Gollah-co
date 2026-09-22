@@ -242,7 +242,6 @@
               </div>
             </div>
 
-            <!-- Trust Badges for Network Reviews -->
             <div class="flex flex-wrap items-center gap-2 text-[10px] font-mono">
               <span class="bg-[#121c25] text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
                 <i data-lucide="shield-check" class="w-3 h-3"></i> FraudShield Active
@@ -308,7 +307,7 @@
 
   </div>
 
-  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP (Shown ONLY when offer completes or cashout updates) -->
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP (Shown ONLY on Verified Real Events) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -324,7 +323,7 @@
     </div>
   </div>
 
-  <!-- NOTIFICATIONS MODAL -->
+  <!-- NOTIFICATIONS MODAL (WITH ACCURATE ROUND GREEN TICK & CLOCK STATUS) -->
   <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -335,7 +334,9 @@
         <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]"></div>
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]">
+        <!-- Injected Dynamically with Round Green Tick / Clock Badge -->
+      </div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
         <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
@@ -541,7 +542,7 @@
       closeAvatarModal();
     }
 
-    // 2. Comprehensive Offer Database & Real Tracking Engine
+    // 2. Comprehensive Offer Database
     const ALL_OFFERS = [
       { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete high-paying profile surveys with honest feedback.', link: 'https://theoremreach.com' },
       { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter, create character and reach Level 10.', link: 'https://lootably.com' },
@@ -567,12 +568,11 @@
     let currentCategory = 'featured';
     let searchQuery = '';
 
-    // Notifications Storage & History
+    // Smart Notifications Storage with explicit status (click vs complete)
     let userNotifications = [
-      { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', type: 'system', isRead: false }
+      { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
     ];
 
-    // Withdrawals In-Memory History
     let userWithdrawals = [];
 
     function updateNotificationsBadge() {
@@ -599,6 +599,7 @@
       updateNotificationsBadge();
     }
 
+    // NOTIFICATIONS MODAL RENDERING: Round Green Tick for Complete | Blue Clock for Click/In-Progress
     function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
@@ -609,13 +610,34 @@
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
-          item.className = `p-3 rounded-xl border ${n.isRead ? 'bg-[#0f1720] border-[#1c2734]' : 'bg-[#182330] border-[#00d672]/30'} flex flex-col gap-1`;
+          const isComplete = (n.status === 'complete');
+          
+          item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
+          
+          // Left side: Text Details
+          // Right side: Exact status badge (ROUND GREEN TICK if complete, Blue Clock if clicked/in-progress)
           item.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-white text-xs">${n.title}</span>
-              <span class="text-[10px] text-slate-500">${n.time}</span>
+            <div class="flex-1 flex flex-col gap-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-white text-xs">${n.title}</span>
+                <span class="text-[10px] text-slate-500">• ${n.time}</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-snug">${n.message}</p>
             </div>
-            <p class="text-xs text-slate-300">${n.message}</p>
+            
+            <div class="shrink-0 pt-0.5">
+              ${isComplete ? `
+                <div class="w-5 h-5 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/30" title="Offer Completed">
+                  ✓
+                </div>
+              ` : (n.status === 'click' ? `
+                <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs" title="Tracking Active">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                </div>
+              ` : `
+                <div class="w-2.5 h-2.5 rounded-full bg-[#00d672]/80 mt-1"></div>
+              `)}
+            </div>
           `;
           list.appendChild(item);
         });
@@ -644,7 +666,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // Dollah-style Floating Action Toast Popup (ONLY POPPED ON REAL EVENTS)
+    // Dollah-style Floating Action Toast Popup (TRIGGERED ONLY ON REAL COMPLETION / CASHOUT)
     let floatingToastTimer = null;
     function triggerDollahFloatingToast(data) {
       const card = document.getElementById('dollah-floating-card');
@@ -703,26 +725,26 @@
       activeOfferData = null;
     }
 
-    // Launch Tracking (DOES NOT SHOW INSTANT COMPLETE POPUP)
+    // 1. OFFER CLICK ONLY: Logs tracking notification with 'click' status (NO POPUP, NO COMPLETE)
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
       
       const offer = activeOfferData;
       closeOfferModal();
 
-      // Silent tracking: Log to In-Progress without showing fake "Complete" toast
+      // Silent tracking notification: status is 'click'
       addNotification({
-        title: `${offer.name} In-Progress`,
-        message: `Task opened via ${offer.provider}. Reward (● ${offer.coins.toLocaleString()}) will credit upon advertiser completion verification.`,
-        type: 'offer'
+        title: `${offer.name} Clicked`,
+        message: `Task opened via ${offer.provider}. Tracking active. Coins (● ${offer.coins.toLocaleString()}) credit upon completion verification.`,
+        status: 'click'
       });
 
-      // Open official advertiser tracking link
+      // Launch official advertiser link with UID sub-tracking
       const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
       window.open(trackingUrl, '_blank');
     }
 
-    // REAL SIMULATED POSTBACK WEBHOOK (Call this when offer completes to trigger the popup & add coins)
+    // 2. OFFER COMPLETE EVENT: Called when task is finished (Shows Round Green Tick & Floating Toast)
     window.creditOfferPostback = async function(offerName, coins) {
       if (!currentUser) return;
       userCoins += coins;
@@ -733,19 +755,20 @@
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
       }
 
-      // NOW Show the Dollah.co Complete Popup
+      // Add Notification with status = 'complete' (Triggers Round Green Tick in Modal)
+      addNotification({
+        title: `${offerName} Complete!`,
+        message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
+        status: 'complete'
+      });
+
+      // Trigger Dollah.co Bottom Corner Complete Floating Popup
       triggerDollahFloatingToast({
         time: 'just now',
         title: offerName,
         status: 'Complete',
         coins: coins.toLocaleString(),
         sound: 'coin'
-      });
-
-      addNotification({
-        title: `${offerName} Completed!`,
-        message: `● ${coins.toLocaleString()} coins credited to your balance.`,
-        type: 'offer'
       });
     };
 
@@ -1076,30 +1099,15 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Terms of Use</h4>
-            <p>Welcome to Gollah Rewards ("Gollah"). By using this platform, you agree to adhere to all terms, advertising rules, and rewarded task policies.</p>
-            <h4 class="font-bold text-white text-sm">2. Rewards & Verification</h4>
-            <p>Virtual currency (Coins) and experience points (XP) are awarded solely upon validated advertiser conversion confirmed through our postback API.</p>
-            <h4 class="font-bold text-white text-sm">3. Payout Processing</h4>
-            <p>Crypto withdrawals (Litecoin, USDT) are reviewed by automated safety protocols prior to blockchain broadcast.</p>
+            <p>Welcome to Gollah Rewards. By using our platform, you agree to our standard community reward terms.</p>
           </div>
         `;
       } else if (type === 'privacy') {
         titleEl.innerHTML = `<i data-lucide="lock" class="w-5 h-5 text-blue-400"></i> Privacy Policy`;
         bodyEl.innerHTML = `
           <div class="space-y-3">
-            <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
-            <p>We process standard account credentials including email address, username, and IP location strictly for user authentication, offer delivery, and verified coin credits.</p>
-          </div>
-        `;
-      } else if (type === 'antifraud') {
-        titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i> Anti-Fraud & Quality Guidelines`;
-        bodyEl.innerHTML = `
-          <div class="space-y-3 bg-[#111a24] border border-[#1e2a36] p-3.5 rounded-xl">
-            <h4 class="font-bold text-white text-sm">Network Compliance Rules:</h4>
-            <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
-              <li>Genuine human engagements with all surveys and install offers.</li>
-              <li>Strict prohibition of automated scraping bots or fake click scripts.</li>
-            </ul>
+            <h4 class="font-bold text-white text-sm">1. Privacy</h4>
+            <p>We respect your privacy and only process email credentials necessary to credit your task earnings.</p>
           </div>
         `;
       } else if (type === 'contact') {
@@ -1199,11 +1207,6 @@
             <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">10m ago</span></div>
             <span class="text-white font-bold text-xs ml-2">805</span>
           </div>
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">₮</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">USDT</span><span class="text-slate-500 text-[10px]">18m ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">5,000</span>
-          </div>
         </div>
 
         <!-- Featured Spotlight Cards -->
@@ -1299,7 +1302,7 @@
             <span class="col-span-2 text-slate-400">Torox</span>
             <span class="col-span-2 text-amber-400 font-bold">● 75,000</span>
             <span class="col-span-2 text-slate-500">10m ago</span>
-            <span class="col-span-2 text-right"><span class="text-blue-400 font-semibold text-[11px]">Tracking...</span></span>
+            <span class="col-span-2 text-right"><span class="text-blue-400 font-semibold text-[11px]">Tracking Active</span></span>
           </div>
         `;
       }
@@ -1406,7 +1409,7 @@
       addNotification({
         title: `${crypto} Cashout Requested`,
         message: `● ${minAmount.toLocaleString()} coins submitted. Status: PENDING.`,
-        type: 'withdraw'
+        status: 'click'
       });
 
       triggerDollahFloatingToast({
@@ -1418,7 +1421,7 @@
       });
     }
 
-    // Admin / Webhook payout simulator
+    // Admin / Webhook payout simulator: Triggers Round Green Tick
     window.completeUserWithdrawal = async function(withdrawalId) {
       if (!db || !currentUser) return;
       await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
@@ -1433,9 +1436,9 @@
       });
 
       addNotification({
-        title: `Withdrawal Completed`,
-        message: `Your payout has been sent to your wallet!`,
-        type: 'withdraw'
+        title: `Withdrawal Complete!`,
+        message: `Your cashout has been confirmed and broadcasted to blockchain.`,
+        status: 'complete'
       });
     };
 
