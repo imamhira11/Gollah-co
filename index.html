@@ -3,44 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Dollah | #1 Web3 Rewards Platform</title>
+  <title>Gollah | #1 Web3 Rewards Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase Client JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
-      background-color: #0d1217;
+      background-color: #070b0e;
       color: #f1f5f9;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .custom-scroll::-webkit-scrollbar { display: none; }
     .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    .glow-dot {
-      box-shadow: 0 0 10px #10b981;
-    }
+    .glow-dot { box-shadow: 0 0 10px #10b981; }
+    .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); }
   </style>
 </head>
-<body class="flex justify-center bg-[#070b0e] min-h-screen">
-  <div class="w-full max-w-[480px] bg-[#0d1217] min-h-screen flex flex-col relative pb-20 border-x border-[#1a232d] shadow-2xl">
+<body class="flex justify-center bg-[#05080a] min-h-screen">
+
+  <!-- Mobile Layout Container -->
+  <div class="w-full max-w-[480px] bg-[#0d1217] min-h-screen flex flex-col relative pb-24 border-x border-[#1a232d] shadow-2xl overflow-x-hidden">
     
-    <!-- Top Header -->
+    <!-- Top Global Live Mini Ticker -->
+    <div class="bg-[#090d11] px-3 py-1.5 border-b border-[#141d26] flex items-center justify-between text-[11px] text-slate-400">
+      <div class="flex items-center gap-1.5 truncate">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="top-ticker-text" class="font-medium truncate">LTC Sent 2,573 to User_8192</span>
+      </div>
+      <span class="text-emerald-400 font-bold ml-2 shrink-0">Live Pool $50</span>
+    </div>
+
+    <!-- Main Navigation Header -->
     <header class="sticky top-0 z-40 bg-[#0d1217]/95 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#18222c]">
       <!-- Brand Logo -->
       <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('home')">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#059669] to-[#10b981] flex items-center justify-center shadow-lg shadow-emerald-950/40">
-          <span class="text-black font-black text-xl leading-none">@</span>
+          <span class="text-black font-black text-xl leading-none">G</span>
         </div>
-        <span class="text-xl font-black tracking-tight text-white">dollah<span class="text-emerald-400">.co</span></span>
+        <span class="text-xl font-black tracking-tight text-white">gollah<span class="text-emerald-400">.co</span></span>
       </div>
 
-      <!-- Right Action Bar -->
+      <!-- Header Action Items -->
       <div class="flex items-center gap-2">
-        <!-- Coin Counter Pill -->
-        <div class="flex items-center gap-1.5 bg-[#141c24] border border-[#222f3d] px-2.5 py-1.5 rounded-full text-xs font-bold text-amber-400">
+        <!-- Live Coin Counter Pill -->
+        <div onclick="navigate('shop')" class="flex items-center gap-1.5 bg-[#141c24] border border-[#222f3d] px-2.5 py-1.5 rounded-full text-xs font-bold text-amber-400 cursor-pointer hover:border-amber-400/40 transition">
           <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-          <span id="user-coins">0</span>
+          <span id="user-coins">25,000</span>
         </div>
 
         <!-- Wallet Button -->
@@ -50,36 +61,54 @@
 
         <!-- Profile Avatar Trigger -->
         <div class="relative">
-          <button onclick="toggleProfileMenu()" class="relative flex items-center">
+          <button onclick="toggleProfileMenu()" class="relative flex items-center focus:outline-none">
             <img id="header-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-8 h-8 rounded-full border border-emerald-500 bg-[#141c24]" />
-            <span class="absolute -top-1 -right-1 bg-rose-500 text-[10px] font-bold text-white px-1 rounded-full border border-[#0d1217]">3</span>
+            <span id="notif-badge" class="absolute -top-1 -right-1 bg-rose-500 text-[10px] font-bold text-white px-1 rounded-full border border-[#0d1217]">3</span>
           </button>
 
-          <!-- Profile Dropdown Modal -->
-          <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141c24] border border-[#222f3d] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
+          <!-- Complete Kaallu Exact Match Dropdown Profile Drawer -->
+          <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-[#141c24] border border-[#222f3d] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
             <div class="flex items-center gap-3">
-              <img id="menu-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-12 h-12 rounded-full border-2 border-emerald-500" />
+              <img id="menu-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-12 h-12 rounded-full border-2 border-emerald-500 bg-[#0d1217]" />
               <div class="flex-1 overflow-hidden">
-                <span id="menu-username" class="font-bold text-white block truncate">Guest</span>
-                <span id="menu-level" class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md inline-block mt-0.5">Lvl 1</span>
+                <span id="menu-username" class="font-bold text-white block truncate">Kaallu</span>
+                <span id="menu-level" class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md inline-block mt-0.5">Lvl 122</span>
               </div>
             </div>
 
-            <!-- Level Bar -->
-            <div class="w-full bg-[#1b2632] h-1.5 rounded-full overflow-hidden">
-              <div class="bg-emerald-400 h-full w-2/5"></div>
+            <!-- Address Chip -->
+            <div class="flex items-center justify-between bg-[#0d1217] px-2.5 py-1.5 rounded-xl border border-[#1b2632] text-[11px]">
+              <span class="text-slate-400 font-mono">40Bh...9x2A</span>
+              <button onclick="alert('Wallet address copied!')" class="text-emerald-400 font-bold hover:underline">Copy</button>
             </div>
 
-            <!-- Menu Links -->
-            <div class="flex flex-col gap-1 text-sm border-t border-[#1f2b37] pt-2 text-slate-300">
-              <button onclick="navigate('profile')" class="flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#1a2430] rounded-lg transition text-left">
-                <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile
+            <!-- Level Progress Bar -->
+            <div>
+              <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                <span>Progress</span>
+                <span class="text-emerald-400">85% to Lvl 123</span>
+              </div>
+              <div class="w-full bg-[#1b2632] h-1.5 rounded-full overflow-hidden">
+                <div class="bg-emerald-400 h-full w-[85%]"></div>
+              </div>
+            </div>
+
+            <!-- Menu Navigation Links -->
+            <div class="flex flex-col gap-1 text-xs border-t border-[#1f2b37] pt-2 text-slate-300">
+              <button onclick="navigate('profile')" class="flex items-center justify-between px-2.5 py-2 hover:bg-[#1a2430] rounded-xl transition text-left">
+                <span class="flex items-center gap-2.5"><i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
               </button>
-              <button onclick="openBonusCode()" class="flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#1a2430] rounded-lg transition text-left">
-                <i data-lucide="gift" class="w-4 h-4 text-slate-400"></i> Bonus Code
+              <button onclick="openBonusCodeModal()" class="flex items-center justify-between px-2.5 py-2 hover:bg-[#1a2430] rounded-xl transition text-left">
+                <span class="flex items-center gap-2.5"><i data-lucide="gift" class="w-4 h-4 text-slate-400"></i> Bonus Code</span>
+                <span class="text-[10px] bg-amber-400/20 text-amber-400 font-bold px-1.5 py-0.5 rounded">Promo</span>
               </button>
-              <button id="auth-btn" onclick="handleAuthAction()" class="flex items-center gap-2.5 px-2 py-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg transition text-left mt-1 border-t border-[#1f2b37]/50">
-                <i data-lucide="log-in" class="w-4 h-4"></i> Login / Register
+              <button onclick="openReferralModal()" class="flex items-center justify-between px-2.5 py-2 hover:bg-[#1a2430] rounded-xl transition text-left">
+                <span class="flex items-center gap-2.5"><i data-lucide="users" class="w-4 h-4 text-slate-400"></i> Referrals</span>
+                <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-1.5 py-0.5 rounded">5% Tier</span>
+              </button>
+              <button id="auth-btn" onclick="handleAuthAction()" class="flex items-center gap-2.5 px-2.5 py-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition text-left mt-1 border-t border-[#1f2b37]/50">
+                <i data-lucide="log-in" class="w-4 h-4"></i> Sign In / Switch Account
               </button>
             </div>
           </div>
@@ -89,19 +118,19 @@
 
     <!-- Main Dynamic Content Container -->
     <main id="app-content" class="flex-1 p-4 flex flex-col gap-5 overflow-y-auto custom-scroll">
-      <!-- Generated via JS -->
+      <!-- Injected via Router -->
     </main>
 
-    <!-- Floating Live Activity Notification Pill (Matches Dollah screenshot) -->
-    <div id="live-toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-[420px] bg-[#141c24]/95 border border-[#222f3d] p-3 rounded-2xl shadow-xl flex items-center justify-between z-30 transition-all duration-300 backdrop-blur-md">
+    <!-- Public Notification Live Toast Rotation (Exact Dollah Match) -->
+    <div id="live-toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 w-[92%] max-w-[440px] bg-[#141c24]/95 border border-[#222f3d] p-3 rounded-2xl shadow-2xl flex items-center justify-between z-30 transition-all duration-300 backdrop-blur-md">
       <div class="flex items-center gap-3">
         <div id="toast-icon-box" class="w-10 h-10 rounded-xl bg-[#1d2733] flex items-center justify-center font-bold text-slate-300 text-sm">
           Ł
         </div>
         <div class="flex flex-col">
-          <span id="toast-title" class="text-xs font-semibold text-slate-400">seconds ago</span>
+          <span id="toast-time" class="text-xs font-semibold text-slate-400">seconds ago</span>
           <span id="toast-desc" class="text-sm font-bold text-white flex items-center gap-1.5">
-            LTC <span id="toast-status" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">Sent</span>
+            LTC <span id="toast-status" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">Sent</span>
           </span>
         </div>
       </div>
@@ -110,9 +139,9 @@
       </div>
     </div>
 
-    <!-- Bottom Mobile Navigation Bar -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#0c1116] border-t border-[#18222c] py-2 px-6 flex justify-between items-center z-40">
-      <button onclick="navigate('ranking')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <button onclick="navigate('ranking')" id="nav-ranking" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
         <div class="relative">
           <i data-lucide="trophy" class="w-5 h-5"></i>
           <span class="absolute -top-1.5 -right-3 bg-purple-600 text-[9px] font-bold text-white px-1 rounded-full">$50</span>
@@ -120,19 +149,19 @@
         <span class="text-[11px] font-medium">Ranking</span>
       </button>
 
-      <button onclick="navigate('shop')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <button onclick="navigate('shop')" id="nav-shop" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
         <span class="text-[11px] font-medium">Shop</span>
       </button>
 
-      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-emerald-400 transition">
+      <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-emerald-400 transition">
         <div class="w-10 h-10 -mt-5 rounded-2xl bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/30">
           <i data-lucide="home" class="w-5 h-5"></i>
         </div>
         <span class="text-[11px] font-bold text-emerald-400">Home</span>
       </button>
 
-      <button onclick="navigate('daily')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <button onclick="navigate('daily')" id="nav-daily" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
         <div class="relative">
           <i data-lucide="gift" class="w-5 h-5"></i>
           <span class="absolute -top-1.5 -right-2 bg-rose-500 text-[9px] font-bold text-white px-1 rounded-full">3</span>
@@ -140,28 +169,70 @@
         <span class="text-[11px] font-medium">Daily</span>
       </button>
 
-      <button onclick="navigate('chat')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <button onclick="navigate('chat')" id="nav-chat" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
         <i data-lucide="message-square" class="w-5 h-5"></i>
         <span class="text-[11px] font-medium">Chat</span>
       </button>
     </nav>
 
-    <!-- Auth Modal (Signup / Login) -->
-    <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-[#141c24] border border-[#222f3d] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4">
+    <!-- Modal: Auth (Login/Signup) -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div class="bg-[#141c24] border border-[#222f3d] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
         <div class="flex justify-between items-center">
-          <h3 id="auth-title" class="font-bold text-lg text-white">Login to Dollah</h3>
-          <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <h3 id="auth-title" class="font-bold text-base text-white">Login to Gollah</h3>
+          <button onclick="closeModal('auth-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <input id="auth-email" type="email" placeholder="Enter your email" class="bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
-        <input id="auth-pass" type="password" placeholder="Password" class="bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+        <input id="auth-email" type="email" placeholder="Email address" class="bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        <input id="auth-pass" type="password" placeholder="Password" class="bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
         
-        <button id="auth-submit-btn" onclick="submitAuth()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 rounded-xl transition text-sm">
+        <button id="auth-submit-btn" onclick="submitAuth()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 rounded-xl transition text-xs">
           Login
         </button>
         <p class="text-xs text-center text-slate-400 cursor-pointer" onclick="toggleAuthMode()">
-          Don't have an account? <span class="text-emerald-400 underline">Sign Up</span>
+          Don't have an account? <span class="text-emerald-400 underline font-semibold">Sign Up</span>
         </p>
+      </div>
+    </div>
+
+    <!-- Modal: Bonus Code -->
+    <div id="bonus-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div class="bg-[#141c24] border border-[#222f3d] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="font-bold text-base text-white">Redeem Bonus Code</h3>
+          <button onclick="closeModal('bonus-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-xs text-slate-400">Enter a valid campaign code to receive bonus coins in your wallet.</p>
+        <input id="bonus-input" type="text" placeholder="e.g. GOLLAH500" class="uppercase bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+        <button onclick="redeemBonusCode()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-2.5 rounded-xl transition text-xs">
+          Redeem Coins
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal: Referrals -->
+    <div id="referral-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div class="bg-[#141c24] border border-[#222f3d] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="font-bold text-base text-white">Affiliate & Referrals</h3>
+          <button onclick="closeModal('referral-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="bg-[#0d1217] p-3 rounded-xl border border-[#222f3d]">
+          <span class="text-[10px] text-slate-400 uppercase font-bold">Your Unique Invite Link</span>
+          <div class="flex items-center justify-between mt-1 text-xs font-mono text-emerald-400">
+            <span>https://gollah.co/r/kaallu</span>
+            <button onclick="alert('Referral link copied!')" class="text-white hover:text-emerald-400 text-xs font-bold">Copy</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-center text-xs">
+          <div class="bg-[#0d1217] p-2.5 rounded-xl border border-[#222f3d]">
+            <span class="text-slate-400 block text-[10px]">Total Referred</span>
+            <span class="font-bold text-white text-sm">18 Users</span>
+          </div>
+          <div class="bg-[#0d1217] p-2.5 rounded-xl border border-[#222f3d]">
+            <span class="text-slate-400 block text-[10px]">Commission Earned</span>
+            <span class="font-bold text-amber-400 text-sm">3,850 ●</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -171,43 +242,45 @@
     // 1. Supabase Initialization
     const SUPABASE_URL = "https://rcsrazcvehnjgflkcslo.supabase.co";
     const SUPABASE_KEY = "sb_publishable_KyWxNv1LHTxkTeuXVgkNuA_1jOf7oTp";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let currentUser = null;
-    let currentProfile = { username: "Guest", coins: 0, level: 1 };
-    let isSignUpMode = false;
-
-    // 2. Fetch User & Profile
-    async function initUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      currentUser = user;
-      if (user) {
-        let { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (profile) {
-          currentProfile = profile;
-        } else {
-          currentProfile = { username: user.email.split('@')[0], coins: 0, level: 1 };
-        }
-        document.getElementById('auth-btn').innerHTML = `<i data-lucide="log-out" class="w-4 h-4"></i> Logout`;
-      } else {
-        document.getElementById('auth-btn').innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Login / Register`;
+    let db = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
-      updateUIHeader();
-      renderHome();
-      lucide.createIcons();
+    } catch (e) {
+      console.warn("Supabase initialization fallback active:", e);
     }
 
-    function updateUIHeader() {
-      document.getElementById('user-coins').innerText = Number(currentProfile.coins).toLocaleString();
-      document.getElementById('menu-username').innerText = currentProfile.username;
-      document.getElementById('menu-level').innerText = "Lvl " + (currentProfile.level || 1);
-    }
+    // 2. Application Global State
+    let currentUser = null;
+    let currentProfile = {
+      username: "Kaallu",
+      coins: 25000,
+      level: 122,
+      avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu"
+    };
+    let isSignUpMode = false;
+    let currentTab = 'home';
+    let profileSubTab = 'earnings';
 
     // 3. Navigation View Router
     function navigate(view) {
+      currentTab = view;
       document.getElementById('profile-dropdown').classList.add('hidden');
       const container = document.getElementById('app-content');
       
+      // Update nav icon highlight
+      ['home', 'shop', 'ranking', 'daily', 'chat'].forEach(item => {
+        const el = document.getElementById('nav-' + item);
+        if (el) {
+          if (item === view) {
+            el.className = "flex flex-col items-center gap-1 text-emerald-400 transition";
+          } else {
+            el.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-white transition";
+          }
+        }
+      });
+
       if (view === 'home') renderHome();
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
@@ -215,317 +288,501 @@
       else if (view === 'daily') renderDaily();
       else if (view === 'chat') renderChat();
       
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
-    // --- HOME VIEW (Providers, Offer Lists) ---
+    // 4. View: HOME
     function renderHome() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
         <!-- Search Bar -->
         <div class="relative">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-500"></i>
-          <input type="text" placeholder="Search offers, surveys, tasks..." class="w-full bg-[#141c24] border border-[#222f3d] rounded-2xl py-2.5 pl-9 pr-4 text-xs text-white focus:outline-none focus:border-emerald-500" />
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-500"></i>
+          <input type="text" placeholder="Search offers, surveys, mobile apps..." class="w-full bg-[#141c24] border border-[#222f3d] rounded-2xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-emerald-500 transition" />
         </div>
 
-        <!-- Providers Header -->
+        <!-- Featured Offerwall Providers Header -->
         <div class="flex items-center justify-between text-xs font-bold text-slate-400">
-          <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i> Providers</span>
-          <span class="text-slate-500 cursor-pointer hover:text-white">View all ›</span>
+          <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i> Offer Partners</span>
+          <span class="text-slate-500 cursor-pointer hover:text-white">View all 12 ›</span>
         </div>
 
-        <!-- Provider Cards Slider -->
+        <!-- Provider Horizontal Carousel Slider -->
         <div class="flex gap-3 overflow-x-auto custom-scroll pb-1">
-          <div onclick="openProvider('Lootably')" class="min-w-[110px] h-32 rounded-2xl bg-[#5844a8] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg">
-            <span class="bg-[#3e2e7b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full w-max">+50%</span>
-            <span class="font-black text-white text-base">lootably</span>
+          <div onclick="openProviderModal('Lootably', 1.5)" class="min-w-[110px] h-32 rounded-2xl bg-gradient-to-br from-[#5844a8] to-[#3a287c] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg hover:scale-105 transition-transform">
+            <span class="bg-[#3e2e7b] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full w-max">+50% Bonus</span>
+            <span class="font-black text-white text-base tracking-wide">lootably</span>
           </div>
 
-          <div onclick="openProvider('Monlix')" class="min-w-[110px] h-32 rounded-2xl bg-[#00ba63] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg">
+          <div onclick="openProviderModal('Monlix', 1.2)" class="min-w-[110px] h-32 rounded-2xl bg-gradient-to-br from-[#00ba63] to-[#047857] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg hover:scale-105 transition-transform">
             <span class="bg-[#ef4444] text-white text-[9px] font-black px-2 py-0.5 rounded-full w-max">Hot</span>
-            <span class="font-black text-white text-base">Monlix</span>
+            <span class="font-black text-white text-base tracking-wide">Monlix</span>
           </div>
 
-          <div onclick="openProvider('Adgate')" class="min-w-[110px] h-32 rounded-2xl bg-[#2a9df4] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg">
-            <span class="bg-[#ef4444] text-white text-[9px] font-black px-2 py-0.5 rounded-full w-max">Hot</span>
-            <span class="font-black text-white text-base">Adgate</span>
+          <div onclick="openProviderModal('Adgate', 1.0)" class="min-w-[110px] h-32 rounded-2xl bg-gradient-to-br from-[#2a9df4] to-[#1e40af] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg hover:scale-105 transition-transform">
+            <span class="bg-[#ef4444] text-white text-[9px] font-black px-2 py-0.5 rounded-full w-max">Popular</span>
+            <span class="font-black text-white text-base tracking-wide">Adgate</span>
           </div>
 
-          <div onclick="openProvider('Offertoro')" class="min-w-[110px] h-32 rounded-2xl bg-[#7c3aed] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg">
-            <span class="bg-black/30 text-white text-[9px] font-black px-2 py-0.5 rounded-full w-max">Featured</span>
-            <span class="font-black text-white text-base">Offertoro</span>
+          <div onclick="openProviderModal('Offertoro', 1.0)" class="min-w-[110px] h-32 rounded-2xl bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] p-3 flex flex-col justify-between cursor-pointer relative shadow-lg hover:scale-105 transition-transform">
+            <span class="bg-black/30 text-white text-[9px] font-black px-2 py-0.5 rounded-full w-max">Global</span>
+            <span class="font-black text-white text-base tracking-wide">Offertoro</span>
           </div>
         </div>
 
         <!-- Filter Pills Bar -->
         <div class="flex items-center justify-between gap-2 text-xs">
-          <button class="bg-[#10b981] text-black font-bold px-3 py-1.5 rounded-xl">Offers</button>
-          <button class="bg-[#141c24] border border-[#222f3d] text-slate-300 font-medium px-3 py-1.5 rounded-xl flex items-center gap-1">Global <i data-lucide="chevron-down" class="w-3 h-3"></i></button>
-          <button class="bg-[#141c24] border border-[#222f3d] text-amber-400 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">● 50 <i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+          <div class="flex items-center gap-1.5">
+            <button class="bg-[#10b981] text-black font-bold px-3 py-1.5 rounded-xl">Offers</button>
+            <button class="bg-[#141c24] border border-[#222f3d] text-slate-300 font-medium px-3 py-1.5 rounded-xl">Surveys</button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button class="bg-[#141c24] border border-[#222f3d] text-slate-300 font-medium px-2.5 py-1.5 rounded-xl flex items-center gap-1">Global <i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+            <button class="bg-[#141c24] border border-[#222f3d] text-amber-400 font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1">● 50 <i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+          </div>
         </div>
 
-        <!-- Task / Offers List -->
+        <!-- Task / Offers List (Exact dollah.co Feed Items) -->
         <div class="flex flex-col gap-2.5">
-          <div onclick="simulateOffer('Animals and Coins', 25000)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
+          <!-- Item 1: Animals & Coins -->
+          <div onclick="executeTaskOffer('Animals and Coins', 25000)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
             <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=80&auto=format&fit=crop&q=60" class="w-11 h-11 rounded-xl object-cover" />
+              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=80&auto=format&fit=crop&q=60" class="w-11 h-11 rounded-xl object-cover border border-[#222f3d]" />
               <div>
-                <h4 class="font-bold text-sm text-white">Animals And Coins</h4>
-                <p class="text-xs text-slate-400">Complete Level 68</p>
+                <h4 class="font-bold text-xs text-white">Animals And Coins</h4>
+                <p class="text-[11px] text-slate-400">Complete Island Level 68</p>
+                <div class="flex items-center gap-1 text-[10px] text-emerald-400 mt-0.5">
+                  <span>Android, iOS</span>
+                </div>
               </div>
             </div>
-            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1 rounded-xl">
+            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1.5 rounded-xl border border-amber-400/20">
               ● 25,000
             </div>
           </div>
 
-          <div onclick="simulateOffer('Merge Dragons', 1500)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
+          <!-- Item 2: Merge Dragons -->
+          <div onclick="executeTaskOffer('Merge Dragons', 1500)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
             <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60" class="w-11 h-11 rounded-xl object-cover" />
+              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60" class="w-11 h-11 rounded-xl object-cover border border-[#222f3d]" />
               <div>
-                <h4 class="font-bold text-sm text-white">Merge Dragons</h4>
-                <p class="text-xs text-slate-400">Reach Camp 450</p>
+                <h4 class="font-bold text-xs text-white">Merge Dragons</h4>
+                <p class="text-[11px] text-slate-400">Reach Dragon Camp 450</p>
+                <div class="flex items-center gap-1 text-[10px] text-blue-400 mt-0.5">
+                  <span>New Users Only</span>
+                </div>
               </div>
             </div>
-            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1 rounded-xl">
+            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1.5 rounded-xl border border-amber-400/20">
               ● 1,500
             </div>
           </div>
 
-          <div onclick="simulateOffer('Uphold App', 21400)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
+          <!-- Item 3: Uphold BTC -->
+          <div onclick="executeTaskOffer('Uphold App', 21400)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
             <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">UP</div>
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-black flex items-center justify-center font-black text-sm">UP</div>
               <div>
-                <h4 class="font-bold text-sm text-white">Uphold: Buy BTC</h4>
-                <p class="text-xs text-slate-400">Sign Up & KYC</p>
+                <h4 class="font-bold text-xs text-white">Uphold: Buy BTC</h4>
+                <p class="text-[11px] text-slate-400">Register, KYC & trade $10</p>
+                <div class="flex items-center gap-1 text-[10px] text-purple-400 mt-0.5">
+                  <span>Crypto Deposit</span>
+                </div>
               </div>
             </div>
-            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1 rounded-xl">
+            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1.5 rounded-xl border border-amber-400/20">
               ● 21,400
+            </div>
+          </div>
+
+          <!-- Item 4: Dice Dreams -->
+          <div onclick="executeTaskOffer('Dice Dreams', 8200)" class="bg-[#141c24] border border-[#222f3d] p-3 rounded-2xl flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-[#e11d48] text-white flex items-center justify-center font-black text-sm">DD</div>
+              <div>
+                <h4 class="font-bold text-xs text-white">Dice Dreams</h4>
+                <p class="text-[11px] text-slate-400">Finish Kingdom Level 15</p>
+                <div class="flex items-center gap-1 text-[10px] text-emerald-400 mt-0.5">
+                  <span>Instant Verification</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-400/10 text-amber-400 font-black text-xs px-2.5 py-1.5 rounded-xl border border-amber-400/20">
+              ● 8,200
             </div>
           </div>
         </div>
       `;
     }
 
-    // --- PROFILE VIEW (/profile) ---
+    // 5. View: PROFILE HISTORY (dollah.co/profile)
     function renderProfile() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
+        <!-- Profile Sub-Tab Bar -->
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll text-xs">
-          <button class="bg-emerald-500 text-black font-bold px-4 py-2 rounded-xl">Earnings</button>
-          <button class="bg-[#141c24] text-slate-400 font-medium px-4 py-2 rounded-xl">Withdrawals</button>
-          <button class="bg-[#141c24] text-slate-400 font-medium px-4 py-2 rounded-xl">In-Progress</button>
-          <button class="bg-[#141c24] text-slate-400 font-medium px-4 py-2 rounded-xl">On-Hold</button>
+          <button onclick="switchProfileTab('earnings')" class="${profileSubTab === 'earnings' ? 'bg-emerald-500 text-black font-bold' : 'bg-[#141c24] text-slate-400'} px-3.5 py-2 rounded-xl transition">Earnings</button>
+          <button onclick="switchProfileTab('withdrawals')" class="${profileSubTab === 'withdrawals' ? 'bg-emerald-500 text-black font-bold' : 'bg-[#141c24] text-slate-400'} px-3.5 py-2 rounded-xl transition">Withdrawals</button>
+          <button onclick="switchProfileTab('progress')" class="${profileSubTab === 'progress' ? 'bg-emerald-500 text-black font-bold' : 'bg-[#141c24] text-slate-400'} px-3.5 py-2 rounded-xl transition">In-Progress</button>
+          <button onclick="switchProfileTab('hold')" class="${profileSubTab === 'hold' ? 'bg-emerald-500 text-black font-bold' : 'bg-[#141c24] text-slate-400'} px-3.5 py-2 rounded-xl transition">On-Hold</button>
         </div>
 
         <div class="flex justify-between text-xs font-semibold text-slate-500 px-2 mt-2">
-          <span>Name</span>
+          <span>Name & Event</span>
           <span>Reward</span>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div id="profile-records-container" class="flex flex-col gap-2">
+          ${getProfileTabContent()}
+        </div>
+      `;
+    }
+
+    function switchProfileTab(tab) {
+      profileSubTab = tab;
+      renderProfile();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function getProfileTabContent() {
+      if (profileSubTab === 'earnings') {
+        return `
           <div class="bg-[#141c24] border border-[#222f3d] p-3 rounded-xl flex items-center justify-between">
-            <span class="text-sm font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Leaderboard Daily Prize</span>
+            <span class="text-xs font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Leaderboard Daily Prize #1</span>
             <div class="text-right">
               <span class="text-[10px] text-slate-400 block">Released</span>
               <span class="text-amber-400 font-bold text-xs">● 15,000</span>
             </div>
           </div>
           <div class="bg-[#141c24] border border-[#222f3d] p-3 rounded-xl flex items-center justify-between">
-            <span class="text-sm font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Animals And Coins</span>
+            <span class="text-xs font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Animals And Coins Task</span>
             <div class="text-right">
               <span class="text-[10px] text-slate-400 block">Released</span>
               <span class="text-amber-400 font-bold text-xs">● 25,000</span>
             </div>
           </div>
           <div class="bg-[#141c24] border border-[#222f3d] p-3 rounded-xl flex items-center justify-between">
-            <span class="text-sm font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Earn 10000 coins bonus</span>
+            <span class="text-xs font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Earn 10,000 coins bonus</span>
             <div class="text-right">
               <span class="text-[10px] text-slate-400 block">Released</span>
               <span class="text-amber-400 font-bold text-xs">● 500</span>
             </div>
           </div>
-        </div>
-      `;
+        `;
+      } else if (profileSubTab === 'withdrawals') {
+        return `
+          <div class="bg-[#141c24] border border-[#222f3d] p-3 rounded-xl flex items-center justify-between">
+            <span class="text-xs font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Litecoin (LTC) Transfer</span>
+            <div class="text-right">
+              <span class="text-[10px] text-emerald-400 block font-bold">Sent (Tx: 0x8a...)</span>
+              <span class="text-slate-300 font-bold text-xs">21,400 ● ($21.40)</span>
+            </div>
+          </div>
+          <div class="bg-[#141c24] border border-[#222f3d] p-3 rounded-xl flex items-center justify-between">
+            <span class="text-xs font-medium text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span> USDT TRC20</span>
+            <div class="text-right">
+              <span class="text-[10px] text-purple-400 block font-bold">Pending Review</span>
+              <span class="text-slate-300 font-bold text-xs">38,010 ● ($38.01)</span>
+            </div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="p-8 text-center text-slate-500 text-xs bg-[#141c24] rounded-2xl border border-[#222f3d]">
+            No records currently in this category. Complete new offers to view active statuses.
+          </div>
+        `;
+      }
     }
 
-    // --- LEADERBOARD VIEW ---
+    // 6. View: RANKING (dollah.co/leaderboard)
     function renderRanking() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
         <div class="text-center py-2">
-          <h2 class="text-lg font-black text-white">Daily Race ($50 Pool)</h2>
+          <h2 class="text-base font-black text-white">Daily Race ($50 Pool)</h2>
           <p class="text-xs text-slate-400">Resets in 04h 45m 06s</p>
         </div>
 
+        <!-- 3D Podium Layout -->
         <div class="flex items-end justify-center gap-3 pt-6 pb-2">
+          <!-- Rank 2 -->
           <div class="flex flex-col items-center">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Sinful" class="w-14 h-14 rounded-full border-2 border-slate-600 bg-[#141c24]" />
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Sinful" class="w-12 h-12 rounded-full border-2 border-slate-600 bg-[#141c24]" />
             <span class="text-xs font-bold mt-1 text-slate-300">SinfulMa...</span>
             <span class="text-xs text-emerald-400 font-bold">22,400</span>
-            <div class="h-20 w-20 bg-[#16202c] rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-500 text-lg">2</div>
+            <div class="h-20 w-16 bg-[#16202c] rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-500 text-base">2</div>
           </div>
 
+          <!-- Rank 1 (Kaallu) -->
           <div class="flex flex-col items-center -mt-6">
-            <span class="text-lg">👑</span>
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-16 h-16 rounded-full border-2 border-amber-400 bg-[#141c24]" />
+            <span class="text-xl">👑</span>
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-16 h-16 rounded-full border-2 border-amber-400 bg-[#141c24] gold-glow" />
             <span class="text-xs font-bold mt-1 text-amber-400">Kaallu</span>
             <span class="text-xs text-emerald-400 font-bold">25,000</span>
             <div class="h-28 w-20 bg-gradient-to-t from-emerald-950/60 to-[#1b2735] rounded-t-xl mt-2 flex items-center justify-center font-black text-amber-400 text-2xl border-t border-amber-400/40">1</div>
           </div>
 
+          <!-- Rank 3 -->
           <div class="flex flex-col items-center">
-            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Mordant" class="w-14 h-14 rounded-full border-2 border-amber-700 bg-[#141c24]" />
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Mordant" class="w-12 h-12 rounded-full border-2 border-amber-700 bg-[#141c24]" />
             <span class="text-xs font-bold mt-1 text-slate-300">Mordant...</span>
             <span class="text-xs text-emerald-400 font-bold">10,151</span>
-            <div class="h-16 w-20 bg-[#16202c] rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-500 text-lg">3</div>
+            <div class="h-16 w-16 bg-[#16202c] rounded-t-xl mt-2 flex items-center justify-center font-black text-slate-500 text-base">3</div>
+          </div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="flex flex-col gap-2 mt-4">
+          <div class="flex items-center justify-between p-3 bg-[#141c24] border border-[#222f3d] rounded-xl text-xs">
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-slate-400 w-4">4</span>
+              <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Rex" class="w-7 h-7 rounded-full bg-[#0d1217]" />
+              <span class="font-bold text-white">RexHunter</span>
+            </div>
+            <span class="font-bold text-amber-400">● 9,840</span>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-[#141c24] border border-[#222f3d] rounded-xl text-xs">
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-slate-400 w-4">5</span>
+              <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Cyber" class="w-7 h-7 rounded-full bg-[#0d1217]" />
+              <span class="font-bold text-white">CyberGhost</span>
+            </div>
+            <span class="font-bold text-amber-400">● 7,120</span>
           </div>
         </div>
       `;
     }
 
+    // 7. View: SHOP & CASHOUT
     function renderShop() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <h2 class="text-base font-bold text-white mb-2">Withdraw Options</h2>
+        <div class="flex justify-between items-center mb-1">
+          <h2 class="text-sm font-bold text-white">Crypto Cashouts</h2>
+          <span class="text-[11px] text-slate-400">1,000 Coins = $1.00 USD</span>
+        </div>
+        
         <div class="grid grid-cols-2 gap-3">
-          <div onclick="requestCashout('Litecoin (LTC)')" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-black text-xl">Ł</div>
-            <span class="font-bold text-sm text-white">Litecoin</span>
-            <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Instant 0% Fee</span>
+          <!-- Litecoin -->
+          <div onclick="openWithdrawModal('Litecoin (LTC)', 1000)" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-black text-2xl">Ł</div>
+            <span class="font-bold text-xs text-white">Litecoin</span>
+            <span class="text-[9px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">Min: $1.00 (Instant)</span>
           </div>
 
-          <div onclick="requestCashout('USDT')" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-black text-xl">₮</div>
-            <span class="font-bold text-sm text-white">Tether USDT</span>
-            <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Min 5,000 Coins</span>
+          <!-- USDT -->
+          <div onclick="openWithdrawModal('Tether USDT', 5000)" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-black text-2xl">₮</div>
+            <span class="font-bold text-xs text-white">Tether USDT</span>
+            <span class="text-[9px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-bold">Min: $5.00</span>
+          </div>
+
+          <!-- Bitcoin -->
+          <div onclick="openWithdrawModal('Bitcoin (BTC)', 15000)" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-black text-2xl">₿</div>
+            <span class="font-bold text-xs text-white">Bitcoin</span>
+            <span class="text-[9px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-bold">Min: $15.00</span>
+          </div>
+
+          <!-- Gift Cards -->
+          <div onclick="alert('Giftcards (Amazon, Steam) unlock at Level 5+')" class="bg-[#141c24] border border-[#222f3d] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-500 transition opacity-80">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-black text-2xl">🎁</div>
+            <span class="font-bold text-xs text-white">Gift Cards</span>
+            <span class="text-[9px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded font-bold">Steam / Amazon</span>
           </div>
         </div>
       `;
     }
 
+    // 8. View: DAILY BONUS & STREAK
     function renderDaily() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <div class="bg-[#141c24] border border-[#222f3d] rounded-2xl p-4 text-center flex flex-col items-center gap-3">
-          <span class="text-4xl">🎁</span>
+        <div class="bg-[#141c24] border border-[#222f3d] rounded-2xl p-6 text-center flex flex-col items-center gap-3">
+          <span class="text-5xl">🎁</span>
           <h3 class="font-bold text-white text-base">Daily Streak Bonus</h3>
-          <p class="text-xs text-slate-400">Claim free coins everyday to maintain your streak!</p>
-          <button onclick="claimDailyBonus()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-6 py-2 rounded-xl text-sm transition">Claim 100 Coins</button>
+          <p class="text-xs text-slate-400 max-w-xs">Claim your daily allowance to increase your streak multiplier and level tier up to 2.5x!</p>
+          
+          <div class="flex gap-2 my-2">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500 text-emerald-400 font-bold text-xs flex items-center justify-center">D1</div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500 text-emerald-400 font-bold text-xs flex items-center justify-center">D2</div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500 border border-emerald-400 text-black font-black text-xs flex items-center justify-center glow-dot">D3</div>
+            <div class="w-10 h-10 rounded-xl bg-[#0d1217] border border-[#222f3d] text-slate-600 font-bold text-xs flex items-center justify-center">D4</div>
+            <div class="w-10 h-10 rounded-xl bg-[#0d1217] border border-[#222f3d] text-slate-600 font-bold text-xs flex items-center justify-center">D5</div>
+          </div>
+
+          <button onclick="claimStreakReward()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-500/30">
+            Claim Day 3 (+100 Coins)
+          </button>
         </div>
       `;
     }
 
+    // 9. View: LIVE CHAT
     function renderChat() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <div class="bg-[#141c24] border border-[#222f3d] rounded-2xl p-4 flex flex-col h-80 justify-between">
-          <div class="text-xs text-slate-400 border-b border-[#222f3d] pb-2 font-bold">Community Chat (Global)</div>
-          <div class="flex-1 py-2 overflow-y-auto text-xs flex flex-col gap-2 text-slate-300">
-            <div><strong class="text-emerald-400">Kaallu:</strong> Completed animals and coins in 2 days!</div>
-            <div><strong class="text-amber-400">Sinful:</strong> LTC cashout received fast 🚀</div>
+        <div class="bg-[#141c24] border border-[#222f3d] rounded-2xl p-4 flex flex-col h-[400px] justify-between shadow-xl">
+          <div class="flex items-center justify-between text-xs text-slate-400 border-b border-[#222f3d] pb-2 font-bold">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Global Chat (Online: 432)</span>
+            <span class="text-slate-500">English</span>
           </div>
-          <div class="flex gap-2">
-            <input type="text" placeholder="Type a message..." class="flex-1 bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-1.5 text-xs text-white" />
-            <button class="bg-emerald-500 text-black font-bold px-3 py-1.5 rounded-xl text-xs">Send</button>
+
+          <div id="chat-messages" class="flex-1 py-3 overflow-y-auto text-xs flex flex-col gap-2.5 text-slate-300 custom-scroll">
+            <div><strong class="text-emerald-400">Kaallu:</strong> Completed animals and coins in 2 days! Instant payout received.</div>
+            <div><strong class="text-amber-400">Sinful:</strong> LTC cashout sent within 30 seconds 🚀</div>
+            <div><strong class="text-blue-400">Mordant:</strong> Anyone doing Monlix surveys today?</div>
+            <div><strong class="text-purple-400">GollahBot:</strong> User_9918 just withdrew $10.00 LTC!</div>
+          </div>
+
+          <div class="flex gap-2 pt-2 border-t border-[#222f3d]">
+            <input id="chat-input" type="text" placeholder="Type a message..." class="flex-1 bg-[#0d1217] border border-[#222f3d] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" onkeydown="if(event.key==='Enter') sendChatMessage()" />
+            <button onclick="sendChatMessage()" class="bg-emerald-500 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg-emerald-400 transition">Send</button>
           </div>
         </div>
       `;
     }
 
-    // --- ACTIONS & SUPABASE SYNC ---
-    async function simulateOffer(name, reward) {
-      if (!currentUser) {
-        openAuthModal();
-        return;
+    // 10. Task Execution & Supabase Sync
+    async function executeTaskOffer(taskName, coinsAwarded) {
+      currentProfile.coins += coinsAwarded;
+      updateHeaderWallet();
+      alert(`🎉 Success! Task "${taskName}" verified. +${coinsAwarded.toLocaleString()} coins deposited to your Gollah balance.`);
+
+      // Sync to cloud if user & Supabase available
+      if (db && currentUser) {
+        try {
+          await db.from('profiles').update({ coins: currentProfile.coins }).eq('id', currentUser.id);
+          await db.from('postbacks').insert([{
+            user_id: currentUser.id,
+            provider: 'Simulator',
+            offer_name: taskName,
+            coins_awarded: coinsAwarded,
+            status: 'completed'
+          }]);
+        } catch (e) {
+          console.warn("DB save sync:", e);
+        }
       }
-      currentProfile.coins = (Number(currentProfile.coins) || 0) + reward;
-      updateUIHeader();
-
-      // Save to Supabase Profiles & Postbacks
-      await supabase.from('profiles').update({ coins: currentProfile.coins }).eq('id', currentUser.id);
-      await supabase.from('postbacks').insert([{
-        user_id: currentUser.id,
-        provider: 'Simulator',
-        offer_name: name,
-        coins_awarded: reward,
-        status: 'completed'
-      }]);
-
-      alert(`Offer "${name}" completed! +${reward} coins added to your Supabase cloud balance.`);
     }
 
-    async function claimDailyBonus() {
-      if (!currentUser) { openAuthModal(); return; }
-      currentProfile.coins = (Number(currentProfile.coins) || 0) + 100;
-      updateUIHeader();
-      await supabase.from('profiles').update({ coins: currentProfile.coins }).eq('id', currentUser.id);
+    function claimStreakReward() {
+      currentProfile.coins += 100;
+      updateHeaderWallet();
       alert("Claimed 100 Daily Bonus coins!");
     }
 
-    function requestCashout(crypto) {
-      if (!currentUser) { openAuthModal(); return; }
-      alert(`Withdrawal request for ${crypto} placed. Admin will verify via Supabase withdrawals table.`);
+    function openWithdrawModal(method, minCoins) {
+      if (currentProfile.coins < minCoins) {
+        alert(`Insufficient balance. Minimum withdrawal for ${method} is ${minCoins.toLocaleString()} coins.`);
+        return;
+      }
+      const addr = prompt(`Enter your ${method} wallet address:`);
+      if (addr) {
+        currentProfile.coins -= minCoins;
+        updateHeaderWallet();
+        alert(`Withdrawal request for $${(minCoins/1000).toFixed(2)} (${method}) submitted to address: ${addr}. Status: Pending review.`);
+      }
     }
 
-    // --- AUTH MODAL HANDLERS ---
+    function updateHeaderWallet() {
+      document.getElementById('user-coins').innerText = Number(currentProfile.coins).toLocaleString();
+    }
+
+    // 11. Modal Controls & Menus
     function toggleProfileMenu() {
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
-    function handleAuthAction() {
-      if (currentUser) {
-        supabase.auth.signOut().then(() => {
-          currentUser = null;
-          currentProfile = { username: "Guest", coins: 0, level: 1 };
-          updateUIHeader();
-          toggleProfileMenu();
-          location.reload();
-        });
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function openBonusCodeModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      document.getElementById('bonus-modal').classList.remove('hidden');
+    }
+
+    function openReferralModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      document.getElementById('referral-modal').classList.remove('hidden');
+    }
+
+    function openProviderModal(provider, bonus) {
+      alert(`Connecting to ${provider} Offerwall API...\nMultiplier: ${bonus}x rewards.`);
+    }
+
+    function redeemBonusCode() {
+      const code = document.getElementById('bonus-input').value.trim().toUpperCase();
+      if (code === 'GOLLAH500' || code === 'DOLLAH') {
+        currentProfile.coins += 500;
+        updateHeaderWallet();
+        alert("Bonus Code Accepted! +500 Coins added.");
+        closeModal('bonus-modal');
       } else {
-        openAuthModal();
+        alert("Invalid or expired code.");
       }
     }
 
-    function openAuthModal() {
-      document.getElementById('auth-modal').classList.remove('hidden');
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const box = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.innerHTML = `<strong class="text-emerald-400">${currentProfile.username}:</strong> ${text}`;
+      box.appendChild(div);
+      input.value = '';
+      box.scrollTop = box.scrollHeight;
     }
 
-    function closeAuthModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
+    // 12. Authentication Handlers
+    function handleAuthAction() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      document.getElementById('auth-modal').classList.remove('hidden');
     }
 
     function toggleAuthMode() {
       isSignUpMode = !isSignUpMode;
-      document.getElementById('auth-title').innerText = isSignUpMode ? "Create Dollah Account" : "Login to Dollah";
+      document.getElementById('auth-title').innerText = isSignUpMode ? "Create Gollah Account" : "Login to Gollah";
       document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Sign Up" : "Login";
     }
 
     async function submitAuth() {
-      const email = document.getElementById('auth-email').value;
-      const password = document.getElementById('auth-pass').value;
-      if (!email || !password) return alert("Fill all fields");
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value.trim();
+      if (!email || !pass) return alert("Please fill in both email and password.");
 
-      if (isSignUpMode) {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) alert(error.message);
-        else {
-          alert("Account created successfully! Logging you in...");
-          closeAuthModal();
-          initUser();
+      if (db) {
+        if (isSignUpMode) {
+          const { data, error } = await db.auth.signUp({ email, password: pass });
+          if (error) alert(error.message);
+          else {
+            alert("Account created successfully!");
+            closeModal('auth-modal');
+          }
+        } else {
+          const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+          if (error) alert(error.message);
+          else {
+            currentUser = data.user;
+            currentProfile.username = email.split('@')[0];
+            document.getElementById('menu-username').innerText = currentProfile.username;
+            alert("Welcome back, " + currentProfile.username);
+            closeModal('auth-modal');
+          }
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message);
-        else {
-          closeAuthModal();
-          initUser();
-        }
+        currentProfile.username = email.split('@')[0];
+        document.getElementById('menu-username').innerText = currentProfile.username;
+        alert("Logged in as " + currentProfile.username);
+        closeModal('auth-modal');
       }
     }
 
-    // --- LIVE PUBLIC TOAST ROTATION ---
+    // 13. Dynamic Public Toast Notifications Rotation (Exact Dollah Feed)
     const toastItems = [
       { tag: "Sent", title: "LTC Sent", amount: "2,573", color: "text-emerald-400 bg-emerald-500/20" },
       { tag: "Complete", title: "Animals And Coins", amount: "125", color: "text-blue-400 bg-blue-500/20" },
@@ -536,13 +793,21 @@
     setInterval(() => {
       toastIndex = (toastIndex + 1) % toastItems.length;
       const item = toastItems[toastIndex];
-      document.getElementById('toast-title').innerText = "seconds ago";
-      document.getElementById('toast-desc').innerHTML = `${item.title} <span class="text-[10px] ${item.color} px-1.5 py-0.5 rounded">${item.tag}</span>`;
-      document.getElementById('toast-amount').innerText = item.amount;
+      const descEl = document.getElementById('toast-desc');
+      const amountEl = document.getElementById('toast-amount');
+      const topTicker = document.getElementById('top-ticker-text');
+      if (descEl && amountEl) {
+        descEl.innerHTML = `${item.title} <span class="text-[10px] ${item.color} px-1.5 py-0.5 rounded font-bold">${item.tag}</span>`;
+        amountEl.innerText = item.amount;
+      }
+      if (topTicker) {
+        topTicker.innerText = `${item.title} (● ${item.amount})`;
+      }
     }, 4500);
 
-    // Initial load
-    initUser();
+    // Initial App Render
+    renderHome();
+    if (window.lucide) lucide.createIcons();
   </script>
 </body>
 </html>
