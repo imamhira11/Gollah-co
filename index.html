@@ -269,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST -->
+  <!-- FLOATING TOAST (Longer Duration) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -489,6 +489,23 @@
       console.warn("Supabase local active");
     }
 
+    // Live Ticker State for Home Screen
+    let liveTickerItems = [
+      { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
+      { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
+    ];
+
+    function prependLiveTicker(type, amount, icon = 'Ł') {
+      liveTickerItems.unshift({
+        type: type,
+        amount: amount.toLocaleString(),
+        time: 'just now',
+        icon: icon
+      });
+      if (liveTickerItems.length > 5) liveTickerItems.pop();
+      if (currentTab === 'home') renderHome();
+    }
+
     // 2. Comprehensive Offer Database
     const ALL_OFFERS = [
       { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
@@ -657,7 +674,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // SOUND 1: Pending Submit Pop Sound
+    // AUDIO 1: Pending Submit Pop Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playPendingTaakSound() {
@@ -684,12 +701,11 @@
       } catch (e) {}
     }
 
-    // SOUND 2: Completed Custom Audio ("cashout.mp3" uploaded by user)
+    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
     function playCompletedCustomAudio() {
       try {
         const audio = new Audio('cashout.mp3');
         audio.play().catch(() => {
-          // Fallback beep if file is missing
           playPendingTaakSound();
         });
       } catch (e) {}
@@ -720,7 +736,8 @@
       card.classList.add('toast-animate-in');
 
       clearTimeout(floatingToastTimer);
-      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 6000);
+      // LONGER DURATION: Toast stays visible for 10 seconds (10000ms)
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 10000);
       if (window.lucide) lucide.createIcons();
     }
 
@@ -782,6 +799,7 @@
         status: 'complete'
       });
 
+      prependLiveTicker('Offer', coins.toLocaleString(), '⚡');
       playCompletedCustomAudio();
       triggerDollahFloatingToast({
         time: 'just now',
@@ -878,7 +896,6 @@
       submitBtn.disabled = true;
 
       try {
-        // Play pending submit pop sound (Sound 1)
         playPendingTaakSound();
 
         userCoins -= amount;
@@ -961,7 +978,7 @@
             status: (d.status || 'PENDING').toUpperCase()
           }));
 
-          // Compare with local cache to detect newly completed status for custom completed audio (Sound 2) & toast popup
+          // Compare with local cache to detect newly completed status for custom completed audio & live ticker broadcast
           fetchedList.forEach(fw => {
             const oldW = userWithdrawals.find(ow => ow.id === fw.id);
             if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
@@ -977,6 +994,10 @@
                 message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
                 status: 'completed'
               });
+              // Automatically push to live ticker bar on home screen
+              const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
+              const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
+              prependLiveTicker(shortMethod, fw.amount, tickerIcon);
             }
           });
 
@@ -1409,18 +1430,21 @@
         `;
       });
 
+      // Render live ticker items dynamically from liveTickerItems array
+      let tickerHTML = '';
+      liveTickerItems.forEach(t => {
+        tickerHTML += `
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
+            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
+          </div>
+        `;
+      });
+
       container.innerHTML = `
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">10m ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">805</span>
-          </div>
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">🟡</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">Binance</span><span class="text-slate-500 text-[10px]">14m ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">1,500</span>
-          </div>
+          ${tickerHTML}
         </div>
 
         <div class="flex flex-col gap-3">
