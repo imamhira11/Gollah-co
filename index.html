@@ -106,7 +106,7 @@
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
             </button>
             <div id="auth-button-slot">
-              <!-- Injected via Auth State -->
+              <!-- Injected dynamically -->
             </div>
           </div>
         </div>
@@ -243,6 +243,14 @@
 
         <div>
           <div class="flex items-center justify-between text-[11px] mb-0.5">
+            <span class="font-bold text-rose-400">InvincibleMusket</span>
+            <span class="text-[10px] text-slate-600">22:56 pm</span>
+          </div>
+          <p class="text-slate-300 text-xs">Chk my withdrawal plz it's denied</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-0.5">
             <span class="font-bold text-[#00d672]">The KHALID</span>
             <span class="text-[10px] text-slate-600">05:53 am</span>
           </div>
@@ -258,7 +266,7 @@
 
   </div>
 
-  <!-- BULLETPROOF AUTH MODAL (LOGIN / SIGN UP) -->
+  <!-- AUTH MODAL WITH USERNAME & PASSWORD SHOW/HIDE TOGGLE -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -267,13 +275,27 @@
       </div>
       
       <div class="flex flex-col gap-3">
+        <!-- Username Input (Visible only in Signup Mode) -->
+        <div id="auth-username-container" class="hidden">
+          <label class="text-[11px] text-slate-400 block mb-1">Username</label>
+          <input id="auth-username-input" type="text" placeholder="e.g. Kaallu99" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+        </div>
+
+        <!-- Email Input -->
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Email Address</label>
           <input id="auth-email-input" type="email" placeholder="name@example.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
         </div>
+
+        <!-- Password Input with Show/Hide Eye Toggle -->
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Password</label>
-          <input id="auth-pass-input" type="password" placeholder="At least 6 characters" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+          <div class="relative flex items-center">
+            <input id="auth-pass-input" type="password" placeholder="At least 6 characters" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl pl-3 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none">
+              <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -309,6 +331,7 @@
     let currentUser = null;
     let userCoins = 0;
     let isSignupMode = false;
+    let isPasswordVisible = false;
     let currentTab = 'home';
     let profileFilter = 'on-hold';
 
@@ -332,22 +355,21 @@
       const authSlot = document.getElementById('auth-button-slot');
       
       if (user) {
-        // Fetch User Profile
         let coins = 0;
+        let displayName = user.email.split('@')[0];
         try {
           const { data: profile } = await db.from('profiles').select('coins, username, level').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
-            document.getElementById('profile-username-display').innerText = profile.username || user.email.split('@')[0];
+            displayName = profile.username || displayName;
             document.getElementById('profile-level-badge').innerText = "Lvl " + (profile.level || 1);
-          } else {
-            document.getElementById('profile-username-display').innerText = user.email.split('@')[0];
           }
         } catch (e) {
           console.warn("Profile fetch error:", e);
         }
 
         userCoins = coins;
+        document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
         document.getElementById('header-avatar-img').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${user.id}`;
@@ -386,6 +408,12 @@
 
     function closeAuthModal() {
       document.getElementById('auth-modal').classList.add('hidden');
+      // Reset password field to hidden
+      isPasswordVisible = false;
+      document.getElementById('auth-pass-input').type = 'password';
+      const icon = document.getElementById('pass-toggle-icon');
+      if (icon) icon.setAttribute('data-lucide', 'eye');
+      if (window.lucide) lucide.createIcons();
     }
 
     function toggleAuthMode() {
@@ -394,15 +422,40 @@
     }
 
     function updateAuthModalUI() {
+      const usernameBox = document.getElementById('auth-username-container');
+      if (isSignupMode) {
+        usernameBox.classList.remove('hidden');
+      } else {
+        usernameBox.classList.add('hidden');
+      }
+
       document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create New Account" : "Login to Gollah";
       document.getElementById('auth-submit-btn').innerText = isSignupMode ? "Sign Up Free" : "Login";
       document.getElementById('auth-toggle-msg').innerText = isSignupMode ? "Already have an account?" : "Don't have an account?";
       document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Create Account";
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Password Show / Hide Functionality
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('auth-pass-input');
+      const icon = document.getElementById('pass-toggle-icon');
+      isPasswordVisible = !isPasswordVisible;
+
+      if (isPasswordVisible) {
+        passInput.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        passInput.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      if (window.lucide) lucide.createIcons();
     }
 
     async function submitAuthForm() {
       const email = document.getElementById('auth-email-input').value.trim();
       const password = document.getElementById('auth-pass-input').value.trim();
+      const username = document.getElementById('auth-username-input').value.trim();
 
       if (!email || !password) {
         alert("Please enter both email and password.");
@@ -410,6 +463,11 @@
       }
       if (password.length < 6) {
         alert("Password must be at least 6 characters.");
+        return;
+      }
+
+      if (isSignupMode && (!username || username.length < 3)) {
+        alert("Please enter a username with at least 3 characters.");
         return;
       }
 
@@ -424,22 +482,40 @@
 
       try {
         if (isSignupMode) {
+          // 1. Double check duplicate user security via Supabase profiles
+          const { data: existingProfile } = await db.from('profiles').select('id, username').eq('username', username).maybeSingle();
+          if (existingProfile) {
+            alert("This username is already taken! Please choose another username.");
+            submitBtn.disabled = false;
+            updateAuthModalUI();
+            return;
+          }
+
           const { data, error } = await db.auth.signUp({ 
             email, 
             password,
             options: {
               data: {
-                user_name: email.split('@')[0]
+                user_name: username
               }
             }
           });
           
           if (error) {
-            alert("Signup Failed: " + error.message);
+            if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("unique")) {
+              alert("An account with this email already exists! Please click Login instead.");
+            } else {
+              alert("Signup Error: " + error.message);
+            }
           } else {
-            alert("Account created successfully! Welcome to Gollah.");
-            closeAuthModal();
-            syncUserSession(data.user);
+            // Check if identities is empty (Supabase returns empty identities array when user already exists)
+            if (data.user && data.user.identities && data.user.identities.length === 0) {
+              alert("An account with this email already exists! Please click Login.");
+            } else {
+              alert("Account created successfully! Welcome to Gollah, " + username);
+              closeAuthModal();
+              syncUserSession(data.user);
+            }
           }
         } else {
           const { data, error } = await db.auth.signInWithPassword({ email, password });
@@ -777,7 +853,7 @@
       const val = input.value.trim();
       if (!val) return;
       const stream = document.getElementById('chat-stream');
-      const sender = currentUser ? (currentUser.email.split('@')[0]) : "Guest";
+      const sender = currentUser ? (document.getElementById('profile-username-display').innerText) : "Guest";
       const msg = document.createElement('div');
       msg.innerHTML = `
         <div class="flex items-center justify-between text-[11px] mb-0.5">
