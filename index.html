@@ -66,7 +66,6 @@
 
     <!-- Right Header Elements -->
     <div class="flex items-center gap-2.5">
-      <!-- Network Trust Badge (Displays compliance to offerwall reviewers) -->
       <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
         <span>Network Verified</span>
@@ -151,10 +150,9 @@
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
 
-    <!-- LEFT SIDEBAR WITH ACTIVE LIVE FILTERS -->
+    <!-- LEFT SIDEBAR -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
-        <!-- Main Navigation Links -->
         <div class="flex flex-col gap-1">
           <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
             <i data-lucide="home" class="w-4 h-4"></i> Home
@@ -174,7 +172,6 @@
           </button>
         </div>
 
-        <!-- Fully Interactive Categories (No Broken Links) -->
         <div class="flex flex-col gap-1 text-xs">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
           
@@ -219,7 +216,7 @@
     <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
       
-      <!-- Top Announcement Banner (Visible compliance text for Offerwalls) -->
+      <!-- Top Announcement Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
@@ -233,7 +230,7 @@
         <!-- Injected via Router -->
       </main>
 
-      <!-- PUBLISHER-GRADE ENTERPRISE FOOTER (Crucial for Ad Network Approvals) -->
+      <!-- PUBLISHER-GRADE ENTERPRISE FOOTER -->
       <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
         <div class="max-w-6xl mx-auto flex flex-col gap-6">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -311,7 +308,7 @@
 
   </div>
 
-  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP -->
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP (Shown ONLY when offer completes or cashout updates) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -327,7 +324,7 @@
     </div>
   </div>
 
-  <!-- NOTIFICATIONS MODAL (Dollah-style Alert Center) -->
+  <!-- NOTIFICATIONS MODAL -->
   <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -404,7 +401,7 @@
     </div>
   </div>
 
-  <!-- AUTH MODAL (MULTI-ACCOUNT FRIENDLY & ZERO BLOCKS) -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -647,7 +644,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // Dollah-style Floating Action Toast Popup
+    // Dollah-style Floating Action Toast Popup (ONLY POPPED ON REAL EVENTS)
     let floatingToastTimer = null;
     function triggerDollahFloatingToast(data) {
       const card = document.getElementById('dollah-floating-card');
@@ -660,10 +657,7 @@
       document.getElementById('floating-offer-coins').innerText = `● ${data.coins}`;
 
       const pill = document.getElementById('floating-status-pill');
-      if (data.status === 'In-Progress' || data.status === 'Tracking') {
-        pill.className = "w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center";
-        pill.innerHTML = `<i data-lucide="loader" class="w-3 h-3 animate-spin"></i>`;
-      } else if (data.status === 'Pending Cashout') {
+      if (data.status === 'Pending Cashout') {
         pill.className = "w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center";
         pill.innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i>`;
       } else {
@@ -709,30 +703,51 @@
       activeOfferData = null;
     }
 
-    // Launch Tracking
+    // Launch Tracking (DOES NOT SHOW INSTANT COMPLETE POPUP)
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
       
       const offer = activeOfferData;
       closeOfferModal();
 
+      // Silent tracking: Log to In-Progress without showing fake "Complete" toast
+      addNotification({
+        title: `${offer.name} In-Progress`,
+        message: `Task opened via ${offer.provider}. Reward (● ${offer.coins.toLocaleString()}) will credit upon advertiser completion verification.`,
+        type: 'offer'
+      });
+
+      // Open official advertiser tracking link
+      const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
+      window.open(trackingUrl, '_blank');
+    }
+
+    // REAL SIMULATED POSTBACK WEBHOOK (Call this when offer completes to trigger the popup & add coins)
+    window.creditOfferPostback = async function(offerName, coins) {
+      if (!currentUser) return;
+      userCoins += coins;
+      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+      const newLvl = updateLevelAndXpUI(userCoins);
+
+      if (db) {
+        await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
+      }
+
+      // NOW Show the Dollah.co Complete Popup
       triggerDollahFloatingToast({
         time: 'just now',
-        title: offer.name,
-        status: 'Tracking Initialized',
-        coins: offer.coins.toLocaleString(),
+        title: offerName,
+        status: 'Complete',
+        coins: coins.toLocaleString(),
         sound: 'coin'
       });
 
       addNotification({
-        title: `${offer.name} Clicked`,
-        message: `Task opened via ${offer.provider}. Reward (● ${offer.coins.toLocaleString()}) will credit upon advertiser verification.`,
+        title: `${offerName} Completed!`,
+        message: `● ${coins.toLocaleString()} coins credited to your balance.`,
         type: 'offer'
       });
-
-      const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
-      window.open(trackingUrl, '_blank');
-    }
+    };
 
     function filterCategory(cat) {
       currentCategory = cat;
@@ -943,7 +958,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // MULTIPLE ACCOUNT FRIENDLY REGISTRATION (Zero IP/Device Blocks)
+    // MULTIPLE ACCOUNT FRIENDLY REGISTRATION
     async function submitAuthForm() {
       const email = document.getElementById('auth-email-input').value.trim();
       const password = document.getElementById('auth-pass-input').value.trim();
@@ -961,7 +976,6 @@
         if (isSignupMode) {
           const detectedCountry = await getUserCountry();
 
-          // Auto-generate suffix if username already taken so user never faces blocker
           let finalUsername = username;
           const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
           if (existingProfile) {
@@ -1051,7 +1065,7 @@
       } catch (e) {}
     }
 
-    // Legal Modals (Complete Compliance for Networks)
+    // Legal Modals
     function openLegalModal(type) {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const titleEl = document.getElementById('legal-modal-title');
@@ -1075,8 +1089,6 @@
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
             <p>We process standard account credentials including email address, username, and IP location strictly for user authentication, offer delivery, and verified coin credits.</p>
-            <h4 class="font-bold text-white text-sm">2. Third-Party Networks</h4>
-            <p>When clicking advertiser tasks, your user ID is transmitted through secure sub-tracking parameters solely for postback validation.</p>
           </div>
         `;
       } else if (type === 'antifraud') {
@@ -1087,26 +1099,17 @@
             <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
               <li>Genuine human engagements with all surveys and install offers.</li>
               <li>Strict prohibition of automated scraping bots or fake click scripts.</li>
-              <li>Chargeback and reversed leads are tracked directly via server postbacks.</li>
             </ul>
           </div>
         `;
       } else if (type === 'contact') {
         titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Help & Publisher Support Desk`;
         bodyEl.innerHTML = `
-          <div class="space-y-3">
-            <p>For missing reward tracking, offerwall business integration, or general inquiries:</p>
-            <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
-              <div class="flex items-center gap-2">
-                <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
-                <span class="font-bold text-white">Support Email:</span>
-                <span class="text-emerald-400 font-mono">support@gollah.co</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i data-lucide="briefcase" class="w-4 h-4 text-purple-400"></i>
-                <span class="font-bold text-white">Publisher Inquiries:</span>
-                <span class="text-purple-400 font-mono">partnerships@gollah.co</span>
-              </div>
+          <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
+              <span class="font-bold text-white">Support Email:</span>
+              <span class="text-emerald-400 font-mono">support@gollah.co</span>
             </div>
           </div>
         `;
@@ -1340,7 +1343,7 @@
           <div onclick="executeWithdraw('Litecoin (LTC)', 1000, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
             <span class="text-2xl text-blue-400 font-black">Ł</span>
             <span class="font-bold text-xs text-white">Litecoin (LTC)</span>
-            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Instant)</span>
+            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Fast)</span>
           </div>
           <div onclick="executeWithdraw('Tether USDT', 5000, '₮')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
             <span class="text-2xl text-emerald-400 font-black">₮</span>
@@ -1415,7 +1418,7 @@
       });
     }
 
-    // Admin / Webhook simulation to Approve Withdrawals
+    // Admin / Webhook payout simulator
     window.completeUserWithdrawal = async function(withdrawalId) {
       if (!db || !currentUser) return;
       await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
