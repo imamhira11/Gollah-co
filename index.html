@@ -49,7 +49,6 @@
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
     <div class="flex items-center gap-4 flex-1 max-w-xl">
-      <!-- Brand Logo -->
       <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
           G
@@ -57,21 +56,18 @@
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
 
-      <!-- Live Search Input -->
       <div class="relative w-full max-w-xs hidden sm:block">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
       </div>
     </div>
 
-    <!-- Right Header Elements -->
     <div class="flex items-center gap-2.5">
       <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
         <span>Network Verified</span>
       </div>
 
-      <!-- Coin Pill Counter -->
       <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
         <span id="header-coins">0</span>
@@ -82,7 +78,6 @@
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
-      <!-- Profile Avatar Button with Notification Badge -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
@@ -90,7 +85,6 @@
           <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
         </button>
 
-        <!-- Dynamic Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
@@ -106,7 +100,6 @@
             </div>
           </div>
 
-          <!-- XP & Level Progress Bar -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
               <span id="xp-text">0 / 10 XP</span>
@@ -121,7 +114,6 @@
             </div>
           </div>
 
-          <!-- Menu Options -->
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
             <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
@@ -142,8 +134,6 @@
 
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
-
-    <!-- LEFT SIDEBAR -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-1">
@@ -163,37 +153,30 @@
 
         <div class="flex flex-col gap-1 text-xs">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
-          
           <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
           </button>
-
           <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
           </button>
-
           <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
           </button>
-
           <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
           </button>
-
           <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
           </button>
-
           <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
           </button>
-
           <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
@@ -202,7 +185,7 @@
       </div>
     </aside>
 
-    <!-- CENTER STREAM + FOOTER -->
+    <!-- CENTER FLUID STREAM -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
@@ -286,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST (Longer Duration: 15 seconds) -->
+  <!-- FLOATING TOAST (Longer Duration) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -508,8 +491,8 @@
 
     // Live Ticker State for Home Screen
     let liveTickerItems = [
-      { type: 'LTC', amount: '300', time: 'just now', icon: 'Ł' },
-      { type: 'Binance', amount: '500', time: '1m ago', icon: '🟡' }
+      { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
+      { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
     ];
 
     function prependLiveTicker(type, amount, icon = 'Ł') {
@@ -523,7 +506,7 @@
       if (currentTab === 'home') renderHome();
     }
 
-    // 2. Comprehensive Offer Database (Full 1400+ offers structure)
+    // 2. Comprehensive Offer Database
     const ALL_OFFERS = [
       { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
       { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
@@ -691,7 +674,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // SOUND 1: Pending Submit Pop Sound
+    // AUDIO 1: Pending Submit Pop Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playPendingTaakSound() {
@@ -718,7 +701,7 @@
       } catch (e) {}
     }
 
-    // SOUND 2: Completed Custom Audio ("cashout.mp3")
+    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
     function playCompletedCustomAudio() {
       try {
         const audio = new Audio('cashout.mp3');
@@ -753,8 +736,8 @@
       card.classList.add('toast-animate-in');
 
       clearTimeout(floatingToastTimer);
-      // Extended duration: 15 seconds (15000ms)
-      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 15000);
+      // LONGER DURATION: Toast stays visible for 10 seconds (10000ms)
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 10000);
       if (window.lucide) lucide.createIcons();
     }
 
@@ -1394,6 +1377,219 @@
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
       if (window.lucide) lucide.createIcons();
+    }
+
+    function renderHome() {
+      const container = document.getElementById('app-content');
+      let filtered = ALL_OFFERS;
+      if (currentCategory === 'featured') {
+        filtered = ALL_OFFERS.filter(o => o.featured);
+      } else if (currentCategory !== 'all') {
+        filtered = ALL_OFFERS.filter(o => o.category === currentCategory);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(o => 
+          o.name.toLowerCase().includes(searchQuery) || 
+          o.provider.toLowerCase().includes(searchQuery) ||
+          o.category.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      const categoryTitleMap = {
+        'featured': '🔥 Featured Tasks & Surveys',
+        'all': '⚡ All Active Rewarded Tasks',
+        'apps': '📱 Best Mobile Apps',
+        'games': '🎮 High-Paying Game Quests',
+        'surveys': '📝 Fast Rewarded Surveys',
+        'gpt': '💡 GPT Tasks & Quizzes',
+        'signups': '✍️ High-Reward Sign Ups'
+      };
+
+      const title = categoryTitleMap[currentCategory] || 'Active Offers';
+
+      let offersHTML = '';
+      filtered.forEach(o => {
+        offersHTML += `
+          <div onclick="openOfferModal('${o.id}')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-lg group">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-xs text-[#00d672] group-hover:bg-[#00d672] group-hover:text-black transition">
+                ${o.icon}
+              </div>
+              <span class="text-[10px] bg-[#1a2530] text-slate-400 px-2 py-0.5 rounded font-mono font-semibold">${o.provider}</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white block truncate mb-1">${o.name}</h4>
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${o.tag || o.category}</span>
+            </div>
+            <div class="pt-3 mt-3 border-t border-[#1d2a37] flex items-center justify-between">
+              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ${o.coins.toLocaleString()}</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">+${Math.floor(o.coins / 1000)} XP</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render live ticker items dynamically from liveTickerItems array
+      let tickerHTML = '';
+      liveTickerItems.forEach(t => {
+        tickerHTML += `
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
+            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
+          ${tickerHTML}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> ${title}
+            </h2>
+            <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${offersHTML}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderProfile() {
+      const container = document.getElementById('app-content');
+
+      let displayedWithdrawals = userWithdrawals;
+      if (profileFilter === 'pending') {
+        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
+      } else if (profileFilter === 'completed') {
+        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
+      }
+
+      let listHTML = '';
+      if (displayedWithdrawals.length === 0) {
+        listHTML = `
+          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
+            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
+          </div>
+        `;
+      } else {
+        listHTML = displayedWithdrawals.map(w => {
+          const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
+          const isBinance = (w.method || '').includes('Binance');
+          return `
+            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
+              <span class="col-span-4 font-bold text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
+                  ${isBinance ? '🟡' : 'Ł'}
+                </span> 
+                ${w.method}
+              </span>
+              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
+              <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
+              <span class="col-span-2 text-right">
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
+                  ${w.status}
+                </span>
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div class="flex flex-col gap-5">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
+          </h2>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Withdrawals History:</span>
+              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
+              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
+              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
+            </div>
+            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            ${listHTML}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function changeProfileFilter(filter) {
+      profileFilter = filter;
+      renderProfile();
+    }
+
+    function renderShop() {
+      const container = document.getElementById('app-content');
+      container.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-base font-bold text-white">Withdraw Options</h2>
+            <p class="text-xs text-slate-400">Cash out coins directly to your personal crypto wallet.</p>
+          </div>
+          <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
+            Min 300 Coins
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+                Ł
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+
+          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
+                🟡
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
+                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleProfileDropdown() {
+      document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
     renderHome();
