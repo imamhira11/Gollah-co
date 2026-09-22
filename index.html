@@ -220,7 +220,7 @@
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-          <span><strong>Quality Assurance:</strong> Verified reward delivery system with instant postbacks and dedicated user support.</span>
+          <span><strong>Quality Assurance:</strong> Verified reward delivery system with instant postbacks and 300 Coin min cashout!</span>
         </div>
         <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
       </div>
@@ -307,7 +307,7 @@
 
   </div>
 
-  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP (Shown ONLY on Verified Real Events) -->
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -335,12 +335,63 @@
       </div>
 
       <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]">
-        <!-- Injected Dynamically with Round Green Tick / Clock Badge -->
+        <!-- Injected Dynamically -->
       </div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
         <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
         <button onclick="closeNotificationsModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-4 py-1.5 rounded-xl transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL IN-APP CASHOUT MODAL (NO BROWSER PROMPTS, TYPE YOUR COIN AMOUNT) -->
+  <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div class="flex items-center gap-3">
+          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
+            Ł
+          </div>
+          <div>
+            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw Crypto</h3>
+            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Blockchain Payout</span>
+          </div>
+        </div>
+        <button onclick="closeCashoutModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <!-- Coin Amount Input -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[11px] font-bold text-slate-300">Amount to Withdraw (Coins)</label>
+            <span class="text-[10px] text-amber-400 font-bold">Balance: <span id="cashout-current-balance">0</span></span>
+          </div>
+          <div class="relative">
+            <input id="cashout-amount-input" type="number" min="300" placeholder="Min 300" oninput="calculateEstimatedCrypto()" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+            <button onclick="setCashoutMax()" class="absolute right-2 top-2 bg-[#1f2d3d] hover:bg-[#27384c] text-[#00d672] font-bold text-[10px] px-2 py-1 rounded-lg">MAX</button>
+          </div>
+          <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400">
+            <span>You will receive approx:</span>
+            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.00 LTC</span>
+          </div>
+        </div>
+
+        <!-- Wallet Address Input -->
+        <div>
+          <label class="text-[11px] font-bold text-slate-300 block mb-1">Destination Wallet Address</label>
+          <input id="cashout-address-input" type="text" placeholder="Enter your valid wallet address" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3 border-t border-[#202c38]">
+        <button onclick="closeCashoutModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="cashout-submit-btn" onclick="submitCustomWithdrawal()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40">
+          Confirm & Cashout
+        </button>
       </div>
     </div>
   </div>
@@ -568,7 +619,7 @@
     let currentCategory = 'featured';
     let searchQuery = '';
 
-    // Smart Notifications Storage with explicit status (click vs complete)
+    // Notifications Storage & History
     let userNotifications = [
       { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
     ];
@@ -599,7 +650,7 @@
       updateNotificationsBadge();
     }
 
-    // NOTIFICATIONS MODAL RENDERING: Round Green Tick for Complete | Blue Clock for Click/In-Progress
+    // NOTIFICATIONS MODAL RENDERING
     function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
@@ -614,8 +665,6 @@
           
           item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
           
-          // Left side: Text Details
-          // Right side: Exact status badge (ROUND GREEN TICK if complete, Blue Clock if clicked/in-progress)
           item.innerHTML = `
             <div class="flex-1 flex flex-col gap-0.5">
               <div class="flex items-center gap-1.5">
@@ -666,12 +715,41 @@
       alert("User ID copied to clipboard!");
     }
 
-    // Dollah-style Floating Action Toast Popup (TRIGGERED ONLY ON REAL COMPLETION / CASHOUT)
+    // DOLLAH.CO "TAAK" SOUND SYNTHESIZER
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playDollahTaakSound(variant = 'taak') {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        // Wooden/crisp "Taak" click waveform
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        // Fast pitch envelope to create sharp mechanical "Taak"
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(variant === 'complete' ? 1480 : 880, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.045);
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } catch (e) {}
+    }
+
+    // Dollah-style Floating Action Toast Popup
     let floatingToastTimer = null;
     function triggerDollahFloatingToast(data) {
       const card = document.getElementById('dollah-floating-card');
       if (!card) return;
-      playSound(data.sound || 'coin');
+      playDollahTaakSound('complete');
 
       document.getElementById('floating-time').innerText = data.time || 'just now';
       document.getElementById('floating-offer-title').innerText = data.title;
@@ -708,6 +786,7 @@
       const offer = ALL_OFFERS.find(o => o.id === offerId);
       if (!offer) return;
 
+      playDollahTaakSound('taak');
       activeOfferData = offer;
       document.getElementById('modal-offer-title').innerText = offer.name;
       document.getElementById('modal-offer-provider').innerText = `Provided by ${offer.provider}`;
@@ -725,26 +804,25 @@
       activeOfferData = null;
     }
 
-    // 1. OFFER CLICK ONLY: Logs tracking notification with 'click' status (NO POPUP, NO COMPLETE)
+    // Launch Tracking
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
       
       const offer = activeOfferData;
       closeOfferModal();
+      playDollahTaakSound('taak');
 
-      // Silent tracking notification: status is 'click'
       addNotification({
         title: `${offer.name} Clicked`,
         message: `Task opened via ${offer.provider}. Tracking active. Coins (● ${offer.coins.toLocaleString()}) credit upon completion verification.`,
         status: 'click'
       });
 
-      // Launch official advertiser link with UID sub-tracking
       const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
       window.open(trackingUrl, '_blank');
     }
 
-    // 2. OFFER COMPLETE EVENT: Called when task is finished (Shows Round Green Tick & Floating Toast)
+    // Webhook simulation for Offer Complete
     window.creditOfferPostback = async function(offerName, coins) {
       if (!currentUser) return;
       userCoins += coins;
@@ -755,20 +833,158 @@
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
       }
 
-      // Add Notification with status = 'complete' (Triggers Round Green Tick in Modal)
       addNotification({
         title: `${offerName} Complete!`,
         message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
         status: 'complete'
       });
 
-      // Trigger Dollah.co Bottom Corner Complete Floating Popup
       triggerDollahFloatingToast({
         time: 'just now',
         title: offerName,
         status: 'Complete',
-        coins: coins.toLocaleString(),
-        sound: 'coin'
+        coins: coins.toLocaleString()
+      });
+    };
+
+    // 3. IN-APP CASHOUT ENGINE (MIN 300 COINS, TYPE ANY AMOUNT, NO BROWSER PROMPT)
+    let selectedCashoutCrypto = 'Litecoin (LTC)';
+    let selectedCashoutIcon = 'Ł';
+    let cashoutMinCoins = 300;
+
+    function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
+      if (!currentUser) {
+        alert("Please login to request cashouts!");
+        openAuthModal(false);
+        return;
+      }
+
+      playDollahTaakSound('taak');
+      selectedCashoutCrypto = crypto;
+      selectedCashoutIcon = icon;
+      cashoutMinCoins = minLimit;
+
+      document.getElementById('cashout-modal-title').innerText = `Withdraw ${crypto}`;
+      document.getElementById('cashout-icon-box').innerText = icon;
+      document.getElementById('cashout-current-balance').innerText = userCoins.toLocaleString();
+      
+      const amtInput = document.getElementById('cashout-amount-input');
+      amtInput.value = userCoins >= minLimit ? minLimit : userCoins;
+      amtInput.min = minLimit;
+
+      document.getElementById('cashout-address-input').value = '';
+      calculateEstimatedCrypto();
+
+      document.getElementById('cashout-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeCashoutModal() {
+      document.getElementById('cashout-modal').classList.add('hidden');
+    }
+
+    function setCashoutMax() {
+      document.getElementById('cashout-amount-input').value = userCoins;
+      calculateEstimatedCrypto();
+    }
+
+    function calculateEstimatedCrypto() {
+      const val = parseInt(document.getElementById('cashout-amount-input').value) || 0;
+      const el = document.getElementById('cashout-estimated-crypto');
+      
+      if (selectedCashoutCrypto.includes('Litecoin')) {
+        // approx 1000 coins = $1.00 USD -> calculate LTC
+        const estLTC = (val / 1000 * 0.012).toFixed(6);
+        el.innerText = `${estLTC} LTC`;
+      } else {
+        const estUSDT = (val / 1000).toFixed(2);
+        el.innerText = `${estUSDT} USDT`;
+      }
+    }
+
+    async function submitCustomWithdrawal() {
+      if (!currentUser) return;
+      const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
+      const address = document.getElementById('cashout-address-input').value.trim();
+
+      if (amount < cashoutMinCoins) {
+        alert(`Minimum withdrawal for ${selectedCashoutCrypto} is ${cashoutMinCoins} Coins.`);
+        return;
+      }
+
+      if (amount > userCoins) {
+        alert(`Insufficient coins. You only have ${userCoins.toLocaleString()} coins.`);
+        return;
+      }
+
+      if (!address || address.length < 8) {
+        alert("Please enter a valid wallet address.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('cashout-submit-btn');
+      submitBtn.innerText = "Submitting Request...";
+      submitBtn.disabled = true;
+
+      try {
+        userCoins -= amount;
+        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+
+        if (db) {
+          await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+          const { data: newW } = await db.from('withdrawals').insert({
+            user_id: currentUser.id,
+            method: selectedCashoutCrypto,
+            amount: amount,
+            address: address,
+            status: 'PENDING'
+          }).select().single();
+
+          if (newW) userWithdrawals.unshift(newW);
+        }
+
+        closeCashoutModal();
+        playDollahTaakSound('taak');
+
+        addNotification({
+          title: `${selectedCashoutCrypto} Cashout Requested`,
+          message: `● ${amount.toLocaleString()} coins submitted to address: ${address.substring(0, 10)}... Status: PENDING.`,
+          status: 'click'
+        });
+
+        triggerDollahFloatingToast({
+          time: 'just now',
+          title: `${selectedCashoutCrypto} Cashout`,
+          status: 'Pending Cashout',
+          coins: amount.toLocaleString()
+        });
+
+        if (currentTab === 'profile') renderProfile();
+      } catch (e) {
+        alert("Withdrawal Error: " + e.message);
+      } finally {
+        submitBtn.innerText = "Confirm & Cashout";
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Webhook simulation for Withdrawal Paid
+    window.completeUserWithdrawal = async function(withdrawalId) {
+      if (!db || !currentUser) return;
+      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
+      await fetchUserWithdrawals();
+
+      triggerDollahFloatingToast({
+        time: 'just now',
+        title: `Withdrawal Paid!`,
+        status: 'Complete',
+        coins: 'Approved'
+      });
+
+      addNotification({
+        title: `Withdrawal Complete!`,
+        message: `Your cashout has been confirmed and broadcasted to the blockchain.`,
+        status: 'complete'
       });
     };
 
@@ -792,7 +1008,7 @@
       else renderHome();
     }
 
-    // 3. User, Auth, XP & Country Engine
+    // 4. User, Auth, XP & Country Engine
     let currentUser = null;
     let userCoins = 0;
     let isSignupMode = false;
@@ -981,7 +1197,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // MULTIPLE ACCOUNT FRIENDLY REGISTRATION
     async function submitAuthForm() {
       const email = document.getElementById('auth-email-input').value.trim();
       const password = document.getElementById('auth-pass-input').value.trim();
@@ -1061,33 +1276,6 @@
       alert("Signed out successfully.");
     }
 
-    // Audio Synthesizer
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    function playSound(type = 'coin') {
-      try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        if (type === 'coin') {
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.1);
-        } else {
-          osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.setValueAtTime(1760, now + 0.15);
-        }
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.5);
-      } catch (e) {}
-    }
-
     // Legal Modals
     function openLegalModal(type) {
       document.getElementById('profile-dropdown').classList.add('hidden');
@@ -1099,19 +1287,30 @@
         bodyEl.innerHTML = `
           <div class="space-y-3">
             <h4 class="font-bold text-white text-sm">1. Terms of Use</h4>
-            <p>Welcome to Gollah Rewards. By using our platform, you agree to our standard community reward terms.</p>
+            <p>Welcome to Gollah Rewards. By using this platform, you agree to adhere to all terms, advertising rules, and rewarded task policies.</p>
           </div>
         `;
       } else if (type === 'privacy') {
         titleEl.innerHTML = `<i data-lucide="lock" class="w-5 h-5 text-blue-400"></i> Privacy Policy`;
         bodyEl.innerHTML = `
           <div class="space-y-3">
-            <h4 class="font-bold text-white text-sm">1. Privacy</h4>
-            <p>We respect your privacy and only process email credentials necessary to credit your task earnings.</p>
+            <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
+            <p>We process standard account credentials strictly for user authentication, offer delivery, and verified coin credits.</p>
+          </div>
+        `;
+      } else if (type === 'antifraud') {
+        titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i> Anti-Fraud & Quality Guidelines`;
+        bodyEl.innerHTML = `
+          <div class="space-y-3 bg-[#111a24] border border-[#1e2a36] p-3.5 rounded-xl">
+            <h4 class="font-bold text-white text-sm">Network Rules:</h4>
+            <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+              <li>Genuine human engagements with surveys and install offers.</li>
+              <li>Strict prohibition of automated scraping bots or fake click scripts.</li>
+            </ul>
           </div>
         `;
       } else if (type === 'contact') {
-        titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Help & Publisher Support Desk`;
+        titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Support Desk`;
         bodyEl.innerHTML = `
           <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
             <div class="flex items-center gap-2">
@@ -1206,6 +1405,11 @@
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
             <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">10m ago</span></div>
             <span class="text-white font-bold text-xs ml-2">805</span>
+          </div>
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">₮</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">USDT</span><span class="text-slate-500 text-[10px]">18m ago</span></div>
+            <span class="text-white font-bold text-xs ml-2">5,000</span>
           </div>
         </div>
 
@@ -1338,23 +1542,55 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // MODERN SHOP VIEW WITH IN-APP CASHOUT MODAL (MIN 300 COINS)
     function renderShop() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <h2 class="text-sm font-bold text-white mb-2">Withdraw Options</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div onclick="executeWithdraw('Litecoin (LTC)', 1000, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-blue-400 font-black">Ł</span>
-            <span class="font-bold text-xs text-white">Litecoin (LTC)</span>
-            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Fast)</span>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-base font-bold text-white">Withdraw Options</h2>
+            <p class="text-xs text-slate-400">Cash out your coins directly to your personal crypto wallet.</p>
           </div>
-          <div onclick="executeWithdraw('Tether USDT', 5000, '₮')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-emerald-400 font-black">₮</span>
-            <span class="font-bold text-xs text-white">USDT (TRC20)</span>
-            <span class="text-[10px] text-slate-400">Min 5,000 Coins</span>
+          <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
+            Min 300 Coins
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Litecoin Card -->
+          <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+                Ł
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+
+          <!-- USDT Card -->
+          <div onclick="openCustomCashoutModal('USDT (TRC20)', 300, '₮')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+                ₮
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Tether USDT (TRC20)</h3>
+                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (Zero Fee)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
           </div>
         </div>
       `;
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderRanking() {
@@ -1374,78 +1610,11 @@
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
-    // REAL WITHDRAWAL LIFECYCLE
-    async function executeWithdraw(crypto, minAmount, icon = 'Ł') {
-      if (!currentUser) {
-        alert("Please login to request cashouts!");
-        openAuthModal(false);
-        return;
-      }
-
-      if (userCoins < minAmount) {
-        alert(`Insufficient coins. Minimum withdrawal is ${minAmount.toLocaleString()} coins.`);
-        return;
-      }
-
-      const address = prompt(`Enter your ${crypto} wallet address:`);
-      if (!address || address.trim().length < 5) return alert("Valid address is required.");
-
-      userCoins -= minAmount;
-      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-
-      if (db) {
-        await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-        const { data: newW } = await db.from('withdrawals').insert({
-          user_id: currentUser.id,
-          method: crypto,
-          amount: minAmount,
-          address: address.trim(),
-          status: 'PENDING'
-        }).select().single();
-
-        if (newW) userWithdrawals.unshift(newW);
-      }
-
-      addNotification({
-        title: `${crypto} Cashout Requested`,
-        message: `● ${minAmount.toLocaleString()} coins submitted. Status: PENDING.`,
-        status: 'click'
-      });
-
-      triggerDollahFloatingToast({
-        time: 'just now',
-        title: `${crypto} Cashout`,
-        status: 'Pending Cashout',
-        coins: minAmount.toLocaleString(),
-        sound: 'cashout'
-      });
-    }
-
-    // Admin / Webhook payout simulator: Triggers Round Green Tick
-    window.completeUserWithdrawal = async function(withdrawalId) {
-      if (!db || !currentUser) return;
-      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
-      await fetchUserWithdrawals();
-
-      triggerDollahFloatingToast({
-        time: 'just now',
-        title: `Withdrawal Paid!`,
-        status: 'Complete',
-        coins: 'Approved',
-        sound: 'coin'
-      });
-
-      addNotification({
-        title: `Withdrawal Complete!`,
-        message: `Your cashout has been confirmed and broadcasted to blockchain.`,
-        status: 'complete'
-      });
-    };
-
     function sendLiveChat() {
       const input = document.getElementById('chat-input');
       const val = input.value.trim();
       if (!val) return;
+      playDollahTaakSound('taak');
       const stream = document.getElementById('chat-stream');
       const sender = currentUser ? (document.getElementById('profile-username-display').innerText) : "Guest";
       const msg = document.createElement('div');
