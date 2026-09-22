@@ -589,7 +589,7 @@
       closeAvatarModal();
     }
 
-    // Web Audio Synthesizer: Sharp "Taak" & Realistic Bubble "Pop"
+    // Web Audio Synthesizer: Sharp "Taak" Mechanical Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -599,54 +599,21 @@
       return audioCtx;
     }
 
-    function playTaakSound() {
+    function playTaakSound(variant = 'normal') {
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(120, now + 0.045);
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+        osc.frequency.setValueAtTime(variant === 'cashout' ? 920 : 880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.05);
-      } catch (e) {}
-    }
-
-    function playPopSound() {
-      try {
-        const ctx = getAudioContext();
-        const now = ctx.currentTime;
-        
-        // High-impact dual oscillator punchy bubble-pop
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(320, now);
-        osc1.frequency.exponentialRampToValueAtTime(1650, now + 0.055);
-        osc1.frequency.exponentialRampToValueAtTime(180, now + 0.11);
-
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(450, now);
-        osc2.frequency.exponentialRampToValueAtTime(1200, now + 0.04);
-
-        gain.gain.setValueAtTime(0.85, now); // Significantly louder & punchier
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-        osc1.connect(gain);
-        osc2.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + 0.13);
-        osc2.stop(now + 0.13);
+        osc.stop(now + 0.055);
       } catch (e) {}
     }
 
@@ -675,12 +642,64 @@
     let currentCategory = 'featured';
     let searchQuery = '';
 
-    let userNotifications = [
-      { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your Binance or LTC wallet.', time: 'just now', status: 'system', isRead: false }
-    ];
-
+    let userNotifications = [];
     let userWithdrawals = [];
     let withdrawalSubFilter = 'all'; // 'all', 'pending', 'completed'
+
+    function loadCachedNotifications() {
+      const storageKey = currentUser ? ('gollah_notifs_' + currentUser.id) : 'gollah_notifs_guest';
+      try {
+        const cached = localStorage.getItem(storageKey);
+        if (cached) {
+          userNotifications = JSON.parse(cached);
+        } else {
+          userNotifications = [
+            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your Binance or LTC wallet.', time: 'just now', status: 'system', isRead: false }
+          ];
+          localStorage.setItem(storageKey, JSON.stringify(userNotifications));
+        }
+      } catch (e) {
+        userNotifications = [
+          { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your Binance or LTC wallet.', time: 'just now', status: 'system', isRead: false }
+        ];
+      }
+      updateNotificationsBadge();
+    }
+
+    function saveCachedNotifications() {
+      const storageKey = currentUser ? ('gollah_notifs_' + currentUser.id) : 'gollah_notifs_guest';
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(userNotifications));
+      } catch (e) {}
+    }
+
+    async function fetchUserNotificationsFromDB() {
+      if (!currentUser) {
+        loadCachedNotifications();
+        return;
+      }
+
+      loadCachedNotifications();
+
+      if (!db) return;
+      try {
+        const { data, error } = await db.from('user_notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          userNotifications = data.map(row => ({
+            id: row.id,
+            title: row.title,
+            message: row.message,
+            time: row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now',
+            status: row.type || 'system',
+            isRead: row.is_read || false
+          }));
+          saveCachedNotifications();
+          updateNotificationsBadge();
+        }
+      } catch (e) {
+        console.warn("Notifications DB fetch error:", e);
+      }
+    }
 
     function updateNotificationsBadge() {
       const unreadCount = userNotifications.filter(n => !n.isRead).length;
@@ -696,17 +715,33 @@
       }
     }
 
-    function addNotification(notif) {
-      userNotifications.unshift({
+    async function addNotification(notif) {
+      const newNotifItem = {
         id: 'n_' + Date.now(),
         ...notif,
         time: 'just now',
         isRead: false
-      });
+      };
+      userNotifications.unshift(newNotifItem);
+      saveCachedNotifications();
       updateNotificationsBadge();
+
+      if (db && currentUser) {
+        try {
+          await db.from('user_notifications').insert({
+            user_id: currentUser.id,
+            title: notif.title,
+            message: notif.message,
+            type: notif.status || 'system',
+            is_read: false
+          });
+        } catch (e) {
+          console.warn("Failed to persist notification to DB:", e);
+        }
+      }
     }
 
-    function openNotificationsModal() {
+    async function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
       list.innerHTML = '';
@@ -748,7 +783,14 @@
       }
 
       userNotifications.forEach(n => n.isRead = true);
+      saveCachedNotifications();
       updateNotificationsBadge();
+
+      if (db && currentUser) {
+        try {
+          await db.from('user_notifications').update({ is_read: true }).eq('user_id', currentUser.id);
+        } catch (e) {}
+      }
 
       document.getElementById('notifications-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -758,9 +800,15 @@
       document.getElementById('notifications-modal').classList.add('hidden');
     }
 
-    function clearAllNotifications() {
+    async function clearAllNotifications() {
       userNotifications = [];
+      saveCachedNotifications();
       updateNotificationsBadge();
+      if (db && currentUser) {
+        try {
+          await db.from('user_notifications').delete().eq('user_id', currentUser.id);
+        } catch (e) {}
+      }
       openNotificationsModal();
     }
 
@@ -854,7 +902,7 @@
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
       }
 
-      playPopSound();
+      playTaakSound('complete');
       addNotification({
         title: `${offerName} Complete!`,
         message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
@@ -1005,10 +1053,10 @@
         // Close Modal Immediately
         closeCashoutModal();
 
-        // 1. Play the loud, punchy bubble POP Sound
-        playPopSound();
+        // 1. Play the crisp mechanical Taak sound
+        playTaakSound('cashout');
 
-        // 2. Add Notification
+        // 2. Add Notification (persisted to localStorage & Supabase)
         addNotification({
           title: `${selectedCashoutCrypto} Cashout Requested`,
           message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 12)}... Status: PENDING.`,
@@ -1052,7 +1100,7 @@
         await fetchUserWithdrawals();
       }
 
-      playPopSound();
+      playTaakSound('complete');
       triggerDollahFloatingToast({
         time: 'just now',
         title: `Withdrawal Paid!`,
@@ -1209,7 +1257,7 @@
         document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
         updateLevelAndXpUI(userCoins);
-        updateNotificationsBadge();
+        fetchUserNotificationsFromDB();
         fetchUserWithdrawals();
 
         authSlot.innerHTML = `
@@ -1228,7 +1276,7 @@
         document.getElementById('dropdown-avatar-img').src = avatarList[0];
         
         updateLevelAndXpUI(0);
-        updateNotificationsBadge();
+        loadCachedNotifications();
 
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -1767,6 +1815,7 @@
 
     // Initial setup
     renderHome();
+    loadCachedNotifications();
     initAuth();
     if (window.lucide) lucide.createIcons();
   </script>
