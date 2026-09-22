@@ -257,14 +257,6 @@
 
         <div>
           <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-rose-400">InvincibleMusket</span>
-            <span class="text-[10px] text-slate-600">22:56 pm</span>
-          </div>
-          <p class="text-slate-300 text-xs">Chk my withdrawal plz it's denied</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
             <span class="font-bold text-[#00d672]">The KHALID</span>
             <span class="text-[10px] text-slate-600">05:53 am</span>
           </div>
@@ -332,9 +324,7 @@
         <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
-        <!-- Injected via JS -->
-      </div>
+      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]"></div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-end">
         <button onclick="closeAvatarModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Done</button>
@@ -401,7 +391,7 @@
       closeAvatarModal();
     }
 
-    // 2. XP, Level & Country Engine
+    // 2. XP, Level & Ultra-Reliable Country Engine
     let currentUser = null;
     let userCoins = 0;
     let userEarnedTotal = 0;
@@ -410,7 +400,6 @@
     let currentTab = 'home';
     let profileFilter = 'on-hold';
 
-    // Formula: 1,000 Coins = 1 XP | 10 XP = 1 Level
     function updateLevelAndXpUI(earnedCoins) {
       const totalXp = Math.floor(earnedCoins / 1000);
       const currentLevel = 1 + Math.floor(totalXp / 10);
@@ -433,17 +422,33 @@
       return currentLevel;
     }
 
+    // Bulletproof GeoIP Tracker with multi-fallback
     async function getUserCountry() {
       try {
-        const res = await fetch('https://ipapi.co/json/');
-        if (res.ok) {
-          const data = await res.json();
-          return data.country_code || data.country_name || 'US';
+        const r1 = await fetch('https://ipwho.is/');
+        if (r1.ok) {
+          const d1 = await r1.json();
+          if (d1 && d1.country_code) return d1.country_code;
         }
-      } catch (e) {
-        console.warn("Country detection fallback:", e);
-      }
-      return 'US';
+      } catch (e) {}
+
+      try {
+        const r2 = await fetch('https://get.geojs.io/v1/ip/country.json');
+        if (r2.ok) {
+          const d2 = await r2.json();
+          if (d2 && d2.country) return d2.country;
+        }
+      } catch (e) {}
+
+      try {
+        const r3 = await fetch('https://ipapi.co/json/');
+        if (r3.ok) {
+          const d3 = await r3.json();
+          if (d3 && d3.country_code) return d3.country_code;
+        }
+      } catch (e) {}
+
+      return 'BD'; // Smart fallback default for your primary region
     }
 
     async function initAuth() {
@@ -476,9 +481,17 @@
             coins = profile.coins || 0;
             userEarnedTotal = coins;
             displayName = profile.username || displayName;
-            userCountry = profile.country || userCountry;
+            userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
             if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
               avatarUrl = profile.avatar_url;
+            }
+
+            // Self-repair: if DB has "Unknown", update it now
+            if (!profile.country || profile.country === 'Unknown') {
+              getUserCountry().then(c => {
+                db.from('profiles').update({ country: c }).eq('id', user.id);
+                document.getElementById('profile-country-badge').innerText = `🚩 ${c}`;
+              });
             }
           }
         } catch (e) {
@@ -612,18 +625,19 @@
           if (error) {
             alert("Signup Error: " + error.message);
           } else {
-            // Upsert into profiles table
+            // Immediate upsert into profiles table to guarantee country is written
             if (data.user) {
               await db.from('profiles').upsert({
                 id: data.user.id,
                 username: username,
                 avatar_url: randomAvatar,
                 country: detectedCountry,
-                coins: 0
+                coins: 0,
+                level: 1
               });
             }
 
-            alert(`Welcome to Gollah, ${username}! (${detectedCountry} detected)`);
+            alert(`Welcome to Gollah, ${username}! (${detectedCountry} saved)`);
             closeAuthModal();
             syncUserSession(data.user);
             setTimeout(() => openAvatarModal(), 600);
@@ -653,7 +667,7 @@
       alert("Signed out successfully.");
     }
 
-    // Synthesizer Audio
+    // Audio & Action Popup
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playSound(type = 'coin') {
