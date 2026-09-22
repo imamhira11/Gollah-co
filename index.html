@@ -234,7 +234,7 @@
       </footer>
     </div>
 
-    <!-- RIGHT CHAT SIDEBAR (Fake counter completely removed for strict compliance) -->
+    <!-- RIGHT CHAT SIDEBAR -->
     <aside class="w-72 shrink-0 bg-[#0d141b] border-l border-[#18232e] flex flex-col justify-between hidden xl:flex">
       <div class="p-3 border-b border-[#18232e] flex items-center justify-between text-xs font-bold text-slate-400">
         <div class="flex items-center gap-3">
@@ -657,30 +657,32 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO: Taak Sound for Money Addition / Completed Payout
+    // AUDIO: Custom Audio Player with Auto-Fallback
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playCashoutTaakSound() {
       try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
-
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        osc.start(now);
-        osc.stop(now + 0.055);
+        const customAudio = new Audio('cashout.mp3');
+        const playPromise = customAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Synthesizer fallback if file is missing
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.055);
+          });
+        }
       } catch (e) {}
     }
 
@@ -866,8 +868,6 @@
       submitBtn.disabled = true;
 
       try {
-        playCashoutTaakSound();
-
         userCoins -= amount;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
 
