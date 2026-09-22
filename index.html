@@ -24,13 +24,19 @@
       color: #061910 !important;
       font-weight: 800 !important;
     }
+    @keyframes slideFeed {
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .feed-animated {
+      animation: slideFeed 0.35s ease-out;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
 
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
-    <!-- Left: Menu + Logo + Search -->
     <div class="flex items-center gap-4 flex-1 max-w-xl">
       <button class="text-slate-400 hover:text-white lg:hidden"><i data-lucide="menu" class="w-5 h-5"></i></button>
       
@@ -51,7 +57,6 @@
 
     <!-- Right Header Elements -->
     <div class="flex items-center gap-2.5">
-      <!-- Windows Dropdown Filter -->
       <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer">
         <i data-lucide="monitor" class="w-3.5 h-3.5 text-slate-400"></i>
         <span>windows</span>
@@ -65,19 +70,16 @@
         <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
       </div>
 
-      <!-- Wallet Button -->
       <button onclick="navigate('shop')" class="w-8 h-8 rounded-xl bg-[#6366f1] flex items-center justify-center text-white hover:bg-[#5558e6] transition shadow-md shadow-indigo-950/40">
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
-      <!-- Profile Avatar Button -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl">
           <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-6 h-6 rounded-lg bg-[#202c38]" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
-        <!-- Dropdown Box (Exact Replica of Hossain-Bros/King Larry) -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center">
             <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu" class="w-12 h-12 rounded-xl border border-[#00d672] bg-[#0b1116] mb-2" />
@@ -107,7 +109,6 @@
         </div>
       </div>
 
-      <!-- Notification Badges -->
       <div class="flex items-center gap-1.5">
         <span class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[11px] font-bold flex items-center justify-center">62</span>
         <span class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[11px] font-bold flex items-center justify-center">1</span>
@@ -118,10 +119,9 @@
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
 
-    <!-- LEFT SIDEBAR (Fixed 230px) -->
+    <!-- LEFT SIDEBAR -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none">
       <div class="flex flex-col gap-5">
-        <!-- Main Navigation Items -->
         <div class="flex flex-col gap-1">
           <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
             <i data-lucide="home" class="w-4 h-4"></i> Home
@@ -141,7 +141,6 @@
           </button>
         </div>
 
-        <!-- Category Filters with Badges -->
         <div class="flex flex-col gap-1 text-xs">
           <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
             <span>Featured</span>
@@ -174,19 +173,19 @@
         </div>
       </div>
 
-      <!-- Bottom Pinned Notification Card (LTC Pending Screenshot Match) -->
-      <div class="bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-lg">
+      <!-- BOTTOM LIVE DYNAMIC ROTATING FEED (Auto-updates every 3.5s) -->
+      <div id="live-bottom-card" class="bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-lg feed-animated cursor-pointer transition">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-[#1a2532] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</div>
+          <div id="feed-icon" class="w-8 h-8 rounded-lg bg-[#1a2532] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</div>
           <div class="flex flex-col">
-            <span class="text-[9px] text-slate-500">seconds ago</span>
-            <span class="text-[11px] font-bold text-white">LTC</span>
-            <span class="text-[9px] text-slate-400">Pending approval</span>
+            <span id="feed-time" class="text-[9px] text-slate-500">seconds ago</span>
+            <span id="feed-title" class="text-[11px] font-bold text-white">LTC</span>
+            <span id="feed-subtitle" class="text-[9px] text-slate-400">Pending approval</span>
           </div>
         </div>
         <div class="text-right">
-          <span class="text-[9px] bg-purple-500/20 text-purple-300 font-bold px-1.5 py-0.2 rounded block mb-0.5">PENDING</span>
-          <span class="text-[11px] font-bold text-amber-400">● 111,087</span>
+          <span id="feed-badge" class="text-[9px] bg-purple-500/20 text-purple-300 font-bold px-1.5 py-0.2 rounded block mb-0.5">PENDING</span>
+          <span id="feed-coins" class="text-[11px] font-bold text-amber-400">● 111,087</span>
         </div>
       </div>
     </aside>
@@ -196,9 +195,8 @@
       <!-- Injected via Router -->
     </main>
 
-    <!-- RIGHT CHAT SIDEBAR (Fixed 300px) -->
+    <!-- RIGHT CHAT SIDEBAR -->
     <aside class="w-72 shrink-0 bg-[#0d141b] border-l border-[#18232e] flex flex-col justify-between hidden xl:flex">
-      <!-- Chat Header -->
       <div class="p-3 border-b border-[#18232e] flex items-center justify-between text-xs font-bold text-slate-400">
         <div class="flex items-center gap-3">
           <span class="text-white hover:underline cursor-pointer">General</span>
@@ -210,13 +208,11 @@
         </div>
       </div>
 
-      <!-- Pinned Message -->
       <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400">
         <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> Lootably 50% Boost Active</span>
         <i data-lucide="chevron-right" class="w-3 h-3"></i>
       </div>
 
-      <!-- Chat Messages Container -->
       <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
         <div>
           <div class="flex items-center justify-between text-[11px] mb-0.5">
@@ -259,7 +255,6 @@
         </div>
       </div>
 
-      <!-- Chat Input Field -->
       <div class="p-3 border-t border-[#18232e] flex items-center gap-2">
         <input id="chat-input" type="text" placeholder="Write a message..." class="flex-1 bg-[#131d27] border border-[#202c38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d672]" onkeydown="if(event.key==='Enter') sendLiveChat()" />
         <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
@@ -299,7 +294,6 @@
     function renderHome() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <!-- Horizontal Crypto Ticker Line (Screenshot 1 Exact) -->
         <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
           <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
@@ -338,9 +332,7 @@
           </div>
         </div>
 
-        <!-- 3 Big Hero Feature Banners (Screenshot 1) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Banner 1: TheoremReach Surveys -->
           <div class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div>
               <span class="text-[11px] text-purple-300 font-semibold tracking-wider">theoremreach</span>
@@ -352,7 +344,6 @@
             </div>
           </div>
 
-          <!-- Banner 2: Neverwinter -->
           <div class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div class="flex justify-center items-center h-20">
               <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
@@ -366,7 +357,6 @@
             </div>
           </div>
 
-          <!-- Banner 3: RAID Shadow Legends -->
           <div class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div class="flex justify-center items-center h-20">
               <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
@@ -381,7 +371,6 @@
           </div>
         </div>
 
-        <!-- Premium Task Section (Screenshot 1 Exact Cards) -->
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-white flex items-center gap-2">
@@ -390,9 +379,7 @@
             <span class="text-xs text-slate-400 hover:text-white cursor-pointer">View all ›</span>
           </div>
 
-          <!-- Swiper Row -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <!-- Card 1 -->
             <div onclick="claimTask(19136)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-blue-400 text-sm">SB</div>
               <div>
@@ -402,7 +389,6 @@
               <span class="text-amber-400 font-bold text-xs">● 19,136</span>
             </div>
 
-            <!-- Card 2 -->
             <div onclick="claimTask(25600)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xs">Slotastic</div>
               <div>
@@ -412,7 +398,6 @@
               <span class="text-amber-400 font-bold text-xs">● 25,600</span>
             </div>
 
-            <!-- Card 3 -->
             <div onclick="claimTask(25600)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-xs">Vegas</div>
               <div>
@@ -422,7 +407,6 @@
               <span class="text-amber-400 font-bold text-xs">● 25,600</span>
             </div>
 
-            <!-- Card 4 -->
             <div onclick="claimTask(64)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-xs">Edge</div>
               <div>
@@ -432,7 +416,6 @@
               <span class="text-amber-400 font-bold text-xs">● 64</span>
             </div>
 
-            <!-- Card 5 -->
             <div onclick="claimTask(4480)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">Sirius</div>
               <div>
@@ -442,7 +425,6 @@
               <span class="text-amber-400 font-bold text-xs">● 4,480</span>
             </div>
 
-            <!-- Card 6 -->
             <div onclick="claimTask(1024)" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
               <div class="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-xs">Watch</div>
               <div>
@@ -456,7 +438,7 @@
       `;
     }
 
-    // PROFILE VIEW (Exact Match to Screenshot 2 dollah.co/profile)
+    // PROFILE VIEW (Exact Match to Screenshot 2)
     function renderProfile() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
@@ -465,7 +447,6 @@
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Stats
           </h2>
 
-          <!-- Exact 6 Stats Grid from Screenshot 2 -->
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center">
               <span class="text-xs text-slate-400 block mb-1">Balance</span>
@@ -493,7 +474,6 @@
             </div>
           </div>
 
-          <!-- Exact Tabs from Screenshot 2 -->
           <div class="flex items-center gap-4 text-xs font-semibold border-b border-[#1d2a37] pb-2">
             <button onclick="changeProfileFilter('earnings')" class="${profileFilter === 'earnings' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Earnings</button>
             <button onclick="changeProfileFilter('withdrawals')" class="${profileFilter === 'withdrawals' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Withdrawals</button>
@@ -502,7 +482,6 @@
             <button onclick="changeProfileFilter('tickets')" class="${profileFilter === 'tickets' ? 'text-[#00d672] font-bold' : 'text-slate-400'}">Tickets</button>
           </div>
 
-          <!-- Table Header -->
           <div class="grid grid-cols-12 text-xs font-semibold text-slate-500 px-3">
             <span class="col-span-4">Name</span>
             <span class="col-span-2">Provider</span>
@@ -511,7 +490,6 @@
             <span class="col-span-2 text-right">Support</span>
           </div>
 
-          <!-- Exact Rows from Screenshot 2 -->
           <div class="flex flex-col gap-2">
             <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3 rounded-xl text-xs">
               <span class="col-span-4 font-bold text-white flex items-center gap-2"><span class="w-5 h-5 rounded-lg bg-[#202c38] flex items-center justify-center text-[10px]">🎲</span> Animals & Coins</span>
@@ -632,6 +610,39 @@
       input.value = '';
       stream.scrollTop = stream.scrollHeight;
     }
+
+    // --- DYNAMIC LIVE BOTTOM FEED ENGINE (Auto Rotation Every 3.5 Seconds) ---
+    const liveFeeds = [
+      { icon: "Ł", time: "seconds ago", title: "LTC", subtitle: "Pending approval", badge: "PENDING", badgeClass: "bg-purple-500/20 text-purple-300", coins: "111,087" },
+      { icon: "✓", time: "an hour ago", title: "Finance Quiz", subtitle: "Complete", badge: "COMPLETE", badgeClass: "bg-emerald-500/20 text-emerald-400", coins: "1,050" },
+      { icon: "🎮", time: "17h ago", title: "Animals & Coins", subtitle: "Torox Task", badge: "ON-HOLD", badgeClass: "bg-amber-500/20 text-amber-400", coins: "75,000" },
+      { icon: "Ł", time: "just now", title: "LTC Sent", subtitle: "Instant Payout", badge: "SENT", badgeClass: "bg-emerald-500/20 text-emerald-400", coins: "2,573" },
+      { icon: "🎯", time: "12d ago", title: "Domino Dreams", subtitle: "Completed", badge: "COMPLETE", badgeClass: "bg-blue-500/20 text-blue-400", coins: "20,000" }
+    ];
+    let feedIndex = 0;
+
+    setInterval(() => {
+      feedIndex = (feedIndex + 1) % liveFeeds.length;
+      const item = liveFeeds[feedIndex];
+      const card = document.getElementById('live-bottom-card');
+      
+      if (card) {
+        card.classList.remove('feed-animated');
+        void card.offsetWidth; // retrigger animation
+        card.classList.add('feed-animated');
+
+        document.getElementById('feed-icon').innerText = item.icon;
+        document.getElementById('feed-time').innerText = item.time;
+        document.getElementById('feed-title').innerText = item.title;
+        document.getElementById('feed-subtitle').innerText = item.subtitle;
+        
+        const badgeEl = document.getElementById('feed-badge');
+        badgeEl.innerText = item.badge;
+        badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${item.badgeClass}`;
+        
+        document.getElementById('feed-coins').innerText = `● ${item.coins}`;
+      }
+    }, 3500);
 
     renderHome();
     if (window.lucide) lucide.createIcons();
