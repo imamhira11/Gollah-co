@@ -49,6 +49,7 @@
   <!-- TOP HEADER -->
   <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
     <div class="flex items-center gap-4 flex-1 max-w-xl">
+      <!-- Brand Logo -->
       <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
           G
@@ -56,6 +57,7 @@
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
 
+      <!-- Live Search Input -->
       <div class="relative w-full max-w-xs hidden sm:block">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
@@ -69,6 +71,7 @@
         <span>Network Verified</span>
       </div>
 
+      <!-- Coin Pill Counter -->
       <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
         <span id="header-coins">0</span>
@@ -79,7 +82,7 @@
         <i data-lucide="wallet" class="w-4 h-4"></i>
       </button>
 
-      <!-- Profile Avatar Button with Red Notification Badge -->
+      <!-- Profile Avatar Button with Notification Badge -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
@@ -87,10 +90,13 @@
           <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
         </button>
 
-        <!-- Profile Dropdown -->
+        <!-- Dynamic Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
-            <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+            <div class="relative group cursor-pointer" onclick="openAvatarModal()">
+              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+              <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
+            </div>
             <div class="flex items-center gap-1.5 mt-0.5">
               <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
               <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
@@ -102,7 +108,7 @@
             </div>
           </div>
 
-          <!-- XP Bar -->
+          <!-- XP & Level Progress Bar -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
               <span id="xp-text">0 / 10 XP</span>
@@ -117,10 +123,14 @@
             </div>
           </div>
 
+          <!-- Menu Options -->
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
             <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
               <span id="dropdown-notif-pill" class="hidden bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+            </button>
+            <button onclick="openAvatarModal()" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
+              <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Memoji Face
             </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
@@ -137,6 +147,7 @@
 
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
+
     <!-- LEFT SIDEBAR -->
     <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
@@ -161,30 +172,37 @@
 
         <div class="flex flex-col gap-1 text-xs">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
+          
           <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
           </button>
+
           <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
           </button>
+
           <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
           </button>
+
           <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
           </button>
+
           <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
           </button>
+
           <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
           </button>
+
           <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
             <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
             <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
@@ -193,8 +211,10 @@
       </div>
     </aside>
 
-    <!-- CENTER FLUID STREAM -->
+    <!-- CENTER FLUID STREAM + FOOTER WRAPPER -->
     <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
+      
+      <!-- Top Announcement Banner -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
@@ -203,8 +223,12 @@
         <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
       </div>
 
-      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
+      <!-- Main Dynamic Content -->
+      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1">
+        <!-- Injected via Router -->
+      </main>
 
+      <!-- PUBLISHER-GRADE ENTERPRISE FOOTER -->
       <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
         <div class="max-w-6xl mx-auto flex flex-col gap-6">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -236,10 +260,13 @@
               <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
               <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
             </div>
-            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400">
+              © 2026 Gollah Inc. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
+
     </div>
 
     <!-- RIGHT CHAT SIDEBAR -->
@@ -275,9 +302,10 @@
         <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
       </div>
     </aside>
+
   </div>
 
-  <!-- FLOATING TOAST -->
+  <!-- EXACT DOLLAH.CO BOTTOM FLOATING POPUP -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -313,7 +341,7 @@
     </div>
   </div>
 
-  <!-- IN-APP CASHOUT MODAL -->
+  <!-- REAL IN-APP CASHOUT MODAL -->
   <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -465,6 +493,25 @@
     </div>
   </div>
 
+  <!-- MEMOJI AVATAR SELECTOR MODAL -->
+  <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div>
+          <h3 class="font-black text-base text-white flex items-center gap-1.5">😊 Choose Your Face</h3>
+          <p class="text-xs text-slate-400">Select your custom 3D Memoji avatar</p>
+        </div>
+        <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]"></div>
+
+      <div class="pt-2 border-t border-[#202c38] flex justify-end">
+        <button onclick="closeAvatarModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- LEGAL & SUPPORT MODAL -->
   <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
@@ -492,6 +539,50 @@
       }
     } catch (e) {
       console.warn("Supabase local active");
+    }
+
+    // Dynamic Avatars Engine (17 Assets)
+    const TOTAL_AVATARS = 17;
+    const avatarList = [];
+    for (let i = 1; i <= TOTAL_AVATARS; i++) {
+      avatarList.push(`avatars/${i}.png`);
+    }
+
+    let selectedAvatar = avatarList[0];
+
+    function renderAvatarGrid() {
+      const container = document.getElementById('avatar-grid-list');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      avatarList.forEach((url) => {
+        const div = document.createElement('div');
+        div.className = "w-14 h-14 rounded-full overflow-hidden border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-105 p-0.5 bg-[#141d26] flex items-center justify-center";
+        div.onclick = () => chooseAvatar(url);
+        div.innerHTML = `<img src="${url}" class="w-full h-full rounded-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />`;
+        container.appendChild(div);
+      });
+    }
+
+    function openAvatarModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      renderAvatarGrid();
+      document.getElementById('avatar-modal').classList.remove('hidden');
+    }
+
+    function closeAvatarModal() {
+      document.getElementById('avatar-modal').classList.add('hidden');
+    }
+
+    async function chooseAvatar(url) {
+      selectedAvatar = url;
+      document.getElementById('header-avatar-img').src = url;
+      document.getElementById('dropdown-avatar-img').src = url;
+
+      if (db && currentUser) {
+        await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+      }
+      closeAvatarModal();
     }
 
     // 2. Comprehensive Offer Database
@@ -528,7 +619,7 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // PERSISTENT NOTIFICATIONS & WITHDRAWALS ENGINE
+    // PERSISTENT STORAGE ENGINE
     function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
@@ -657,7 +748,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO: "Taak" Sound exclusively for Cashout confirmation
+    // AUDIO
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playCashoutTaakSound() {
@@ -684,7 +775,6 @@
       } catch (e) {}
     }
 
-    // Floating Action Toast Popup
     let floatingToastTimer = null;
     function triggerDollahFloatingToast(data) {
       const card = document.getElementById('dollah-floating-card');
@@ -714,7 +804,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Offer Details Modal
     function openOfferModal(offerId) {
       if (!currentUser) {
         alert("Please login first to view and start offers!");
@@ -781,7 +870,7 @@
       });
     };
 
-    // 3. CASHOUT & WITHDRAWALS ENGINE
+    // CASHOUT ENGINE
     let selectedCashoutCrypto = 'Litecoin (LTC)';
     let selectedCashoutIcon = 'Ł';
     let cashoutMinCoins = 300;
@@ -843,7 +932,6 @@
       }
     }
 
-    // PURE WITHDRAWAL: Saves to Supabase withdrawals table & Local Backup
     async function submitCustomWithdrawal() {
       if (!currentUser) return;
       const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
@@ -887,7 +975,6 @@
         userWithdrawals.unshift(newRecord);
         saveWithdrawalsToStorage();
 
-        // Sync directly into Supabase database
         if (db) {
           await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
           const { data, error } = await db.from('withdrawals').insert({
@@ -1359,7 +1446,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // PROFILE VIEW: Shows real pending/completed rows with sub-filters
     function renderProfile() {
       const container = document.getElementById('app-content');
 
@@ -1437,7 +1523,6 @@
       renderProfile();
     }
 
-    // SHOP VIEW: LTC on Left, Binance Pay on Right (Min 300 Coins)
     function renderShop() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
@@ -1452,7 +1537,6 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 1. Litecoin (LTC) on the Left -->
           <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
@@ -1468,7 +1552,6 @@
             </button>
           </div>
 
-          <!-- 2. Binance Pay on the Right -->
           <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
@@ -1503,25 +1586,6 @@
 
     function toggleProfileDropdown() {
       document.getElementById('profile-dropdown').classList.toggle('hidden');
-    }
-
-    function sendLiveChat() {
-      const input = document.getElementById('chat-input');
-      const val = input.value.trim();
-      if (!val) return;
-      const stream = document.getElementById('chat-stream');
-      const sender = currentUser ? (document.getElementById('profile-username-display').innerText) : "Guest";
-      const msg = document.createElement('div');
-      msg.innerHTML = `
-        <div class="flex items-center justify-between text-[11px] mb-0.5">
-          <span class="font-bold text-[#00d672]">${sender}</span>
-          <span class="text-[10px] text-slate-600">just now</span>
-        </div>
-        <p class="text-white text-xs">${val}</p>
-      `;
-      stream.appendChild(msg);
-      input.value = '';
-      stream.scrollTop = stream.scrollHeight;
     }
 
     renderHome();
