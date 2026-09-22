@@ -523,7 +523,7 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // PERSISTENT STORAGE ENGINE
+    // PERSISTENT STORAGE & PERMANENT SUPABASE FETCH ENGINE
     function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
@@ -536,14 +536,8 @@
           ];
           saveNotificationsToStorage();
         }
-
-        const withStored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
-        if (withStored) {
-          userWithdrawals = JSON.parse(withStored);
-        }
       } catch (e) {
         userNotifications = [];
-        userWithdrawals = [];
       }
       updateNotificationsBadge();
     }
@@ -879,24 +873,16 @@
 
         const usdValueNum = parseFloat((amount / 1000).toFixed(2));
 
-        const newRecord = {
+        const newRecordLoc = {
           id: 'w_' + Date.now(),
           user_id: currentUser.id,
           method: selectedCashoutCrypto,
-          destination_address: address,
-          coins_amount: amount,
-          usd_value: usdValueNum,
-          status: 'PENDING',
-          created_at: new Date().toISOString()
+          address: address,
+          amount: amount,
+          status: 'PENDING'
         };
 
-        userWithdrawals.unshift({
-          id: newRecord.id,
-          method: newRecord.method,
-          amount: newRecord.coins_amount,
-          address: newRecord.destination_address,
-          status: newRecord.status
-        });
+        userWithdrawals.unshift(newRecordLoc);
         saveWithdrawalsToStorage();
 
         addNotification({
@@ -907,25 +893,14 @@
 
         if (db) {
           await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-          const { data, error } = await db.from('withdrawals').insert({
+          await db.from('withdrawals').insert({
             user_id: currentUser.id,
             method: selectedCashoutCrypto,
             destination_address: address,
             coins_amount: amount,
             usd_value: usdValueNum,
             status: 'PENDING'
-          }).select().single();
-
-          if (!error && data) {
-            userWithdrawals[0] = {
-              id: data.id,
-              method: data.method,
-              amount: data.coins_amount,
-              address: data.destination_address,
-              status: data.status
-            };
-            saveWithdrawalsToStorage();
-          }
+          });
         }
 
         closeCashoutModal();
@@ -937,6 +912,7 @@
           coins: amount.toLocaleString()
         });
 
+        await fetchUserWithdrawals();
         if (currentTab === 'profile') renderProfile();
       } catch (e) {
         alert("Withdrawal Error: " + e.message);
@@ -946,17 +922,24 @@
       }
     }
 
+    // FETCH PERMANENT WITHDRAWALS FROM SUPABASE DATABASE
     async function fetchUserWithdrawals() {
       if (!currentUser) return;
-      try {
-        const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
-        if (stored) userWithdrawals = JSON.parse(stored);
-      } catch (e) {}
+      if (!db) {
+        try {
+          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+          if (stored) userWithdrawals = JSON.parse(stored);
+        } catch (e) {}
+        return;
+      }
 
-      if (!db) return;
       try {
-        const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
+        const { data, error } = await db.from('withdrawals')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
           const fetchedList = data.map(d => ({
             id: d.id,
             method: d.method,
@@ -965,11 +948,10 @@
             status: (d.status || 'PENDING').toUpperCase()
           }));
 
-          // Check if any previously pending withdrawal just became COMPLETED
+          // Compare with local cache to detect newly completed status for sound & toast
           fetchedList.forEach(fw => {
             const oldW = userWithdrawals.find(ow => ow.id === fw.id);
             if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
-              // Play Sweet Money Sound & Trigger Popup Toast!
               playCashoutTaakSound();
               triggerDollahFloatingToast({
                 time: 'just now',
@@ -989,10 +971,15 @@
           saveWithdrawalsToStorage();
           if (currentTab === 'profile') renderProfile();
         }
-      } catch (e) {}
+      } catch (e) {
+        try {
+          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+          if (stored) userWithdrawals = JSON.parse(stored);
+        } catch (err) {}
+      }
     }
 
-    // AUTO-POLLING / BACKGROUND SYNC: Checks Supabase every 3 seconds for admin approval
+    // AUTO-POLLING SYNC ENGINE: Checks Supabase every 3 seconds for permanent sync & instant completed alerts
     let syncInterval = null;
     function startAutoSyncEngine() {
       if (syncInterval) clearInterval(syncInterval);
@@ -1472,7 +1459,7 @@
               <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
               <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
               <span class="col-span-2 text-right">
-                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-emerald-500/30 animate-pulse'}">
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
                   ${w.status}
                 </span>
               </span>
@@ -1545,7 +1532,7 @@
             </button>
           </div>
 
-          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+          <link onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
                 🟡
