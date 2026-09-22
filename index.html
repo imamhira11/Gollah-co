@@ -1,1387 +1,1600 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gollah | #1 Web3 Rewards Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      background-color: #0b1116;
-      color: #94a3b8;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
-      overflow-x: hidden;
-    }
-    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #0b1116; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #1b2632; border-radius: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #243445; }
-    .nav-active {
-      background-color: #00d672 !important;
-      color: #061910 !important;
-      font-weight: 800 !important;
-    }
-    .cat-active {
-      background-color: #1a2734 !important;
-      color: #00d672 !important;
-      font-weight: 700 !important;
-      border-left: 3px solid #00d672;
-    }
-    .cat-active .cat-badge {
-      background-color: #00d672 !important;
-      color: #061910 !important;
-    }
-    @keyframes toastSlideIn {
-      0% { opacity: 0; transform: translateY(25px) scale(0.95); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .toast-animate-in {
-      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gollah | #1 Web3 Rewards Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      background-color: #0b1116;
+      color: #94a3b8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+      overflow-x: hidden;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0b1116; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1b2632; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #243445; }
+    .nav-active {
+      background-color: #00d672 !important;
+      color: #061910 !important;
+      font-weight: 800 !important;
+    }
+    .cat-active {
+      background-color: #1a2734 !important;
+      color: #00d672 !important;
+      font-weight: 700 !important;
+      border-left: 3px solid #00d672;
+    }
+    .cat-active .cat-badge {
+      background-color: #00d672 !important;
+      color: #061910 !important;
+    }
+    @keyframes toastSlideIn {
+      0% { opacity: 0; transform: translateY(25px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .toast-animate-in {
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
 
-  <!-- TOP HEADER -->
-  <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
-    <div class="flex items-center gap-4 flex-1 max-w-xl">
-      <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
-        <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
-          G
-        </div>
-        <span class="text-xl font-black text-white tracking-tight">Gollah</span>
-      </div>
-
-      <div class="relative w-full max-w-xs hidden sm:block">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
-        <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-      </div>
-    </div>
-
-    <div class="flex items-center gap-2.5">
-      <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-        <span>Network Verified</span>
-      </div>
-
-      <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        <span id="header-coins">0</span>
-        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
-      </div>
-
-      <button onclick="navigate('shop')" class="w-8 h-8 rounded-xl bg-[#6366f1] flex items-center justify-center text-white hover:bg-[#5558e6] transition shadow-md shadow-indigo-950/40" title="Cashout Wallet">
-        <i data-lucide="wallet" class="w-4 h-4"></i>
-      </button>
-
-      <div class="relative">
-        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
-          <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
-          <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
-        </button>
-
-        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
-          <div class="flex flex-col items-center text-center relative">
-            <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
-              <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
-            </div>
-            <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
-            <span id="profile-email-display" class="text-[11px] text-emerald-400 font-mono mt-0.5 truncate max-w-[220px]">guest@gollah.co</span>
-            <div class="flex items-center gap-1 bg-[#0b1116] px-2 py-0.5 rounded-lg border border-[#1e2a36] mt-1">
-              <span id="profile-user-id-snippet" class="text-[10px] font-mono text-slate-400">UID: guest</span>
-              <i data-lucide="copy" class="w-3 h-3 text-slate-500 cursor-pointer hover:text-white" onclick="copyUserId()"></i>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
-              <span id="xp-text">0 / 10 XP</span>
-              <span id="xp-next-level" class="text-[#00d672]">Lvl 2</span>
-            </div>
-            <div class="w-full bg-[#202c38] h-2 rounded-full overflow-hidden">
-              <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500"></div>
-            </div>
-            <div class="flex justify-between text-[9px] text-slate-500 mt-1">
-              <span>1,000 Coins = 1 XP</span>
-              <span id="xp-needed">10 XP to Lvl 2</span>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
-            <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
-              <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
-              <span id="dropdown-notif-pill" class="hidden bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">0</span>
-            </button>
-            <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
-              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
-            </button>
-            <button onclick="openLegalModal('contact')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
-              <i data-lucide="life-buoy" class="w-4 h-4 text-blue-400"></i> Help & Support
-            </button>
-            <div id="auth-button-slot"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
-  <div class="flex-1 flex w-full overflow-hidden">
-    <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
-      <div class="flex flex-col gap-5">
-        <div class="flex flex-col gap-1">
-          <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
-            <i data-lucide="home" class="w-4 h-4"></i> Home
-          </button>
-          <button onclick="navigate('premium')" id="nav-premium" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
-            <i data-lucide="gem" class="w-4 h-4"></i> Premium
-          </button>
-          <button onclick="navigate('shop')" id="nav-shop" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Shop
-          </button>
-          <button onclick="navigate('profile')" id="nav-profile" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
-            <i data-lucide="user" class="w-4 h-4"></i> Profile
-          </button>
-        </div>
-
-        <div class="flex flex-col gap-1 text-xs">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
-          <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
-          </button>
-          <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
-          </button>
-          <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
-          </button>
-          <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
-          </button>
-          <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
-          </button>
-          <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
-          </button>
-          <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
-            <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
-            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- CENTER FLUID STREAM -->
-    <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
-      <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
-        <div class="flex items-center gap-2 text-slate-300">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-          <span><strong>Quality Assurance:</strong> Verified reward delivery system with instant postbacks and 300 Coin min cashout!</span>
-        </div>
-        <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
-      </div>
-
-      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
-
-      <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
-        <div class="max-w-6xl mx-auto flex flex-col gap-6">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm">G</div>
-              <div>
-                <span class="text-base font-black text-white tracking-tight block">Gollah Rewards</span>
-                <span class="text-[11px] text-slate-400">Certified Web3 Gamification & CPA Loyalty Aggregator</span>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 text-[10px] font-mono">
-              <span class="bg-[#121c25] text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-3 h-3"></i> FraudShield Active
-              </span>
-              <span class="bg-[#121c25] text-blue-400 px-2.5 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1.5">
-                <i data-lucide="lock" class="w-3 h-3"></i> SSL 256-Bit Encrypted
-              </span>
-              <span class="bg-[#121c25] text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
-                <i data-lucide="zap" class="w-3 h-3"></i> Instant Postbacks
-              </span>
-            </div>
-          </div>
-
-          <div class="border-t border-[#16202a] pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-            <div class="flex flex-wrap items-center justify-center gap-5">
-              <button onclick="openLegalModal('terms')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Terms of Service</button>
-              <button onclick="openLegalModal('privacy')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Privacy Policy</button>
-              <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
-              <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
-            </div>
-            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-
-    <!-- RIGHT CHAT SIDEBAR -->
-    <aside class="w-72 shrink-0 bg-[#0d141b] border-l border-[#18232e] flex flex-col justify-between hidden xl:flex">
-      <div class="p-3 border-b border-[#18232e] flex items-center justify-between text-xs font-bold text-slate-400">
-        <div class="flex items-center gap-3">
-          <span class="text-white hover:underline cursor-pointer">General</span>
-          <span class="text-slate-500 hover:text-white cursor-pointer" onclick="openLegalModal('contact')">Help</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-[#00d672]"></span>
-          <span class="text-[11px] text-slate-400">Live Lounge</span>
-        </div>
-      </div>
-
-      <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
-        <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> 50% XP Boost Active</span>
-        <i data-lucide="chevron-right" class="w-3 h-3"></i>
-      </div>
-
-      <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-[#00d672]">The KHALID</span>
-            <span class="text-[10px] text-slate-600">05:53 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">hello 😊 LTC received fast</p>
-        </div>
-      </div>
-
-      <div class="p-3 border-t border-[#18232e] flex items-center gap-2">
-        <input id="chat-input" type="text" placeholder="Write a message..." class="flex-1 bg-[#131d27] border border-[#202c38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d672]" onkeydown="if(event.key==='Enter') sendLiveChat()" />
-        <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
-      </div>
-    </aside>
-  </div>
-
-  <!-- FLOATING TOAST (Longer Duration: 20 seconds) -->
-  <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
-    <div class="flex items-center justify-between mb-1.5">
-      <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
-      <div id="floating-status-pill" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-        <i data-lucide="check" class="w-3 h-3"></i>
-      </div>
-    </div>
-    <h4 id="floating-offer-title" class="text-sm font-bold text-white block truncate">Animals And Coins</h4>
-    <p id="floating-offer-status" class="text-xs text-slate-400 mb-2">Complete</p>
-    <div class="flex items-center justify-between pt-1 border-t border-[#1f2c3a]">
-      <span class="text-[11px] text-slate-500 font-bold">Reward</span>
-      <span id="floating-offer-coins" class="text-sm font-black text-amber-400 flex items-center gap-1">● 2,500</span>
-    </div>
-  </div>
-
-  <!-- NOTIFICATIONS MODAL -->
-  <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
-          <h3 class="font-bold text-base text-white">Notifications & Alerts</h3>
-        </div>
-        <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]"></div>
-
-      <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
-        <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
-        <button onclick="closeNotificationsModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-4 py-1.5 rounded-xl transition">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- IN-APP CASHOUT MODAL -->
-  <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div class="flex items-center gap-3">
-          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
-            Ł
-          </div>
-          <div>
-            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw Crypto</h3>
-            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Processing</span>
-          </div>
-        </div>
-        <button onclick="closeCashoutModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="text-[11px] font-bold text-slate-300">Amount to Withdraw (Coins)</label>
-            <span class="text-[10px] text-amber-400 font-bold">Balance: <span id="cashout-current-balance">0</span></span>
-          </div>
-          <div class="relative">
-            <input id="cashout-amount-input" type="number" min="300" placeholder="Min 300" oninput="calculateEstimatedCrypto()" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
-            <button onclick="setCashoutMax()" class="absolute right-2 top-2 bg-[#1f2d3d] hover:bg-[#27384c] text-[#00d672] font-bold text-[10px] px-2 py-1 rounded-lg">MAX</button>
-          </div>
-          <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400">
-            <span>Estimated payout:</span>
-            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.00 LTC</span>
-          </div>
-        </div>
-
-        <div>
-          <label id="cashout-address-label" class="text-[11px] font-bold text-slate-300 block mb-1">Destination Address / UID</label>
-          <input id="cashout-address-input" type="text" placeholder="Enter address or ID" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
-        </div>
-      </div>
-
-      <div class="pt-2 flex items-center gap-3 border-t border-[#202c38]">
-        <button onclick="closeCashoutModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">
-          Cancel
-        </button>
-        <button id="cashout-submit-btn" onclick="submitCustomWithdrawal()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40">
-          Cashout
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- OFFER DETAILS MODAL -->
-  <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
-      <div class="flex justify-between items-start border-b border-[#202c38] pb-4">
-        <div class="flex items-center gap-3">
-          <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#1e2c3a] flex items-center justify-center font-black text-emerald-400 text-sm">
-            OFFER
-          </div>
-          <div>
-            <h3 id="modal-offer-title" class="font-bold text-base text-white">Offer Name</h3>
-            <span id="modal-offer-provider" class="text-xs text-slate-400">Provider</span>
-          </div>
-        </div>
-        <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="bg-[#0e1620] border border-[#1e2c3a] rounded-2xl p-4 flex items-center justify-between">
-        <div>
-          <span class="text-[11px] text-slate-400 block mb-0.5">Total Reward Payout</span>
-          <div class="flex items-center gap-2">
-            <span id="modal-offer-coins" class="text-xl font-black text-amber-400">● 0</span>
-            <span id="modal-offer-xp" class="text-xs bg-[#00d672]/20 text-[#00d672] font-bold px-2 py-0.5 rounded">+0 XP</span>
-          </div>
-        </div>
-        <span class="text-[11px] bg-blue-500/20 text-blue-300 font-bold px-2.5 py-1 rounded-lg">VERIFIED OFFER</span>
-      </div>
-
-      <div class="flex flex-col gap-2 text-xs">
-        <span class="font-bold text-slate-300">Task Instructions:</span>
-        <div class="bg-[#111922] border border-[#1d2a37] rounded-xl p-3 flex flex-col gap-2 text-slate-300">
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
-            <span>Click <strong>"Start Offer Now"</strong> below to open the official advertiser tracking page.</span>
-          </div>
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
-            <span id="modal-offer-instruction">Complete the required actions (install app, reach level, or answer survey questions).</span>
-          </div>
-          <div class="flex items-start gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
-            <span>Coins credit automatically once the advertiser confirms completion via postback.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-2 flex items-center gap-3">
-        <button onclick="closeOfferModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-3 rounded-xl text-xs transition">
-          Cancel
-        </button>
-        <button id="modal-offer-launch-btn" onclick="launchOfferTracking()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
-          <span>Start Offer Now</span>
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- AUTH MODAL -->
-  <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-3xl p-7 flex flex-col gap-4 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div>
-          <h3 id="auth-modal-title" class="font-black text-base text-white">Welcome Back</h3>
-          <p id="auth-modal-subtitle" class="text-[11px] text-slate-400">Secure access to your rewards balance</p>
-        </div>
-        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div id="auth-error-banner" class="hidden bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-[11px] text-rose-300 flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
-        <span id="auth-error-text">An error occurred</span>
-      </div>
-      
-      <div class="flex flex-col gap-3.5">
-        <div id="auth-username-container" class="hidden">
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Username</label>
-          <input id="auth-username-input" type="text" placeholder="e.g. Kaallu99" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Email Address</label>
-          <input id="auth-email-input" type="email" placeholder="name@example.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Password</label>
-          <div class="relative flex items-center">
-            <input id="auth-pass-input" type="password" placeholder="At least 6 characters" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl pl-3.5 pr-10 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none">
-              <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <button id="auth-submit-btn" onclick="submitAuthForm()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl transition text-xs shadow-lg shadow-emerald-950/40 mt-1">
-        Login
-      </button>
-
-      <p class="text-xs text-center text-slate-400 pt-1">
-        <span id="auth-toggle-msg">Don't have an account?</span> 
-        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[#00d672] font-semibold underline ml-1">Create Account</button>
-      </p>
-    </div>
-  </div>
-
-  <!-- LEGAL & SUPPORT MODAL -->
-  <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">Information</h3>
-        <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
-      <div class="pt-3 border-t border-[#202c38] flex justify-end">
-        <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // 1. Supabase Initialization
-    const SUPABASE_URL = "https://rcsrazcvehnjgflkcslo.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_KyWxNv1LHTxkTeuXVgkNuA_1jOf7oTp";
-    let db = null;
-    try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: { persistSession: true, autoRefreshToken: true }
-        });
-      }
-    } catch (e) {
-      console.warn("Supabase local active");
-    }
-
-    // Live Ticker State for Home Screen
-    let liveTickerItems = [
-      { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
-      { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
-    ];
-
-    function prependLiveTicker(type, amount, icon = 'Ł') {
-      liveTickerItems.unshift({
-        type: type,
-        amount: amount.toLocaleString(),
-        time: 'just now',
-        icon: icon
-      });
-      if (liveTickerItems.length > 5) liveTickerItems.pop();
-      if (currentTab === 'home') renderHome();
-    }
-
-    // 2. Comprehensive Offer Database
-    const ALL_OFFERS = [
-      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
-      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
-      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
-      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
-      { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
-      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
-      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
-      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
-      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
-      { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
-      { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
-      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
-      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
-      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
-      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' },
-      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass quiz with 100% score.', link: 'https://torox.io' },
-      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone.', link: 'https://coinbase.com' },
-      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete verification.', link: 'https://binance.com' }
-    ];
-
-    let activeOfferData = null;
-    let currentCategory = 'featured';
-    let searchQuery = '';
-    let userNotifications = [];
-    let userWithdrawals = [];
-    let currentUser = null;
-    let userCoins = 0;
-    let isSignupMode = false;
-    let isPasswordVisible = false;
-    let currentTab = 'home';
-    let profileFilter = 'all';
-
-    // PERSISTENT STORAGE ENGINE
-    function loadUserDataFromStorage() {
-      if (!currentUser) return;
-      try {
-        const notifStored = localStorage.getItem(`gollah_notifications_${currentUser.id}`);
-        if (notifStored) {
-          userNotifications = JSON.parse(notifStored);
-        } else {
-          userNotifications = [
-            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
-          ];
-          saveNotificationsToStorage();
-        }
-      } catch (e) {
-        userNotifications = [];
-      }
-      updateNotificationsBadge();
-    }
-
-    function saveNotificationsToStorage() {
-      if (!currentUser) return;
-      try {
-        localStorage.setItem(`gollah_notifications_${currentUser.id}`, JSON.stringify(userNotifications));
-      } catch (e) {}
-    }
-
-    function saveWithdrawalsToStorage() {
-      if (!currentUser) return;
-      try {
-        localStorage.setItem(`gollah_withdrawals_${currentUser.id}`, JSON.stringify(userWithdrawals));
-      } catch (e) {}
-    }
-
-    function updateNotificationsBadge() {
-      const unreadCount = userNotifications.filter(n => !n.isRead).length;
-      const headerBadge = document.getElementById('header-notif-badge');
-      const dropdownPill = document.getElementById('dropdown-notif-pill');
-
-      if (unreadCount > 0) {
-        if (headerBadge) { headerBadge.innerText = unreadCount; headerBadge.classList.remove('hidden'); }
-        if (dropdownPill) { dropdownPill.innerText = unreadCount; dropdownPill.classList.remove('hidden'); }
-      } else {
-        if (headerBadge) headerBadge.classList.add('hidden');
-        if (dropdownPill) dropdownPill.classList.add('hidden');
-      }
-    }
-
-    function addNotification(notif) {
-      userNotifications.unshift({
-        id: 'n_' + Date.now(),
-        ...notif,
-        time: 'just now',
-        isRead: false
-      });
-      saveNotificationsToStorage();
-      updateNotificationsBadge();
-    }
-
-    function openNotificationsModal() {
-      document.getElementById('profile-dropdown').classList.add('hidden');
-      const list = document.getElementById('notifications-list');
-      list.innerHTML = '';
-
-      if (userNotifications.length === 0) {
-        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
-      } else {
-        userNotifications.forEach(n => {
-          const item = document.createElement('div');
-          
-          let currentStatus = (n.status || '').toLowerCase();
-          if (n.title && n.title.includes('Cashout')) {
-            const matchedW = userWithdrawals.find(w => n.message && n.message.includes(w.amount));
-            if (matchedW && (matchedW.status || '').toUpperCase() === 'COMPLETED') {
-              currentStatus = 'completed';
-            }
-          }
-
-          const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
-          let displayMessage = n.message;
-          if (isComplete && displayMessage.includes('Status: PENDING')) {
-            displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
-          }
-
-          item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
-          item.innerHTML = `
-            <div class="flex-1 flex flex-col gap-0.5">
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold text-white text-xs">${n.title}</span>
-                <span class="text-[10px] text-slate-500">• ${n.time}</span>
-              </div>
-              <p class="text-xs text-slate-300 leading-snug">${displayMessage}</p>
-            </div>
-            
-            <div class="shrink-0 pt-0.5">
-              ${isComplete ? `
-                <div class="w-5 h-5 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/30" title="Complete">
-                  ✓
-                </div>
-              ` : `
-                <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs" title="Pending">
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                </div>
-              `}
-            </div>
-          `;
-          list.appendChild(item);
-        });
-      }
-
-      userNotifications.forEach(n => n.isRead = true);
-      saveNotificationsToStorage();
-      updateNotificationsBadge();
-
-      document.getElementById('notifications-modal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeNotificationsModal() {
-      document.getElementById('notifications-modal').classList.add('hidden');
-    }
-
-    function clearAllNotifications() {
-      userNotifications = [];
-      saveNotificationsToStorage();
-      updateNotificationsBadge();
-      openNotificationsModal();
-    }
-
-    function copyUserId() {
-      if (!currentUser) return;
-      navigator.clipboard.writeText(currentUser.id);
-      alert("User ID copied to clipboard!");
-    }
-
-    // SOUND 1: Pending Submit Pop Sound
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    function playPendingTaakSound() {
-      try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
-
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        osc.start(now);
-        osc.stop(now + 0.055);
-      } catch (e) {}
-    }
-
-    // SOUND 2: Completed Custom Audio ("cashout.mp3")
-    function playCompletedCustomAudio() {
-      try {
-        const audio = new Audio('cashout.mp3');
-        audio.play().catch(() => {
-          playPendingTaakSound();
-        });
-      } catch (e) {}
-    }
-
-    let floatingToastTimer = null;
-    function triggerDollahFloatingToast(data) {
-      const card = document.getElementById('dollah-floating-card');
-      if (!card) return;
-
-      document.getElementById('floating-time').innerText = data.time || 'just now';
-      document.getElementById('floating-offer-title').innerText = data.title;
-      document.getElementById('floating-offer-status').innerText = data.status || 'Complete';
-      document.getElementById('floating-offer-coins').innerText = `● ${data.coins}`;
-
-      const pill = document.getElementById('floating-status-pill');
-      if (data.status === 'Pending Cashout') {
-        pill.className = "w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center";
-        pill.innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i>`;
-      } else {
-        pill.className = "w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
-        pill.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i>`;
-      }
-
-      card.classList.remove('hidden');
-      card.classList.remove('toast-animate-in');
-      void card.offsetWidth;
-      card.classList.add('toast-animate-in');
-
-      clearTimeout(floatingToastTimer);
-      // EXTENDED DURATION: 20 seconds (20000ms) as requested
-      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 20000);
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function openOfferModal(offerId) {
-      if (!currentUser) {
-        alert("Please login first to view and start offers!");
-        openAuthModal(false);
-        return;
-      }
-
-      const offer = ALL_OFFERS.find(o => o.id === offerId);
-      if (!offer) return;
-
-      activeOfferData = offer;
-      document.getElementById('modal-offer-title').innerText = offer.name;
-      document.getElementById('modal-offer-provider').innerText = `Provided by ${offer.provider}`;
-      document.getElementById('modal-offer-icon').innerText = offer.icon;
-      document.getElementById('modal-offer-coins').innerText = `● ${offer.coins.toLocaleString()}`;
-      document.getElementById('modal-offer-xp').innerText = `+${Math.floor(offer.coins / 1000)} XP`;
-      document.getElementById('modal-offer-instruction').innerText = offer.instruction || 'Complete required steps on advertiser site.';
-
-      document.getElementById('offer-modal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeOfferModal() {
-      document.getElementById('offer-modal').classList.add('hidden');
-      activeOfferData = null;
-    }
-
-    function launchOfferTracking() {
-      if (!activeOfferData || !currentUser) return;
-      const offer = activeOfferData;
-      closeOfferModal();
-
-      addNotification({
-        title: `${offer.name} Clicked`,
-        message: `Task opened via ${offer.provider}. Tracking active. Reward credits upon verified completion.`,
-        status: 'click'
-      });
-
-      const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
-      window.open(trackingUrl, '_blank');
-    }
-
-    window.creditOfferPostback = async function(offerName, coins) {
-      if (!currentUser) return;
-      userCoins += coins;
-      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-      const newLvl = updateLevelAndXpUI(userCoins);
-
-      if (db) {
-        await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
-      }
-
-      addNotification({
-        title: `${offerName} Complete!`,
-        message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
-        status: 'complete'
-      });
-
-      prependLiveTicker('Offer', coins.toLocaleString(), '⚡');
-      playCompletedCustomAudio();
-      triggerDollahFloatingToast({
-        time: 'just now',
-        title: offerName,
-        status: 'Complete',
-        coins: coins.toLocaleString()
-      });
-    };
-
-    // CASHOUT ENGINE
-    let selectedCashoutCrypto = 'Litecoin (LTC)';
-    let selectedCashoutIcon = 'Ł';
-    let cashoutMinCoins = 300;
-
-    function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
-      if (!currentUser) {
-        alert("Please login to request cashouts!");
-        openAuthModal(false);
-        return;
-      }
-
-      selectedCashoutCrypto = crypto;
-      selectedCashoutIcon = icon;
-      cashoutMinCoins = minLimit;
-
-      document.getElementById('cashout-modal-title').innerText = `Withdraw ${crypto}`;
-      document.getElementById('cashout-icon-box').innerText = icon;
-      document.getElementById('cashout-current-balance').innerText = userCoins.toLocaleString();
-      
-      const amtInput = document.getElementById('cashout-amount-input');
-      amtInput.value = userCoins >= minLimit ? minLimit : userCoins;
-      amtInput.min = minLimit;
-
-      const addrLabel = document.getElementById('cashout-address-label');
-      const addrInput = document.getElementById('cashout-address-input');
-      addrInput.value = '';
-
-      if (crypto.includes('Binance')) {
-        addrLabel.innerText = "Binance Pay ID / Binance Email / BEP20";
-        addrInput.placeholder = "Enter Binance Pay ID, UID, or BEP20 Address";
-      } else {
-        addrLabel.innerText = "Destination Litecoin (LTC) Address";
-        addrInput.placeholder = "Enter your LTC wallet address";
-      }
-
-      calculateEstimatedCrypto();
-      document.getElementById('cashout-modal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeCashoutModal() {
-      document.getElementById('cashout-modal').classList.add('hidden');
-    }
-
-    function setCashoutMax() {
-      document.getElementById('cashout-amount-input').value = userCoins;
-      calculateEstimatedCrypto();
-    }
-
-    function calculateEstimatedCrypto() {
-      const val = parseInt(document.getElementById('cashout-amount-input').value) || 0;
-      const el = document.getElementById('cashout-estimated-crypto');
-      if (selectedCashoutCrypto.includes('Litecoin')) {
-        const estLTC = (val / 1000 * 0.012).toFixed(6);
-        el.innerText = `${estLTC} LTC`;
-      } else {
-        const estUSDT = (val / 1000).toFixed(2);
-        el.innerText = `${estUSDT} USDT (Binance Pay)`;
-      }
-    }
-
-    async function submitCustomWithdrawal() {
-      if (!currentUser) return;
-      const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
-      const address = document.getElementById('cashout-address-input').value.trim();
-
-      if (amount < cashoutMinCoins) {
-        alert(`Minimum withdrawal for ${selectedCashoutCrypto} is ${cashoutMinCoins} Coins.`);
-        return;
-      }
-
-      if (amount > userCoins) {
-        alert(`Insufficient coins. You have ${userCoins.toLocaleString()} coins.`);
-        return;
-      }
-
-      if (!address || address.length < 5) {
-        alert("Please enter a valid wallet address or Binance ID.");
-        return;
-      }
-
-      const submitBtn = document.getElementById('cashout-submit-btn');
-      submitBtn.innerText = "Processing...";
-      submitBtn.disabled = true;
-
-      try {
-        playPendingTaakSound();
-
-        userCoins -= amount;
-        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-
-        const usdValueNum = parseFloat((amount / 1000).toFixed(2));
-
-        const newRecordLoc = {
-          id: 'w_' + Date.now(),
-          user_id: currentUser.id,
-          method: selectedCashoutCrypto,
-          address: address,
-          amount: amount,
-          status: 'PENDING'
-        };
-
-        userWithdrawals.unshift(newRecordLoc);
-        saveWithdrawalsToStorage();
-
-        addNotification({
-          title: `${selectedCashoutCrypto} Cashout`,
-          message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 10)}... Status: PENDING.`,
-          status: 'pending'
-        });
-
-        if (db) {
-          await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-          await db.from('withdrawals').insert({
-            user_id: currentUser.id,
-            method: selectedCashoutCrypto,
-            destination_address: address,
-            coins_amount: amount,
-            usd_value: usdValueNum,
-            status: 'PENDING'
-          });
-        }
-
-        closeCashoutModal();
-
-        triggerDollahFloatingToast({
-          time: 'just now',
-          title: `${selectedCashoutCrypto} Cashout`,
-          status: 'Pending Cashout',
-          coins: amount.toLocaleString()
-        });
-
-        await fetchUserWithdrawals();
-        if (currentTab === 'profile') renderProfile();
-      } catch (e) {
-        alert("Withdrawal Error: " + e.message);
-      } finally {
-        submitBtn.innerText = "Cashout";
-        submitBtn.disabled = false;
-      }
-    }
-
-    // FETCH PERMANENT WITHDRAWALS FROM SUPABASE DATABASE
-    async function fetchUserWithdrawals() {
-      if (!currentUser) return;
-      if (!db) {
-        try {
-          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
-          if (stored) userWithdrawals = JSON.parse(stored);
-        } catch (e) {}
-        return;
-      }
-
-      try {
-        const { data, error } = await db.from('withdrawals')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          const fetchedList = data.map(d => ({
-            id: d.id,
-            method: d.method,
-            amount: d.coins_amount,
-            address: d.destination_address,
-            status: (d.status || 'PENDING').toUpperCase()
-          }));
-
-          // Compare with local cache to detect newly completed status for custom completed audio & live ticker broadcast
-          fetchedList.forEach(fw => {
-            const oldW = userWithdrawals.find(ow => ow.id === fw.id);
-            if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
-              playCompletedCustomAudio();
-              triggerDollahFloatingToast({
-                time: 'just now',
-                title: `${fw.method || 'Crypto'} Payout Sent`,
-                status: 'Complete',
-                coins: (fw.amount || 0).toLocaleString()
-              });
-              addNotification({
-                title: `${fw.method || 'Crypto'} Paid!`,
-                message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
-                status: 'completed'
-              });
-              // Automatically push to live ticker bar on home screen
-              const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
-              const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
-              prependLiveTicker(shortMethod, fw.amount, tickerIcon);
-            }
-          });
-
-          userWithdrawals = fetchedList;
-          saveWithdrawalsToStorage();
-          if (currentTab === 'profile') renderProfile();
-        }
-      } catch (e) {
-        try {
-          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
-          if (stored) userWithdrawals = JSON.parse(stored);
-        } catch (err) {}
-      }
-    }
-
-    // AUTO-POLLING SYNC ENGINE: Checks Supabase every 3 seconds for permanent sync & instant completed alerts
-    let syncInterval = null;
-    function startAutoSyncEngine() {
-      if (syncInterval) clearInterval(syncInterval);
-      syncInterval = setInterval(() => {
-        if (currentUser) {
-          fetchUserWithdrawals();
-        }
-      }, 3000);
-    }
-
-    window.completeUserWithdrawal = async function(withdrawalId) {
-      if (!db || !currentUser) return;
-      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
-      await fetchUserWithdrawals();
-    };
-
-    function filterCategory(cat) {
-      currentCategory = cat;
-      const categories = ['featured', 'all', 'apps', 'games', 'surveys', 'gpt', 'signups'];
-      categories.forEach(c => {
-        const el = document.getElementById('cat-' + c);
-        if (el) {
-          if (c === cat) el.className = "cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
-          else el.className = "w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
-        }
-      });
-      if (currentTab !== 'home') navigate('home');
-      else renderHome();
-    }
-
-    function handleOfferSearch(q) {
-      searchQuery = q.toLowerCase().trim();
-      if (currentTab !== 'home') navigate('home');
-      else renderHome();
-    }
-
-    function updateLevelAndXpUI(earnedCoins) {
-      const totalXp = Math.floor(earnedCoins / 1000);
-      const currentLevel = 1 + Math.floor(totalXp / 10);
-      const xpInCurrentLevel = totalXp % 10;
-      const progressPercent = Math.min((xpInCurrentLevel / 10) * 100, 100);
-
-      const levelBadge = document.getElementById('profile-level-badge');
-      if (levelBadge) levelBadge.innerText = `Lvl ${currentLevel}`;
-
-      const xpText = document.getElementById('xp-text');
-      const nextLevelText = document.getElementById('xp-next-level');
-      const progressBar = document.getElementById('xp-progress-bar');
-      const xpNeeded = document.getElementById('xp-needed');
-
-      if (xpText) xpText.innerText = `${xpInCurrentLevel} / 10 XP`;
-      if (nextLevelText) nextLevelText.innerText = `Lvl ${currentLevel + 1}`;
-      if (progressBar) progressBar.style.width = `${progressPercent}%`;
-      if (xpNeeded) xpNeeded.innerText = `${10 - xpInCurrentLevel} XP to Lvl ${currentLevel + 1}`;
-
-      return currentLevel;
-    }
-
-    async function getUserCountry() {
-      try {
-        const r1 = await fetch('https://ipwho.is/');
-        if (r1.ok) {
-          const d1 = await r1.json();
-          if (d1 && d1.country_code) return d1.country_code;
-        }
-      } catch (e) {}
-
-      try {
-        const r2 = await fetch('https://get.geojs.io/v1/ip/country.json');
-        if (r2.ok) {
-          const d2 = await r2.json();
-          if (d2 && d2.country) return d2.country;
-        }
-      } catch (e) {}
-
-      return 'BD';
-    }
-
-    async function initAuth() {
-      if (!db) return;
-      try {
-        const { data: { session } } = await db.auth.getSession();
-        syncUserSession(session ? session.user : null);
-
-        db.auth.onAuthStateChange((_event, session) => {
-          syncUserSession(session ? session.session?.user || session.user : null);
-        });
-      } catch (err) {}
-    }
-
-    async function syncUserSession(user) {
-      currentUser = user;
-      const authSlot = document.getElementById('auth-button-slot');
-      
-      if (user) {
-        let coins = 0;
-        let displayName = user.email.split('@')[0];
-        let avatarUrl = 'avatars/1.png';
-        let userCountry = user.user_metadata?.country || 'GLOBAL';
-
-        try {
-          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
-          if (profile) {
-            coins = profile.coins || 0;
-            displayName = profile.username || displayName;
-            userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
-            if (profile.avatar_url) avatarUrl = profile.avatar_url;
-          }
-        } catch (e) {}
-
-        userCoins = coins;
-        document.getElementById('header-avatar-img').src = avatarUrl;
-        document.getElementById('dropdown-avatar-img').src = avatarUrl;
-        document.getElementById('profile-username-display').innerText = displayName;
-        document.getElementById('profile-email-display').innerText = user.email;
-        document.getElementById('profile-user-id-snippet').innerText = `UID: ${user.id.substring(0, 8)}...`;
-        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-        document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
-        
-        updateLevelAndXpUI(userCoins);
-        loadUserDataFromStorage();
-        await fetchUserWithdrawals();
-        startAutoSyncEngine();
-
-        authSlot.innerHTML = `
-          <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
-            <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
-          </button>
-        `;
-      } else {
-        userCoins = 0;
-        userNotifications = [];
-        userWithdrawals = [];
-        document.getElementById('profile-username-display').innerText = "Guest User";
-        document.getElementById('profile-email-display').innerText = "guest@gollah.co";
-        document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
-        document.getElementById('header-coins').innerText = "0";
-        document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
-        document.getElementById('header-avatar-img').src = 'avatars/1.png';
-        document.getElementById('dropdown-avatar-img').src = 'avatars/1.png';
-        
-        updateLevelAndXpUI(0);
-        updateNotificationsBadge();
-
-        authSlot.innerHTML = `
-          <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
-            <i data-lucide="log-in" class="w-4 h-4"></i> Login / Sign Up
-          </button>
-        `;
-      }
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function openAuthModal(signup = false) {
-      document.getElementById('profile-dropdown').classList.add('hidden');
-      isSignupMode = signup;
-      updateAuthModalUI();
-      document.getElementById('auth-error-banner').classList.add('hidden');
-      document.getElementById('auth-modal').classList.remove('hidden');
-    }
-
-    function closeAuthModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-      isPasswordVisible = false;
-      document.getElementById('auth-pass-input').type = 'password';
-      const icon = document.getElementById('pass-toggle-icon');
-      if (icon) icon.setAttribute('data-lucide', 'eye');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function toggleAuthMode() {
-      isSignupMode = !isSignupMode;
-      updateAuthModalUI();
-      document.getElementById('auth-error-banner').classList.add('hidden');
-    }
-
-    function updateAuthModalUI() {
-      const usernameBox = document.getElementById('auth-username-container');
-      if (isSignupMode) usernameBox.classList.remove('hidden');
-      else usernameBox.classList.add('hidden');
-
-      document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create New Account" : "Welcome Back";
-      document.getElementById('auth-modal-subtitle').innerText = isSignupMode ? "Sign up in seconds and start earning rewards!" : "Secure access to your rewards balance";
-      document.getElementById('auth-submit-btn').innerText = isSignupMode ? "Sign Up Free" : "Login";
-      document.getElementById('auth-toggle-msg').innerText = isSignupMode ? "Already have an account?" : "Don't have an account?";
-      document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Create Account";
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function togglePasswordVisibility() {
-      const passInput = document.getElementById('auth-pass-input');
-      const icon = document.getElementById('pass-toggle-icon');
-      isPasswordVisible = !isPasswordVisible;
-
-      if (isPasswordVisible) {
-        passInput.type = 'text';
-        icon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        passInput.type = 'password';
-        icon.setAttribute('data-lucide', 'eye');
-      }
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function showAuthError(msg) {
-      const banner = document.getElementById('auth-error-banner');
-      const text = document.getElementById('auth-error-text');
-      text.innerText = msg;
-      banner.classList.remove('hidden');
-    }
-
-    async function submitAuthForm() {
-      const email = document.getElementById('auth-email-input').value.trim();
-      const password = document.getElementById('auth-pass-input').value.trim();
-      const username = document.getElementById('auth-username-input').value.trim();
-
-      document.getElementById('auth-error-banner').classList.add('hidden');
-
-      if (!email || !password) {
-        showAuthError("Please fill in both email and password.");
-        return;
-      }
-      if (password.length < 6) {
-        showAuthError("Password must be at least 6 characters.");
-        return;
-      }
-      if (isSignupMode && (!username || username.length < 3)) {
-        showAuthError("Username must be at least 3 characters.");
-        return;
-      }
-
-      const submitBtn = document.getElementById('auth-submit-btn');
-      const originalText = submitBtn.innerText;
-      submitBtn.innerText = "Processing...";
-      submitBtn.disabled = true;
-
-      try {
-        if (isSignupMode) {
-          const detectedCountry = await getUserCountry();
-          let finalUsername = username;
-          const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
-          if (existingProfile) {
-            finalUsername = `${username}_${Math.floor(Math.random() * 899 + 100)}`;
-          }
-
-          const { data, error } = await db.auth.signUp({ 
-            email, 
-            password,
-            options: {
-              data: {
-                user_name: finalUsername,
-                avatar_url: 'avatars/1.png',
-                country: detectedCountry
-              }
-            }
-          });
-          
-          if (error) {
-            showAuthError(error.message);
-          } else {
-            if (data.user) {
-              await db.from('profiles').upsert({
-                id: data.user.id,
-                username: finalUsername,
-                avatar_url: 'avatars/1.png',
-                country: detectedCountry,
-                coins: 0,
-                level: 1
-              });
-            }
-            closeAuthModal();
-            syncUserSession(data.user);
-          }
-        } else {
-          const { data, error } = await db.auth.signInWithPassword({ email, password });
-          if (error) {
-            showAuthError(error.message);
-          } else {
-            closeAuthModal();
-            syncUserSession(data.user?.user || data.user || data.session?.user);
-          }
-        }
-      } catch (err) {
-        showAuthError(err.message || "Authentication failed.");
-      } finally {
-        submitBtn.innerText = originalText;
-        submitBtn.disabled = false;
-      }
-    }
-
-    async function handleLogout() {
-      if (db) await db.auth.signOut();
-      currentUser = null;
-      syncUserSession(null);
-      document.getElementById('profile-dropdown').classList.add('hidden');
-    }
-
-    function openLegalModal(type) {
-      document.getElementById('profile-dropdown').classList.add('hidden');
-      const titleEl = document.getElementById('legal-modal-title');
-      const bodyEl = document.getElementById('legal-modal-body');
-
-      if (type === 'terms') {
-        titleEl.innerHTML = `<i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i> Terms of Service`;
-        bodyEl.innerHTML = `
-          <div class="space-y-3">
-            <h4 class="font-bold text-white text-sm">1. Terms of Use</h4>
-            <p>By using this platform, you agree to adhere to all terms, advertising rules, and task policies.</p>
-          </div>
-        `;
-      } else if (type === 'privacy') {
-        titleEl.innerHTML = `<i data-lucide="lock" class="w-5 h-5 text-blue-400"></i> Privacy Policy`;
-        bodyEl.innerHTML = `
-          <div class="space-y-3">
-            <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
-            <p>Account credentials are strictly processed for authentication, offer delivery, and verified coin credits.</p>
-          </div>
-        `;
-      } else if (type === 'antifraud') {
-        titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i> Anti-Fraud & Quality Guidelines`;
-        bodyEl.innerHTML = `
-          <div class="space-y-3 bg-[#111a24] border border-[#1e2a36] p-3.5 rounded-xl">
-            <h4 class="font-bold text-white text-sm">Network Rules:</h4>
-            <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
-              <li>Genuine human engagements with surveys and install offers.</li>
-              <li>Strict prohibition of automated scraping bots or fake click scripts.</li>
-            </ul>
-          </div>
-        `;
-      } else if (type === 'contact') {
-        titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Support Desk`;
-        bodyEl.innerHTML = `
-          <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
-            <div class="flex items-center gap-2">
-              <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
-              <span class="font-bold text-white">Support Email:</span>
-              <span class="text-emerald-400 font-mono">support@gollah.co</span>
-            </div>
-          </div>
-        `;
-      }
-
-      document.getElementById('legal-modal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeLegalModal() {
-      document.getElementById('legal-modal').classList.add('hidden');
-    }
-
-    function navigate(view) {
-      currentTab = view;
-      document.getElementById('profile-dropdown').classList.add('hidden');
-      ['home', 'premium', 'shop', 'ranking', 'profile'].forEach(v => {
-        const el = document.getElementById('nav-' + v);
-        if (el) el.className = (v === view) ? "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition" : "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
-      });
-      if (view === 'home') renderHome();
-      else if (view === 'premium') { currentCategory = 'all'; renderHome(); }
-      else if (view === 'profile') renderProfile();
-      else if (view === 'shop') renderShop();
-      else if (view === 'ranking') renderRanking();
-      if (window.lucide) lucide.createIcons();
-    }
-
-    renderHome();
-    initAuth();
-    if (window.lucide) lucide.createIcons();
-  </script>
+  <!-- TOP HEADER -->
+  <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
+    <div class="flex items-center gap-4 flex-1 max-w-xl">
+      <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
+        <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
+          G
+        </div>
+        <span class="text-xl font-black text-white tracking-tight">Gollah</span>
+      </div>
+
+      <div class="relative w-full max-w-xs hidden sm:block">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
+        <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>Network Verified</span>
+      </div>
+
+      <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        <span id="header-coins">0</span>
+        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+      </div>
+
+      <button onclick="navigate('shop')" class="w-8 h-8 rounded-xl bg-[#6366f1] flex items-center justify-center text-white hover:bg-[#5558e6] transition shadow-md shadow-indigo-950/40" title="Cashout Wallet">
+        <i data-lucide="wallet" class="w-4 h-4"></i>
+      </button>
+
+      <div class="relative">
+        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
+          <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
+          <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
+        </button>
+
+        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
+          <div class="flex flex-col items-center text-center relative">
+            <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
+              <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
+            </div>
+            <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
+            <span id="profile-email-display" class="text-[11px] text-emerald-400 font-mono mt-0.5 truncate max-w-[220px]">guest@gollah.co</span>
+            <div class="flex items-center gap-1 bg-[#0b1116] px-2 py-0.5 rounded-lg border border-[#1e2a36] mt-1">
+              <span id="profile-user-id-snippet" class="text-[10px] font-mono text-slate-400">UID: guest</span>
+              <i data-lucide="copy" class="w-3 h-3 text-slate-500 cursor-pointer hover:text-white" onclick="copyUserId()"></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+              <span id="xp-text">0 / 10 XP</span>
+              <span id="xp-next-level" class="text-[#00d672]">Lvl 2</span>
+            </div>
+            <div class="w-full bg-[#202c38] h-2 rounded-full overflow-hidden">
+              <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500"></div>
+            </div>
+            <div class="flex justify-between text-[9px] text-slate-500 mt-1">
+              <span>1,000 Coins = 1 XP</span>
+              <span id="xp-needed">10 XP to Lvl 2</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
+            <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
+              <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
+              <span id="dropdown-notif-pill" class="hidden bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+            </button>
+            <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
+              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
+            </button>
+            <button onclick="openLegalModal('contact')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
+              <i data-lucide="life-buoy" class="w-4 h-4 text-blue-400"></i> Help & Support
+            </button>
+            <div id="auth-button-slot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
+  <div class="flex-1 flex w-full overflow-hidden">
+    <aside class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1">
+          <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
+            <i data-lucide="home" class="w-4 h-4"></i> Home
+          </button>
+          <button onclick="navigate('premium')" id="nav-premium" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
+            <i data-lucide="gem" class="w-4 h-4"></i> Premium
+          </button>
+          <button onclick="navigate('shop')" id="nav-shop" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Shop
+          </button>
+          <button onclick="navigate('profile')" id="nav-profile" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition">
+            <i data-lucide="user" class="w-4 h-4"></i> Profile
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-1 text-xs">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1">Categories</div>
+          <button onclick="filterCategory('featured')" id="cat-featured" class="cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
+          </button>
+          <button onclick="filterCategory('all')" id="cat-all" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
+          </button>
+          <button onclick="filterCategory('apps')" id="cat-apps" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
+          </button>
+          <button onclick="filterCategory('games')" id="cat-games" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
+          </button>
+          <button onclick="filterCategory('surveys')" id="cat-surveys" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
+          </button>
+          <button onclick="filterCategory('gpt')" id="cat-gpt" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
+          </button>
+          <button onclick="filterCategory('signups')" id="cat-signups" class="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
+            <span class="cat-badge text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER FLUID STREAM -->
+    <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
+      <div class="bg-gradient-to-r from-emerald-950/40 via-[#101a24] to-[#121c25] border-b border-[#1b2633] px-4 py-2 flex items-center justify-between text-[11px]">
+        <div class="flex items-center gap-2 text-slate-300">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span><strong>Quality Assurance:</strong> Verified reward delivery system with instant postbacks and 300 Coin min cashout!</span>
+        </div>
+        <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
+      </div>
+
+      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
+
+      <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
+        <div class="max-w-6xl mx-auto flex flex-col gap-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm">G</div>
+              <div>
+                <span class="text-base font-black text-white tracking-tight block">Gollah Rewards</span>
+                <span class="text-[11px] text-slate-400">Certified Web3 Gamification & CPA Loyalty Aggregator</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+              <span class="bg-[#121c25] text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3 h-3"></i> FraudShield Active
+              </span>
+              <span class="bg-[#121c25] text-blue-400 px-2.5 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1.5">
+                <i data-lucide="lock" class="w-3 h-3"></i> SSL 256-Bit Encrypted
+              </span>
+              <span class="bg-[#121c25] text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
+                <i data-lucide="zap" class="w-3 h-3"></i> Instant Postbacks
+              </span>
+            </div>
+          </div>
+
+          <div class="border-t border-[#16202a] pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+            <div class="flex flex-wrap items-center justify-center gap-5">
+              <button onclick="openLegalModal('terms')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Terms of Service</button>
+              <button onclick="openLegalModal('privacy')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Privacy Policy</button>
+              <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
+              <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
+            </div>
+            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- RIGHT CHAT SIDEBAR -->
+    <aside class="w-72 shrink-0 bg-[#0d141b] border-l border-[#18232e] flex flex-col justify-between hidden xl:flex">
+      <div class="p-3 border-b border-[#18232e] flex items-center justify-between text-xs font-bold text-slate-400">
+        <div class="flex items-center gap-3">
+          <span class="text-white hover:underline cursor-pointer">General</span>
+          <span class="text-slate-500 hover:text-white cursor-pointer" onclick="openLegalModal('contact')">Help</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#00d672]"></span>
+          <span class="text-[11px] text-slate-400">Live Lounge</span>
+        </div>
+      </div>
+
+      <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
+        <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> 50% XP Boost Active</span>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+      </div>
+
+      <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-0.5">
+            <span class="font-bold text-[#00d672]">The KHALID</span>
+            <span class="text-[10px] text-slate-600">05:53 am</span>
+          </div>
+          <p class="text-slate-300 text-xs">hello 😊 LTC received fast</p>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-[#18232e] flex items-center gap-2">
+        <input id="chat-input" type="text" placeholder="Write a message..." class="flex-1 bg-[#131d27] border border-[#202c38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d672]" onkeydown="if(event.key==='Enter') sendLiveChat()" />
+        <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- FLOATING TOAST (Longer Duration) -->
+  <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
+    <div class="flex items-center justify-between mb-1.5">
+      <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
+      <div id="floating-status-pill" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+        <i data-lucide="check" class="w-3 h-3"></i>
+      </div>
+    </div>
+    <h4 id="floating-offer-title" class="text-sm font-bold text-white block truncate">Animals And Coins</h4>
+    <p id="floating-offer-status" class="text-xs text-slate-400 mb-2">Complete</p>
+    <div class="flex items-center justify-between pt-1 border-t border-[#1f2c3a]">
+      <span class="text-[11px] text-slate-500 font-bold">Reward</span>
+      <span id="floating-offer-coins" class="text-sm font-black text-amber-400 flex items-center gap-1">● 2,500</span>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS MODAL -->
+  <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
+          <h3 class="font-bold text-base text-white">Notifications & Alerts</h3>
+        </div>
+        <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]"></div>
+
+      <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
+        <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
+        <button onclick="closeNotificationsModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-4 py-1.5 rounded-xl transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-APP CASHOUT MODAL -->
+  <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div class="flex items-center gap-3">
+          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
+            Ł
+          </div>
+          <div>
+            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw Crypto</h3>
+            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Processing</span>
+          </div>
+        </div>
+        <button onclick="closeCashoutModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[11px] font-bold text-slate-300">Amount to Withdraw (Coins)</label>
+            <span class="text-[10px] text-amber-400 font-bold">Balance: <span id="cashout-current-balance">0</span></span>
+          </div>
+          <div class="relative">
+            <input id="cashout-amount-input" type="number" min="300" placeholder="Min 300" oninput="calculateEstimatedCrypto()" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+            <button onclick="setCashoutMax()" class="absolute right-2 top-2 bg-[#1f2d3d] hover:bg-[#27384c] text-[#00d672] font-bold text-[10px] px-2 py-1 rounded-lg">MAX</button>
+          </div>
+          <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400">
+            <span>Estimated payout:</span>
+            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.00 LTC</span>
+          </div>
+        </div>
+
+        <div>
+          <label id="cashout-address-label" class="text-[11px] font-bold text-slate-300 block mb-1">Destination Address / UID</label>
+          <input id="cashout-address-input" type="text" placeholder="Enter address or ID" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3 border-t border-[#202c38]">
+        <button onclick="closeCashoutModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="cashout-submit-btn" onclick="submitCustomWithdrawal()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40">
+          Cashout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFER DETAILS MODAL -->
+  <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-start border-b border-[#202c38] pb-4">
+        <div class="flex items-center gap-3">
+          <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#1e2c3a] flex items-center justify-center font-black text-emerald-400 text-sm">
+            OFFER
+          </div>
+          <div>
+            <h3 id="modal-offer-title" class="font-bold text-base text-white">Offer Name</h3>
+            <span id="modal-offer-provider" class="text-xs text-slate-400">Provider</span>
+          </div>
+        </div>
+        <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="bg-[#0e1620] border border-[#1e2c3a] rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] text-slate-400 block mb-0.5">Total Reward Payout</span>
+          <div class="flex items-center gap-2">
+            <span id="modal-offer-coins" class="text-xl font-black text-amber-400">● 0</span>
+            <span id="modal-offer-xp" class="text-xs bg-[#00d672]/20 text-[#00d672] font-bold px-2 py-0.5 rounded">+0 XP</span>
+          </div>
+        </div>
+        <span class="text-[11px] bg-blue-500/20 text-blue-300 font-bold px-2.5 py-1 rounded-lg">VERIFIED OFFER</span>
+      </div>
+
+      <div class="flex flex-col gap-2 text-xs">
+        <span class="font-bold text-slate-300">Task Instructions:</span>
+        <div class="bg-[#111922] border border-[#1d2a37] rounded-xl p-3 flex flex-col gap-2 text-slate-300">
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+            <span>Click <strong>"Start Offer Now"</strong> below to open the official advertiser tracking page.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+            <span id="modal-offer-instruction">Complete the required actions (install app, reach level, or answer survey questions).</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+            <span>Coins credit automatically once the advertiser confirms completion via postback.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3">
+        <button onclick="closeOfferModal()" class="w-1/3 bg-[#1e2a36] hover:bg-[#253443] text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="modal-offer-launch-btn" onclick="launchOfferTracking()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
+          <span>Start Offer Now</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-3xl p-7 flex flex-col gap-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <div>
+          <h3 id="auth-modal-title" class="font-black text-base text-white">Welcome Back</h3>
+          <p id="auth-modal-subtitle" class="text-[11px] text-slate-400">Secure access to your rewards balance</p>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="auth-error-banner" class="hidden bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-[11px] text-rose-300 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+        <span id="auth-error-text">An error occurred</span>
+      </div>
+      
+      <div class="flex flex-col gap-3.5">
+        <div id="auth-username-container" class="hidden">
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Username</label>
+          <input id="auth-username-input" type="text" placeholder="e.g. Kaallu99" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+        </div>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Email Address</label>
+          <input id="auth-email-input" type="email" placeholder="name@example.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+        </div>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Password</label>
+          <div class="relative flex items-center">
+            <input id="auth-pass-input" type="password" placeholder="At least 6 characters" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl pl-3.5 pr-10 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none">
+              <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <button id="auth-submit-btn" onclick="submitAuthForm()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl transition text-xs shadow-lg shadow-emerald-950/40 mt-1">
+        Login
+      </button>
+
+      <p class="text-xs text-center text-slate-400 pt-1">
+        <span id="auth-toggle-msg">Don't have an account?</span> 
+        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[#00d672] font-semibold underline ml-1">Create Account</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- LEGAL & SUPPORT MODAL -->
+  <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
+        <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">Information</h3>
+        <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-300 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
+      <div class="pt-3 border-t border-[#202c38] flex justify-end">
+        <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Supabase Initialization
+    const SUPABASE_URL = "https://rcsrazcvehnjgflkcslo.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_KyWxNv1LHTxkTeuXVgkNuA_1jOf7oTp";
+    let db = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
+      }
+    } catch (e) {
+      console.warn("Supabase local active");
+    }
+
+    // Live Ticker State for Home Screen
+    let liveTickerItems = [
+      { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
+      { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
+    ];
+
+    function prependLiveTicker(type, amount, icon = 'Ł') {
+      liveTickerItems.unshift({
+        type: type,
+        amount: amount.toLocaleString(),
+        time: 'just now',
+        icon: icon
+      });
+      if (liveTickerItems.length > 5) liveTickerItems.pop();
+      if (currentTab === 'home') renderHome();
+    }
+
+    // 2. Comprehensive Offer Database
+    const ALL_OFFERS = [
+      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
+      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
+      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
+      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
+      { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
+      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
+      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
+      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
+      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
+      { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
+      { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
+      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
+      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
+      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
+      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' },
+      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass quiz with 100% score.', link: 'https://torox.io' },
+      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone.', link: 'https://coinbase.com' },
+      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete verification.', link: 'https://binance.com' }
+    ];
+
+    let activeOfferData = null;
+    let currentCategory = 'featured';
+    let searchQuery = '';
+    let userNotifications = [];
+    let userWithdrawals = [];
+    let currentUser = null;
+    let userCoins = 0;
+    let isSignupMode = false;
+    let isPasswordVisible = false;
+    let currentTab = 'home';
+    let profileFilter = 'all';
+
+    // PERSISTENT STORAGE ENGINE
+    function loadUserDataFromStorage() {
+      if (!currentUser) return;
+      try {
+        const notifStored = localStorage.getItem(`gollah_notifications_${currentUser.id}`);
+        if (notifStored) {
+          userNotifications = JSON.parse(notifStored);
+        } else {
+          userNotifications = [
+            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
+          ];
+          saveNotificationsToStorage();
+        }
+      } catch (e) {
+        userNotifications = [];
+      }
+      updateNotificationsBadge();
+    }
+
+    function saveNotificationsToStorage() {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(`gollah_notifications_${currentUser.id}`, JSON.stringify(userNotifications));
+      } catch (e) {}
+    }
+
+    function saveWithdrawalsToStorage() {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(`gollah_withdrawals_${currentUser.id}`, JSON.stringify(userWithdrawals));
+      } catch (e) {}
+    }
+
+    function updateNotificationsBadge() {
+      const unreadCount = userNotifications.filter(n => !n.isRead).length;
+      const headerBadge = document.getElementById('header-notif-badge');
+      const dropdownPill = document.getElementById('dropdown-notif-pill');
+
+      if (unreadCount > 0) {
+        if (headerBadge) { headerBadge.innerText = unreadCount; headerBadge.classList.remove('hidden'); }
+        if (dropdownPill) { dropdownPill.innerText = unreadCount; dropdownPill.classList.remove('hidden'); }
+      } else {
+        if (headerBadge) headerBadge.classList.add('hidden');
+        if (dropdownPill) dropdownPill.classList.add('hidden');
+      }
+    }
+
+    function addNotification(notif) {
+      userNotifications.unshift({
+        id: 'n_' + Date.now(),
+        ...notif,
+        time: 'just now',
+        isRead: false
+      });
+      saveNotificationsToStorage();
+      updateNotificationsBadge();
+    }
+
+    function openNotificationsModal() {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      const list = document.getElementById('notifications-list');
+      list.innerHTML = '';
+
+      if (userNotifications.length === 0) {
+        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
+      } else {
+        userNotifications.forEach(n => {
+          const item = document.createElement('div');
+          
+          let currentStatus = (n.status || '').toLowerCase();
+          if (n.title && n.title.includes('Cashout')) {
+            const matchedW = userWithdrawals.find(w => n.message && n.message.includes(w.amount));
+            if (matchedW && (matchedW.status || '').toUpperCase() === 'COMPLETED') {
+              currentStatus = 'completed';
+            }
+          }
+
+          const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
+          let displayMessage = n.message;
+          if (isComplete && displayMessage.includes('Status: PENDING')) {
+            displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
+          }
+
+          item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
+          item.innerHTML = `
+            <div class="flex-1 flex flex-col gap-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-white text-xs">${n.title}</span>
+                <span class="text-[10px] text-slate-500">• ${n.time}</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-snug">${displayMessage}</p>
+            </div>
+            
+            <div class="shrink-0 pt-0.5">
+              ${isComplete ? `
+                <div class="w-5 h-5 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/30" title="Complete">
+                  ✓
+                </div>
+              ` : `
+                <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs" title="Pending">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                </div>
+              `}
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      userNotifications.forEach(n => n.isRead = true);
+      saveNotificationsToStorage();
+      updateNotificationsBadge();
+
+      document.getElementById('notifications-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeNotificationsModal() {
+      document.getElementById('notifications-modal').classList.add('hidden');
+    }
+
+    function clearAllNotifications() {
+      userNotifications = [];
+      saveNotificationsToStorage();
+      updateNotificationsBadge();
+      openNotificationsModal();
+    }
+
+    function copyUserId() {
+      if (!currentUser) return;
+      navigator.clipboard.writeText(currentUser.id);
+      alert("User ID copied to clipboard!");
+    }
+
+    // AUDIO 1: Pending Submit Pop Sound
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playPendingTaakSound() {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.055);
+      } catch (e) {}
+    }
+
+    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
+    function playCompletedCustomAudio() {
+      try {
+        const audio = new Audio('cashout.mp3');
+        audio.play().catch(() => {
+          playPendingTaakSound();
+        });
+      } catch (e) {}
+    }
+
+    let floatingToastTimer = null;
+    function triggerDollahFloatingToast(data) {
+      const card = document.getElementById('dollah-floating-card');
+      if (!card) return;
+
+      document.getElementById('floating-time').innerText = data.time || 'just now';
+      document.getElementById('floating-offer-title').innerText = data.title;
+      document.getElementById('floating-offer-status').innerText = data.status || 'Complete';
+      document.getElementById('floating-offer-coins').innerText = `● ${data.coins}`;
+
+      const pill = document.getElementById('floating-status-pill');
+      if (data.status === 'Pending Cashout') {
+        pill.className = "w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center";
+        pill.innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i>`;
+      } else {
+        pill.className = "w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
+        pill.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i>`;
+      }
+
+      card.classList.remove('hidden');
+      card.classList.remove('toast-animate-in');
+      void card.offsetWidth;
+      card.classList.add('toast-animate-in');
+
+      clearTimeout(floatingToastTimer);
+      // LONGER DURATION: Toast stays visible for 10 seconds (10000ms)
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 10000);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openOfferModal(offerId) {
+      if (!currentUser) {
+        alert("Please login first to view and start offers!");
+        openAuthModal(false);
+        return;
+      }
+
+      const offer = ALL_OFFERS.find(o => o.id === offerId);
+      if (!offer) return;
+
+      activeOfferData = offer;
+      document.getElementById('modal-offer-title').innerText = offer.name;
+      document.getElementById('modal-offer-provider').innerText = `Provided by ${offer.provider}`;
+      document.getElementById('modal-offer-icon').innerText = offer.icon;
+      document.getElementById('modal-offer-coins').innerText = `● ${offer.coins.toLocaleString()}`;
+      document.getElementById('modal-offer-xp').innerText = `+${Math.floor(offer.coins / 1000)} XP`;
+      document.getElementById('modal-offer-instruction').innerText = offer.instruction || 'Complete required steps on advertiser site.';
+
+      document.getElementById('offer-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeOfferModal() {
+      document.getElementById('offer-modal').classList.add('hidden');
+      activeOfferData = null;
+    }
+
+    function launchOfferTracking() {
+      if (!activeOfferData || !currentUser) return;
+      const offer = activeOfferData;
+      closeOfferModal();
+
+      addNotification({
+        title: `${offer.name} Clicked`,
+        message: `Task opened via ${offer.provider}. Tracking active. Reward credits upon verified completion.`,
+        status: 'click'
+      });
+
+      const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
+      window.open(trackingUrl, '_blank');
+    }
+
+    window.creditOfferPostback = async function(offerName, coins) {
+      if (!currentUser) return;
+      userCoins += coins;
+      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+      const newLvl = updateLevelAndXpUI(userCoins);
+
+      if (db) {
+        await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
+      }
+
+      addNotification({
+        title: `${offerName} Complete!`,
+        message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
+        status: 'complete'
+      });
+
+      prependLiveTicker('Offer', coins.toLocaleString(), '⚡');
+      playCompletedCustomAudio();
+      triggerDollahFloatingToast({
+        time: 'just now',
+        title: offerName,
+        status: 'Complete',
+        coins: coins.toLocaleString()
+      });
+    };
+
+    // CASHOUT ENGINE
+    let selectedCashoutCrypto = 'Litecoin (LTC)';
+    let selectedCashoutIcon = 'Ł';
+    let cashoutMinCoins = 300;
+
+    function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
+      if (!currentUser) {
+        alert("Please login to request cashouts!");
+        openAuthModal(false);
+        return;
+      }
+
+      selectedCashoutCrypto = crypto;
+      selectedCashoutIcon = icon;
+      cashoutMinCoins = minLimit;
+
+      document.getElementById('cashout-modal-title').innerText = `Withdraw ${crypto}`;
+      document.getElementById('cashout-icon-box').innerText = icon;
+      document.getElementById('cashout-current-balance').innerText = userCoins.toLocaleString();
+      
+      const amtInput = document.getElementById('cashout-amount-input');
+      amtInput.value = userCoins >= minLimit ? minLimit : userCoins;
+      amtInput.min = minLimit;
+
+      const addrLabel = document.getElementById('cashout-address-label');
+      const addrInput = document.getElementById('cashout-address-input');
+      addrInput.value = '';
+
+      if (crypto.includes('Binance')) {
+        addrLabel.innerText = "Binance Pay ID / Binance Email / BEP20";
+        addrInput.placeholder = "Enter Binance Pay ID, UID, or BEP20 Address";
+      } else {
+        addrLabel.innerText = "Destination Litecoin (LTC) Address";
+        addrInput.placeholder = "Enter your LTC wallet address";
+      }
+
+      calculateEstimatedCrypto();
+      document.getElementById('cashout-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeCashoutModal() {
+      document.getElementById('cashout-modal').classList.add('hidden');
+    }
+
+    function setCashoutMax() {
+      document.getElementById('cashout-amount-input').value = userCoins;
+      calculateEstimatedCrypto();
+    }
+
+    function calculateEstimatedCrypto() {
+      const val = parseInt(document.getElementById('cashout-amount-input').value) || 0;
+      const el = document.getElementById('cashout-estimated-crypto');
+      if (selectedCashoutCrypto.includes('Litecoin')) {
+        const estLTC = (val / 1000 * 0.012).toFixed(6);
+        el.innerText = `${estLTC} LTC`;
+      } else {
+        const estUSDT = (val / 1000).toFixed(2);
+        el.innerText = `${estUSDT} USDT (Binance Pay)`;
+      }
+    }
+
+    async function submitCustomWithdrawal() {
+      if (!currentUser) return;
+      const amount = parseInt(document.getElementById('cashout-amount-input').value) || 0;
+      const address = document.getElementById('cashout-address-input').value.trim();
+
+      if (amount < cashoutMinCoins) {
+        alert(`Minimum withdrawal for ${selectedCashoutCrypto} is ${cashoutMinCoins} Coins.`);
+        return;
+      }
+
+      if (amount > userCoins) {
+        alert(`Insufficient coins. You have ${userCoins.toLocaleString()} coins.`);
+        return;
+      }
+
+      if (!address || address.length < 5) {
+        alert("Please enter a valid wallet address or Binance ID.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('cashout-submit-btn');
+      submitBtn.innerText = "Processing...";
+      submitBtn.disabled = true;
+
+      try {
+        playPendingTaakSound();
+
+        userCoins -= amount;
+        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+
+        const usdValueNum = parseFloat((amount / 1000).toFixed(2));
+
+        const newRecordLoc = {
+          id: 'w_' + Date.now(),
+          user_id: currentUser.id,
+          method: selectedCashoutCrypto,
+          address: address,
+          amount: amount,
+          status: 'PENDING'
+        };
+
+        userWithdrawals.unshift(newRecordLoc);
+        saveWithdrawalsToStorage();
+
+        addNotification({
+          title: `${selectedCashoutCrypto} Cashout`,
+          message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 10)}... Status: PENDING.`,
+          status: 'pending'
+        });
+
+        if (db) {
+          await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+          await db.from('withdrawals').insert({
+            user_id: currentUser.id,
+            method: selectedCashoutCrypto,
+            destination_address: address,
+            coins_amount: amount,
+            usd_value: usdValueNum,
+            status: 'PENDING'
+          });
+        }
+
+        closeCashoutModal();
+
+        triggerDollahFloatingToast({
+          time: 'just now',
+          title: `${selectedCashoutCrypto} Cashout`,
+          status: 'Pending Cashout',
+          coins: amount.toLocaleString()
+        });
+
+        await fetchUserWithdrawals();
+        if (currentTab === 'profile') renderProfile();
+      } catch (e) {
+        alert("Withdrawal Error: " + e.message);
+      } finally {
+        submitBtn.innerText = "Cashout";
+        submitBtn.disabled = false;
+      }
+    }
+
+    // FETCH PERMANENT WITHDRAWALS FROM SUPABASE DATABASE
+    async function fetchUserWithdrawals() {
+      if (!currentUser) return;
+      if (!db) {
+        try {
+          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+          if (stored) userWithdrawals = JSON.parse(stored);
+        } catch (e) {}
+        return;
+      }
+
+      try {
+        const { data, error } = await db.from('withdrawals')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          const fetchedList = data.map(d => ({
+            id: d.id,
+            method: d.method,
+            amount: d.coins_amount,
+            address: d.destination_address,
+            status: (d.status || 'PENDING').toUpperCase()
+          }));
+
+          // Compare with local cache to detect newly completed status for custom completed audio & live ticker broadcast
+          fetchedList.forEach(fw => {
+            const oldW = userWithdrawals.find(ow => ow.id === fw.id);
+            if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
+              playCompletedCustomAudio();
+              triggerDollahFloatingToast({
+                time: 'just now',
+                title: `${fw.method || 'Crypto'} Payout Sent`,
+                status: 'Complete',
+                coins: (fw.amount || 0).toLocaleString()
+              });
+              addNotification({
+                title: `${fw.method || 'Crypto'} Paid!`,
+                message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
+                status: 'completed'
+              });
+              // Automatically push to live ticker bar on home screen
+              const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
+              const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
+              prependLiveTicker(shortMethod, fw.amount, tickerIcon);
+            }
+          });
+
+          userWithdrawals = fetchedList;
+          saveWithdrawalsToStorage();
+          if (currentTab === 'profile') renderProfile();
+        }
+      } catch (e) {
+        try {
+          const stored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+          if (stored) userWithdrawals = JSON.parse(stored);
+        } catch (err) {}
+      }
+    }
+
+    // AUTO-POLLING SYNC ENGINE: Checks Supabase every 3 seconds for permanent sync & instant completed alerts
+    let syncInterval = null;
+    function startAutoSyncEngine() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(() => {
+        if (currentUser) {
+          fetchUserWithdrawals();
+        }
+      }, 3000);
+    }
+
+    window.completeUserWithdrawal = async function(withdrawalId) {
+      if (!db || !currentUser) return;
+      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
+      await fetchUserWithdrawals();
+    };
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      const categories = ['featured', 'all', 'apps', 'games', 'surveys', 'gpt', 'signups'];
+      categories.forEach(c => {
+        const el = document.getElementById('cat-' + c);
+        if (el) {
+          if (c === cat) el.className = "cat-active w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+          else el.className = "w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#141d26] transition text-left";
+        }
+      });
+      if (currentTab !== 'home') navigate('home');
+      else renderHome();
+    }
+
+    function handleOfferSearch(q) {
+      searchQuery = q.toLowerCase().trim();
+      if (currentTab !== 'home') navigate('home');
+      else renderHome();
+    }
+
+    function updateLevelAndXpUI(earnedCoins) {
+      const totalXp = Math.floor(earnedCoins / 1000);
+      const currentLevel = 1 + Math.floor(totalXp / 10);
+      const xpInCurrentLevel = totalXp % 10;
+      const progressPercent = Math.min((xpInCurrentLevel / 10) * 100, 100);
+
+      const levelBadge = document.getElementById('profile-level-badge');
+      if (levelBadge) levelBadge.innerText = `Lvl ${currentLevel}`;
+
+      const xpText = document.getElementById('xp-text');
+      const nextLevelText = document.getElementById('xp-next-level');
+      const progressBar = document.getElementById('xp-progress-bar');
+      const xpNeeded = document.getElementById('xp-needed');
+
+      if (xpText) xpText.innerText = `${xpInCurrentLevel} / 10 XP`;
+      if (nextLevelText) nextLevelText.innerText = `Lvl ${currentLevel + 1}`;
+      if (progressBar) progressBar.style.width = `${progressPercent}%`;
+      if (xpNeeded) xpNeeded.innerText = `${10 - xpInCurrentLevel} XP to Lvl ${currentLevel + 1}`;
+
+      return currentLevel;
+    }
+
+    async function getUserCountry() {
+      try {
+        const r1 = await fetch('https://ipwho.is/');
+        if (r1.ok) {
+          const d1 = await r1.json();
+          if (d1 && d1.country_code) return d1.country_code;
+        }
+      } catch (e) {}
+
+      try {
+        const r2 = await fetch('https://get.geojs.io/v1/ip/country.json');
+        if (r2.ok) {
+          const d2 = await r2.json();
+          if (d2 && d2.country) return d2.country;
+        }
+      } catch (e) {}
+
+      return 'BD';
+    }
+
+    async function initAuth() {
+      if (!db) return;
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        syncUserSession(session ? session.user : null);
+
+        db.auth.onAuthStateChange((_event, session) => {
+          syncUserSession(session ? session.session?.user || session.user : null);
+        });
+      } catch (err) {}
+    }
+
+    async function syncUserSession(user) {
+      currentUser = user;
+      const authSlot = document.getElementById('auth-button-slot');
+      
+      if (user) {
+        let coins = 0;
+        let displayName = user.email.split('@')[0];
+        let avatarUrl = 'avatars/1.png';
+        let userCountry = user.user_metadata?.country || 'GLOBAL';
+
+        try {
+          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
+          if (profile) {
+            coins = profile.coins || 0;
+            displayName = profile.username || displayName;
+            userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
+            if (profile.avatar_url) avatarUrl = profile.avatar_url;
+          }
+        } catch (e) {}
+
+        userCoins = coins;
+        document.getElementById('header-avatar-img').src = avatarUrl;
+        document.getElementById('dropdown-avatar-img').src = avatarUrl;
+        document.getElementById('profile-username-display').innerText = displayName;
+        document.getElementById('profile-email-display').innerText = user.email;
+        document.getElementById('profile-user-id-snippet').innerText = `UID: ${user.id.substring(0, 8)}...`;
+        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+        document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
+        
+        updateLevelAndXpUI(userCoins);
+        loadUserDataFromStorage();
+        await fetchUserWithdrawals();
+        startAutoSyncEngine();
+
+        authSlot.innerHTML = `
+          <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
+            <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+          </button>
+        `;
+      } else {
+        userCoins = 0;
+        userNotifications = [];
+        userWithdrawals = [];
+        document.getElementById('profile-username-display').innerText = "Guest User";
+        document.getElementById('profile-email-display').innerText = "guest@gollah.co";
+        document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
+        document.getElementById('header-coins').innerText = "0";
+        document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
+        document.getElementById('header-avatar-img').src = 'avatars/1.png';
+        document.getElementById('dropdown-avatar-img').src = 'avatars/1.png';
+        
+        updateLevelAndXpUI(0);
+        updateNotificationsBadge();
+
+        authSlot.innerHTML = `
+          <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
+            <i data-lucide="log-in" class="w-4 h-4"></i> Login / Sign Up
+          </button>
+        `;
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openAuthModal(signup = false) {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      isSignupMode = signup;
+      updateAuthModalUI();
+      document.getElementById('auth-error-banner').classList.add('hidden');
+      document.getElementById('auth-modal').classList.remove('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+      isPasswordVisible = false;
+      document.getElementById('auth-pass-input').type = 'password';
+      const icon = document.getElementById('pass-toggle-icon');
+      if (icon) icon.setAttribute('data-lucide', 'eye');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleAuthMode() {
+      isSignupMode = !isSignupMode;
+      updateAuthModalUI();
+      document.getElementById('auth-error-banner').classList.add('hidden');
+    }
+
+    function updateAuthModalUI() {
+      const usernameBox = document.getElementById('auth-username-container');
+      if (isSignupMode) usernameBox.classList.remove('hidden');
+      else usernameBox.classList.add('hidden');
+
+      document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create New Account" : "Welcome Back";
+      document.getElementById('auth-modal-subtitle').innerText = isSignupMode ? "Sign up in seconds and start earning rewards!" : "Secure access to your rewards balance";
+      document.getElementById('auth-submit-btn').innerText = isSignupMode ? "Sign Up Free" : "Login";
+      document.getElementById('auth-toggle-msg').innerText = isSignupMode ? "Already have an account?" : "Don't have an account?";
+      document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Create Account";
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('auth-pass-input');
+      const icon = document.getElementById('pass-toggle-icon');
+      isPasswordVisible = !isPasswordVisible;
+
+      if (isPasswordVisible) {
+        passInput.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        passInput.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function showAuthError(msg) {
+      const banner = document.getElementById('auth-error-banner');
+      const text = document.getElementById('auth-error-text');
+      text.innerText = msg;
+      banner.classList.remove('hidden');
+    }
+
+    async function submitAuthForm() {
+      const email = document.getElementById('auth-email-input').value.trim();
+      const password = document.getElementById('auth-pass-input').value.trim();
+      const username = document.getElementById('auth-username-input').value.trim();
+
+      document.getElementById('auth-error-banner').classList.add('hidden');
+
+      if (!email || !password) {
+        showAuthError("Please fill in both email and password.");
+        return;
+      }
+      if (password.length < 6) {
+        showAuthError("Password must be at least 6 characters.");
+        return;
+      }
+      if (isSignupMode && (!username || username.length < 3)) {
+        showAuthError("Username must be at least 3 characters.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const originalText = submitBtn.innerText;
+      submitBtn.innerText = "Processing...";
+      submitBtn.disabled = true;
+
+      try {
+        if (isSignupMode) {
+          const detectedCountry = await getUserCountry();
+          let finalUsername = username;
+          const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
+          if (existingProfile) {
+            finalUsername = `${username}_${Math.floor(Math.random() * 899 + 100)}`;
+          }
+
+          const { data, error } = await db.auth.signUp({ 
+            email, 
+            password,
+            options: {
+              data: {
+                user_name: finalUsername,
+                avatar_url: 'avatars/1.png',
+                country: detectedCountry
+              }
+            }
+          });
+          
+          if (error) {
+            showAuthError(error.message);
+          } else {
+            if (data.user) {
+              await db.from('profiles').upsert({
+                id: data.user.id,
+                username: finalUsername,
+                avatar_url: 'avatars/1.png',
+                country: detectedCountry,
+                coins: 0,
+                level: 1
+              });
+            }
+            closeAuthModal();
+            syncUserSession(data.user);
+          }
+        } else {
+          const { data, error } = await db.auth.signInWithPassword({ email, password });
+          if (error) {
+            showAuthError(error.message);
+          } else {
+            closeAuthModal();
+            syncUserSession(data.user?.user || data.user || data.session?.user);
+          }
+        }
+      } catch (err) {
+        showAuthError(err.message || "Authentication failed.");
+      } finally {
+        submitBtn.innerText = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function handleLogout() {
+      if (db) await db.auth.signOut();
+      currentUser = null;
+      syncUserSession(null);
+      document.getElementById('profile-dropdown').classList.add('hidden');
+    }
+
+    function openLegalModal(type) {
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      const titleEl = document.getElementById('legal-modal-title');
+      const bodyEl = document.getElementById('legal-modal-body');
+
+      if (type === 'terms') {
+        titleEl.innerHTML = `<i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i> Terms of Service`;
+        bodyEl.innerHTML = `
+          <div class="space-y-3">
+            <h4 class="font-bold text-white text-sm">1. Terms of Use</h4>
+            <p>By using this platform, you agree to adhere to all terms, advertising rules, and task policies.</p>
+          </div>
+        `;
+      } else if (type === 'privacy') {
+        titleEl.innerHTML = `<i data-lucide="lock" class="w-5 h-5 text-blue-400"></i> Privacy Policy`;
+        bodyEl.innerHTML = `
+          <div class="space-y-3">
+            <h4 class="font-bold text-white text-sm">1. Data Handled</h4>
+            <p>Account credentials are strictly processed for authentication, offer delivery, and verified coin credits.</p>
+          </div>
+        `;
+      } else if (type === 'antifraud') {
+        titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i> Anti-Fraud & Quality Guidelines`;
+        bodyEl.innerHTML = `
+          <div class="space-y-3 bg-[#111a24] border border-[#1e2a36] p-3.5 rounded-xl">
+            <h4 class="font-bold text-white text-sm">Network Rules:</h4>
+            <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+              <li>Genuine human engagements with surveys and install offers.</li>
+              <li>Strict prohibition of automated scraping bots or fake click scripts.</li>
+            </ul>
+          </div>
+        `;
+      } else if (type === 'contact') {
+        titleEl.innerHTML = `<i data-lucide="life-buoy" class="w-5 h-5 text-amber-400"></i> Support Desk`;
+        bodyEl.innerHTML = `
+          <div class="bg-[#121c25] border border-[#202c38] rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-[#00d672]"></i>
+              <span class="font-bold text-white">Support Email:</span>
+              <span class="text-emerald-400 font-mono">support@gollah.co</span>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('legal-modal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeLegalModal() {
+      document.getElementById('legal-modal').classList.add('hidden');
+    }
+
+    function navigate(view) {
+      currentTab = view;
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      ['home', 'premium', 'shop', 'ranking', 'profile'].forEach(v => {
+        const el = document.getElementById('nav-' + v);
+        if (el) el.className = (v === view) ? "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition" : "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
+      });
+      if (view === 'home') renderHome();
+      else if (view === 'premium') { currentCategory = 'all'; renderHome(); }
+      else if (view === 'profile') renderProfile();
+      else if (view === 'shop') renderShop();
+      else if (view === 'ranking') renderRanking();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderHome() {
+      const container = document.getElementById('app-content');
+      let filtered = ALL_OFFERS;
+      if (currentCategory === 'featured') {
+        filtered = ALL_OFFERS.filter(o => o.featured);
+      } else if (currentCategory !== 'all') {
+        filtered = ALL_OFFERS.filter(o => o.category === currentCategory);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(o => 
+          o.name.toLowerCase().includes(searchQuery) || 
+          o.provider.toLowerCase().includes(searchQuery) ||
+          o.category.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      const categoryTitleMap = {
+        'featured': '🔥 Featured Tasks & Surveys',
+        'all': '⚡ All Active Rewarded Tasks',
+        'apps': '📱 Best Mobile Apps',
+        'games': '🎮 High-Paying Game Quests',
+        'surveys': '📝 Fast Rewarded Surveys',
+        'gpt': '💡 GPT Tasks & Quizzes',
+        'signups': '✍️ High-Reward Sign Ups'
+      };
+
+      const title = categoryTitleMap[currentCategory] || 'Active Offers';
+
+      let offersHTML = '';
+      filtered.forEach(o => {
+        offersHTML += `
+          <div onclick="openOfferModal('${o.id}')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-lg group">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-xs text-[#00d672] group-hover:bg-[#00d672] group-hover:text-black transition">
+                ${o.icon}
+              </div>
+              <span class="text-[10px] bg-[#1a2530] text-slate-400 px-2 py-0.5 rounded font-mono font-semibold">${o.provider}</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white block truncate mb-1">${o.name}</h4>
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${o.tag || o.category}</span>
+            </div>
+            <div class="pt-3 mt-3 border-t border-[#1d2a37] flex items-center justify-between">
+              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ${o.coins.toLocaleString()}</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">+${Math.floor(o.coins / 1000)} XP</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render live ticker items dynamically from liveTickerItems array
+      let tickerHTML = '';
+      liveTickerItems.forEach(t => {
+        tickerHTML += `
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
+            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
+          ${tickerHTML}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> ${title}
+            </h2>
+            <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${offersHTML}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderProfile() {
+      const container = document.getElementById('app-content');
+
+      let displayedWithdrawals = userWithdrawals;
+      if (profileFilter === 'pending') {
+        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
+      } else if (profileFilter === 'completed') {
+        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
+      }
+
+      let listHTML = '';
+      if (displayedWithdrawals.length === 0) {
+        listHTML = `
+          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
+            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
+          </div>
+        `;
+      } else {
+        listHTML = displayedWithdrawals.map(w => {
+          const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
+          const isBinance = (w.method || '').includes('Binance');
+          return `
+            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
+              <span class="col-span-4 font-bold text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
+                  ${isBinance ? '🟡' : 'Ł'}
+                </span> 
+                ${w.method}
+              </span>
+              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
+              <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
+              <span class="col-span-2 text-right">
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
+                  ${w.status}
+                </span>
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div class="flex flex-col gap-5">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
+          </h2>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Withdrawals History:</span>
+              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
+              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
+              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
+            </div>
+            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            ${listHTML}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function changeProfileFilter(filter) {
+      profileFilter = filter;
+      renderProfile();
+    }
+
+    function renderShop() {
+      const container = document.getElementById('app-content');
+      container.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-base font-bold text-white">Withdraw Options</h2>
+            <p class="text-xs text-slate-400">Cash out coins directly to your personal crypto wallet.</p>
+          </div>
+          <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
+            Min 300 Coins
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+                Ł
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+
+          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
+                🟡
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
+                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
+              </div>
+            </div>
+            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+              Withdraw
+            </button>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleProfileDropdown() {
+      document.getElementById('profile-dropdown').classList.toggle('hidden');
+    }
+
+    renderHome();
+    initAuth();
+    if (window.lucide) lucide.createIcons();
+  </script>
 </body>
 </html>
