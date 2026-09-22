@@ -523,7 +523,7 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // PERSISTENT STORAGE ENGINE
+    // PERSISTENT STORAGE & REALTIME SYNC ENGINE
     function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
@@ -598,7 +598,6 @@
         userNotifications.forEach(n => {
           const item = document.createElement('div');
           
-          // Cross-check real withdrawal status if this notification is a cashout
           let currentStatus = (n.status || '').toLowerCase();
           if (n.title && n.title.includes('Cashout')) {
             const matchedW = userWithdrawals.find(w => n.message && n.message.includes(w.amount));
@@ -608,8 +607,6 @@
           }
 
           const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
-          
-          // Fix message text dynamically if completed
           let displayMessage = n.message;
           if (isComplete && displayMessage.includes('Status: PENDING')) {
             displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
@@ -666,7 +663,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO
+    // AUDIO: Taak Sound for Money Addition / Completed Payout
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playCashoutTaakSound() {
@@ -788,7 +785,7 @@
       });
     };
 
-    // CASHOUT ENGINE MAPPED TO EXACT SUPABASE COLUMNS
+    // CASHOUT ENGINE
     let selectedCashoutCrypto = 'Litecoin (LTC)';
     let selectedCashoutIcon = 'Ł';
     let cashoutMinCoins = 300;
@@ -973,23 +970,55 @@
       } catch (e) {}
     }
 
+    // REALTIME SUPABASE LISTENER: Triggers instant popup toast + sound when admin sets COMPLETED in Supabase
+    let realtimeChannel = null;
+    function setupRealtimeWithdrawalListener() {
+      if (!db || !currentUser) return;
+      if (realtimeChannel) db.removeChannel(realtimeChannel);
+
+      realtimeChannel = db.channel('public:withdrawals:' + currentUser.id)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'withdrawals',
+          filter: `user_id=eq.${currentUser.id}`
+        }, payload => {
+          const updatedRow = payload.new;
+          if (updatedRow && (updatedRow.status || '').toUpperCase() === 'COMPLETED') {
+            // Find existing local item or match
+            const localW = userWithdrawals.find(w => w.id === updatedRow.id || w.amount === updatedRow.coins_amount);
+            if (localW && localW.status !== 'COMPLETED') {
+              localW.status = 'COMPLETED';
+              saveWithdrawalsToStorage();
+
+              // Play money addition sound
+              playCashoutTaakSound();
+
+              // Trigger instant popup toast
+              triggerDollahFloatingToast({
+                time: 'just now',
+                title: `${updatedRow.method || 'Crypto'} Payout Sent`,
+                status: 'Complete',
+                coins: (updatedRow.coins_amount || 0).toLocaleString()
+              });
+
+              addNotification({
+                title: `${updatedRow.method || 'Crypto'} Paid!`,
+                message: `● ${(updatedRow.coins_amount || 0).toLocaleString()} coins payout successfully broadcasted! Status: COMPLETED.`,
+                status: 'completed'
+              });
+
+              if (currentTab === 'profile') renderProfile();
+            }
+          }
+        })
+        .subscribe();
+    }
+
     window.completeUserWithdrawal = async function(withdrawalId) {
       if (!db || !currentUser) return;
       await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
       await fetchUserWithdrawals();
-
-      addNotification({
-        title: `Withdrawal Complete!`,
-        message: `Your cashout has been confirmed and broadcasted to the blockchain.`,
-        status: 'completed'
-      });
-
-      triggerDollahFloatingToast({
-        time: 'just now',
-        title: `Withdrawal Paid!`,
-        status: 'Complete',
-        coins: 'Approved'
-      });
     };
 
     function filterCategory(cat) {
@@ -1098,6 +1127,7 @@
         updateLevelAndXpUI(userCoins);
         loadUserDataFromStorage();
         await fetchUserWithdrawals();
+        setupRealtimeWithdrawalListener();
 
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
