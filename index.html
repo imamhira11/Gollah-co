@@ -269,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST (Duration: 20 seconds) -->
+  <!-- FLOATING TOAST (Longer Duration: 20 seconds) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -506,26 +506,21 @@
       if (currentTab === 'home') renderHome();
     }
 
-    // 2. Comprehensive Offer Database
+    // 2. Comprehensive Offer Database (Complete Dollah.co Offerwall Grid Aggregator)
     const ALL_OFFERS = [
-      { id: 'f1', name: 'TheoremReach Surveys', provider: 'theoremreach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
-      { id: 'f2', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
-      { id: 'f3', name: 'RAID Shadow Legends', provider: 'Adgate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
-      { id: 'a1', name: 'Swagbucks Mobile', provider: 'Torox', coins: 19136, category: 'apps', featured: false, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
-      { id: 'a2', name: 'SiriusXM Stream', provider: 'OfferToro', coins: 4480, category: 'apps', featured: false, icon: 'Sirius', tag: 'Mobile', instruction: 'Start a $1 trial subscription on SiriusXM.', link: 'https://offertoro.com' },
-      { id: 'a3', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: false, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
-      { id: 'a4', name: 'TikTok Install & Open', provider: 'Lootably', coins: 1400, category: 'apps', featured: false, icon: 'TT', tag: 'Social', instruction: 'Install, open and browse videos for 5 minutes.', link: 'https://lootably.com' },
-      { id: 'g1', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: false, icon: 'Slots', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
-      { id: 'g2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: false, icon: 'Vegas', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
-      { id: 'g3', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: false, icon: 'Dice', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
-      { id: 'g4', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: false, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
-      { id: 's1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: false, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
-      { id: 's2', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: false, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
-      { id: 's3', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: false, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
-      { id: 'u1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: false, icon: 'Quiz', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' },
-      { id: 'u2', name: 'Apple Watch Quiz Challenge', provider: 'Torox', coins: 1024, category: 'gpt', featured: false, icon: 'Watch', tag: 'Trivia', instruction: 'Pass quiz with 100% score.', link: 'https://torox.io' },
-      { id: 'u3', name: 'Coinbase Free Registration', provider: 'AdGate', coins: 12500, category: 'signups', featured: false, icon: 'CB', tag: 'Free Reg', instruction: 'Register new account and verify phone.', link: 'https://coinbase.com' },
-      { id: 'u4', name: 'Binance Web3 Signup', provider: 'Monlix', coins: 18000, category: 'signups', featured: false, icon: 'BNB', tag: 'Verify', instruction: 'Sign up for Binance and complete verification.', link: 'https://binance.com' }
+      { id: 't1', name: 'Animals & Coins Adventure', provider: 'Torox', coins: 75000, category: 'games', featured: true, icon: 'TC', tag: 'Level 60', instruction: 'Reach Level 60 on Board 5 to claim full coins.', link: 'https://torox.io' },
+      { id: 't2', name: 'Swagbucks Mobile App', provider: 'Torox', coins: 19136, category: 'apps', featured: true, icon: 'SB', tag: 'Premium', instruction: 'Download app and earn at least 500 SB.', link: 'https://torox.io' },
+      { id: 'l1', name: 'Neverwinter Realm', provider: 'Lootably', coins: 1138, category: 'games', featured: true, icon: 'NW', instruction: 'Install Neverwinter and reach Level 10.', link: 'https://lootably.com' },
+      { id: 'l2', name: 'Lords Mobile: Kingdom', provider: 'Lootably', coins: 54000, category: 'games', featured: true, icon: 'LM', tag: 'Castle 15', instruction: 'Upgrade Castle to Level 15 within 21 days.', link: 'https://lootably.com' },
+      { id: 'ag1', name: 'RAID Shadow Legends', provider: 'AdGate', coins: 43500, category: 'games', featured: true, icon: 'RAID', instruction: 'Open 2 Sacred Shards within 30 days.', link: 'https://adgatemedia.com' },
+      { id: 'ag2', name: 'Slotastic Vegas Casino', provider: 'AdGate', coins: 25600, category: 'games', featured: true, icon: 'SL', tag: 'Casino', instruction: 'Install game and spin 150 times.', link: 'https://adgatemedia.com' },
+      { id: 'm1', name: 'Revolut Banking App', provider: 'Monlix', coins: 32000, category: 'apps', featured: true, icon: 'REV', tag: 'FinTech', instruction: 'Download Revolut and make first purchase.', link: 'https://monlix.com' },
+      { id: 'm2', name: 'Grande Vegas Slots', provider: 'Monlix', coins: 25600, category: 'games', featured: true, icon: 'GV', tag: 'Casino', instruction: 'Complete Level 35 within 14 days.', link: 'https://monlix.com' },
+      { id: 'cpx1', name: 'CPX Research Fast Survey', provider: 'CPX', coins: 1850, category: 'surveys', featured: true, icon: 'CPX', tag: '5 Mins', instruction: 'Complete short consumer survey.', link: 'https://cpx-research.com' },
+      { id: 'bl1', name: 'BitLabs Daily Poll', provider: 'BitLabs', coins: 3200, category: 'surveys', featured: true, icon: 'BL', tag: '10 Mins', instruction: 'Answer all demographic questions accurately.', link: 'https://bitlabs.ai' },
+      { id: 'ib1', name: 'InBrain Consumer Quiz', provider: 'InBrain', coins: 4100, category: 'surveys', featured: true, icon: 'IB', tag: 'High Rate', instruction: 'Complete full survey.', link: 'https://inbrain.ai' },
+      { id: 'tr1', name: 'TheoremReach Surveys', provider: 'TheoremReach', coins: 2500, category: 'surveys', featured: true, icon: 'TR', instruction: 'Complete profile surveys with honest feedback.', link: 'https://theoremreach.com' },
+      { id: 'ads1', name: 'Test Your Knowledge Quiz', provider: 'Adscend', coins: 64, category: 'gpt', featured: true, icon: 'QZ', tag: 'Instant', instruction: 'Score 100% on general trivia.', link: 'https://adscendmedia.com' }
     ];
 
     let activeOfferData = null;
@@ -1356,7 +1351,6 @@
         `;
       }
 
-      document.getElementById('legal-modal').classList.add('hidden'); // Fixed modal display bug
       document.getElementById('legal-modal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
@@ -1377,6 +1371,91 @@
       else if (view === 'profile') renderProfile();
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderHome() {
+      const container = document.getElementById('app-content');
+      if (!container) return;
+
+      let filtered = ALL_OFFERS;
+      if (currentCategory === 'featured') {
+        filtered = ALL_OFFERS.filter(o => o.featured);
+      } else if (currentCategory !== 'all') {
+        filtered = ALL_OFFERS.filter(o => o.category === currentCategory);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(o => 
+          o.name.toLowerCase().includes(searchQuery) || 
+          o.provider.toLowerCase().includes(searchQuery) ||
+          o.category.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      const categoryTitleMap = {
+        'featured': '🔥 Featured Tasks & Surveys',
+        'all': '⚡ All Active Rewarded Tasks',
+        'apps': '📱 Best Mobile Apps',
+        'games': '🎮 High-Paying Game Quests',
+        'surveys': '📝 Fast Rewarded Surveys',
+        'gpt': '💡 GPT Tasks & Quizzes',
+        'signups': '✍️ High-Reward Sign Ups'
+      };
+
+      const title = categoryTitleMap[currentCategory] || 'Active Offers';
+
+      let offersHTML = '';
+      filtered.forEach(o => {
+        offersHTML += `
+          <div onclick="openOfferModal('${o.id}')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-lg group">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-xs text-[#00d672] group-hover:bg-[#00d672] group-hover:text-black transition">
+                ${o.icon}
+              </div>
+              <span class="text-[10px] bg-[#1a2530] text-slate-400 px-2 py-0.5 rounded font-mono font-semibold">${o.provider}</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white block truncate mb-1">${o.name}</h4>
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${o.tag || o.category}</span>
+            </div>
+            <div class="pt-3 mt-3 border-t border-[#1d2a37] flex items-center justify-between">
+              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ${o.coins.toLocaleString()}</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">+${Math.floor(o.coins / 1000)} XP</span>
+            </div>
+          </div>
+        `;
+      });
+
+      let tickerHTML = '';
+      liveTickerItems.forEach(t => {
+        tickerHTML += `
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
+            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
+            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
+          ${tickerHTML}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> ${title}
+            </h2>
+            <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${offersHTML}
+          </div>
+        </div>
+      `;
       if (window.lucide) lucide.createIcons();
     }
 
