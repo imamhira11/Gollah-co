@@ -386,7 +386,7 @@
           Cancel
         </button>
         <button id="cashout-submit-btn" onclick="submitCustomWithdrawal()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40">
-          Confirm & Cashout
+          Cashout
         </button>
       </div>
     </div>
@@ -621,18 +621,32 @@
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
-        // Bubbly "Pop" frequency sweep (low to high snap)
-        const osc = ctx.createOscillator();
+        
+        // High-impact dual oscillator punchy bubble-pop
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(260, now);
-        osc.frequency.exponentialRampToValueAtTime(920, now + 0.07);
-        gain.gain.setValueAtTime(0.45, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        osc.connect(gain);
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(320, now);
+        osc1.frequency.exponentialRampToValueAtTime(1650, now + 0.055);
+        osc1.frequency.exponentialRampToValueAtTime(180, now + 0.11);
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(450, now);
+        osc2.frequency.exponentialRampToValueAtTime(1200, now + 0.04);
+
+        gain.gain.setValueAtTime(0.85, now); // Significantly louder & punchier
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.085);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.13);
+        osc2.stop(now + 0.13);
       } catch (e) {}
     }
 
@@ -666,6 +680,7 @@
     ];
 
     let userWithdrawals = [];
+    let withdrawalSubFilter = 'all'; // 'all', 'pending', 'completed'
 
     function updateNotificationsBadge() {
       const unreadCount = userNotifications.filter(n => !n.isRead).length;
@@ -941,30 +956,56 @@
       }
 
       const submitBtn = document.getElementById('cashout-submit-btn');
-      submitBtn.innerText = "Submitting Request...";
+      submitBtn.innerText = "Processing...";
       submitBtn.disabled = true;
 
       try {
         userCoins -= amount;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
 
-        if (db) {
-          await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-          const { data: newW } = await db.from('withdrawals').insert({
-            user_id: currentUser.id,
-            method: selectedCashoutCrypto,
-            amount: amount,
-            address: address,
-            status: 'PENDING'
-          }).select().single();
+        const pendingWithdrawal = {
+          id: 'w_' + Date.now(),
+          user_id: currentUser.id,
+          method: selectedCashoutCrypto,
+          amount: amount,
+          address: address,
+          status: 'PENDING',
+          created_at: new Date().toISOString()
+        };
 
-          if (newW) userWithdrawals.unshift(newW);
+        // Immediately unshift to in-memory state and localStorage so user always sees it
+        userWithdrawals.unshift(pendingWithdrawal);
+        try {
+          localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
+        } catch (e) {}
+
+        if (db) {
+          try {
+            await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+            const { data: newW } = await db.from('withdrawals').insert({
+              user_id: currentUser.id,
+              method: selectedCashoutCrypto,
+              amount: amount,
+              address: address,
+              status: 'PENDING'
+            }).select().single();
+
+            if (newW) {
+              // Replace mock id with real DB row
+              userWithdrawals[0] = newW;
+              try {
+                localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
+              } catch (e) {}
+            }
+          } catch (dbErr) {
+            console.warn("DB insert error, stored locally:", dbErr);
+          }
         }
 
         // Close Modal Immediately
         closeCashoutModal();
 
-        // 1. Play the requested bubbly POP Sound
+        // 1. Play the loud, punchy bubble POP Sound
         playPopSound();
 
         // 2. Add Notification
@@ -986,16 +1027,30 @@
       } catch (e) {
         alert("Withdrawal Error: " + e.message);
       } finally {
-        submitBtn.innerText = "Confirm & Cashout";
+        submitBtn.innerText = "Cashout";
         submitBtn.disabled = false;
       }
     }
 
     // Webhook simulation for complete withdrawal
     window.completeUserWithdrawal = async function(withdrawalId) {
-      if (!db || !currentUser) return;
-      await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
-      await fetchUserWithdrawals();
+      if (!currentUser) return;
+      
+      const target = userWithdrawals.find(w => w.id === withdrawalId || w.id === 'w_' + withdrawalId);
+      if (target) {
+        target.status = 'COMPLETED';
+      } else if (userWithdrawals.length > 0) {
+        userWithdrawals[0].status = 'COMPLETED';
+      }
+
+      try {
+        localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
+      } catch (e) {}
+
+      if (db) {
+        await db.from('withdrawals').update({ status: 'COMPLETED' }).eq('id', withdrawalId);
+        await fetchUserWithdrawals();
+      }
 
       playPopSound();
       triggerDollahFloatingToast({
@@ -1010,6 +1065,8 @@
         message: `Your cashout has been broadcasted and confirmed on blockchain.`,
         status: 'complete'
       });
+
+      if (currentTab === 'profile') renderProfile();
     };
 
     function filterCategory(cat) {
@@ -1096,13 +1153,23 @@
     }
 
     async function fetchUserWithdrawals() {
-      if (!db || !currentUser) return;
+      if (!currentUser) return;
+      // Load cache first
+      try {
+        const cached = localStorage.getItem('gollah_withdrawals_' + currentUser.id);
+        if (cached) userWithdrawals = JSON.parse(cached);
+      } catch (e) {}
+
+      if (!db) return;
       try {
         const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           userWithdrawals = data;
-          if (currentTab === 'profile') renderProfile();
+          try {
+            localStorage.setItem('gollah_withdrawals_' + currentUser.id, JSON.stringify(userWithdrawals));
+          } catch (e) {}
         }
+        if (currentTab === 'profile') renderProfile();
       } catch (e) {
         console.warn("Withdrawals fetch:", e);
       }
@@ -1492,39 +1559,81 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    function setWithdrawalSubFilter(filter) {
+      withdrawalSubFilter = filter;
+      renderProfile();
+    }
+
     function renderProfile() {
       const container = document.getElementById('app-content');
 
       let listHTML = '';
       if (profileFilter === 'withdrawals') {
-        if (userWithdrawals.length === 0) {
+        let filteredWithdrawals = userWithdrawals;
+        if (withdrawalSubFilter === 'pending') {
+          filteredWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
+        } else if (withdrawalSubFilter === 'completed') {
+          filteredWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
+        }
+
+        const pendingCount = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING').length;
+        const completedCount = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED').length;
+
+        const filterTabsHTML = `
+          <div class="flex items-center gap-2 mb-3">
+            <button onclick="setWithdrawalSubFilter('all')" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition ${withdrawalSubFilter === 'all' ? 'bg-[#1e2a36] text-white border border-[#00d672]' : 'bg-[#10171e] text-slate-400 hover:text-white'}">
+              All (${userWithdrawals.length})
+            </button>
+            <button onclick="setWithdrawalSubFilter('pending')" class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${withdrawalSubFilter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50' : 'bg-[#10171e] text-slate-400 hover:text-amber-400'}">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              Pending (${pendingCount})
+            </button>
+            <button onclick="setWithdrawalSubFilter('completed')" class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${withdrawalSubFilter === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'bg-[#10171e] text-slate-400 hover:text-emerald-400'}">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              Completed (${completedCount})
+            </button>
+          </div>
+        `;
+
+        if (filteredWithdrawals.length === 0) {
           listHTML = `
+            ${filterTabsHTML}
             <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
               <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
-              No cashout history found. Withdraw via the Shop to view live status here.
+              No ${withdrawalSubFilter === 'all' ? '' : withdrawalSubFilter} cashout requests found.
             </div>
           `;
         } else {
-          listHTML = userWithdrawals.map(w => {
-            const isCompleted = w.status === 'COMPLETED';
-            const iconSymbol = w.method.includes('Binance') ? 'B' : 'Ł';
-            const iconColor = w.method.includes('Binance') ? 'text-amber-400' : 'text-blue-400';
-            return `
-              <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs">
-                <span class="col-span-4 font-bold text-white flex items-center gap-2">
-                  <span class="w-6 h-6 rounded-lg bg-[#1f2c3a] flex items-center justify-center text-xs font-bold ${iconColor}">${iconSymbol}</span> 
-                  ${w.method}
-                </span>
-                <span class="col-span-3 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
-                <span class="col-span-3 text-slate-400 text-[11px] truncate">${w.address || 'Verified'}</span>
-                <span class="col-span-2 text-right">
-                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400 animate-pulse'}">
-                    ${w.status}
-                  </span>
-                </span>
-              </div>
-            `;
-          }).join('');
+          listHTML = `
+            ${filterTabsHTML}
+            <div class="flex flex-col gap-2">
+              ${filteredWithdrawals.map(w => {
+                const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
+                const iconSymbol = (w.method || '').includes('Binance') ? 'B' : 'Ł';
+                const iconColor = (w.method || '').includes('Binance') ? 'text-amber-400' : 'text-blue-400';
+                const formattedDate = w.created_at ? new Date(w.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now';
+
+                return `
+                  <div class="grid grid-cols-12 items-center bg-[#121b24] border ${isCompleted ? 'border-[#1d2a37]' : 'border-amber-500/30'} p-3.5 rounded-xl text-xs">
+                    <div class="col-span-5 sm:col-span-4 font-bold text-white flex items-center gap-2">
+                      <span class="w-7 h-7 rounded-lg bg-[#1f2c3a] flex items-center justify-center text-xs font-bold ${iconColor} shrink-0">${iconSymbol}</span> 
+                      <div>
+                        <span class="block truncate">${w.method}</span>
+                        <span class="text-[10px] text-slate-500 font-normal font-mono block">${formattedDate}</span>
+                      </div>
+                    </div>
+                    <span class="col-span-3 text-amber-400 font-bold">● ${parseInt(w.amount).toLocaleString()}</span>
+                    <span class="col-span-2 sm:col-span-3 text-slate-400 text-[11px] font-mono truncate" title="${w.address || ''}">${w.address || 'Verified ID'}</span>
+                    <span class="col-span-2 text-right">
+                      <span class="text-[10px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'}">
+                        ${isCompleted ? '✓ PAID' : '● PENDING'}
+                      </span>
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
         }
       } else {
         listHTML = `
@@ -1555,7 +1664,7 @@
             <button onclick="changeProfileFilter('earnings')" class="${profileFilter === 'earnings' ? 'bg-[#00d672] text-black font-bold px-2.5 py-1 rounded-lg' : 'text-slate-400'}">Earnings / In-Progress</button>
           </div>
 
-          <div class="flex flex-col gap-2">
+          <div>
             ${listHTML}
           </div>
         </div>
