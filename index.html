@@ -489,26 +489,196 @@
       console.warn("Supabase local active");
     }
 
-    // Live Ticker State for Home Screen
-    let liveTickerItems = [
-      { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
-      { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
-    ];
+    // Live Ticker — PERMANENT (localStorage + shared Supabase). Never auto-wipe your withdraws.
+    let liveTickerItems = [];
+    let liveFeedChannel = null;
+    const seenActivityIds = new Set();
+    const LIVE_TICKER_STORAGE_KEY = 'gollah_live_ticker_v2';
+    const LIVE_TICKER_MAX = 20;
 
-    function prependLiveTicker(type, amount, icon = 'Ł', status = '') {
+    function saveLiveTickerToStorage() {
+      try {
+        localStorage.setItem(LIVE_TICKER_STORAGE_KEY, JSON.stringify(liveTickerItems.slice(0, LIVE_TICKER_MAX)));
+      } catch (e) {}
+    }
+
+    function loadLiveTickerFromStorage() {
+      try {
+        const raw = localStorage.getItem(LIVE_TICKER_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || !parsed.length) return;
+        liveTickerItems = [];
+        seenActivityIds.clear();
+        parsed.forEach(item => {
+          if (!item || !item.type) return;
+          const id = item.id || ('stored_' + item.type + '_' + item.amount + '_' + (item.time || ''));
+          if (seenActivityIds.has(id)) return;
+          seenActivityIds.add(id);
+          liveTickerItems.push({
+            id: id,
+            type: item.type,
+            amount: String(item.amount),
+            time: item.time || 'just now',
+            icon: item.icon || 'Ł',
+            status: item.status || ''
+          });
+        });
+      } catch (e) {}
+    }
+
+    function formatTickerTime(isoOrNow) {
+      if (!isoOrNow || isoOrNow === 'just now') return 'just now';
+      try {
+        const d = new Date(isoOrNow);
+        const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (sec < 60) return 'just now';
+        if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+        if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+        return Math.floor(sec / 86400) + 'd ago';
+      } catch (e) {
+        return 'just now';
+      }
+    }
+
+    function prependLiveTicker(type, amount, icon = 'Ł', status = '', activityId = null, createdAt = null) {
       const amtStr = (typeof amount === 'number')
         ? amount.toLocaleString()
         : String(amount);
+      const id = activityId || ('local_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7));
+      if (seenActivityIds.has(id)) return;
+      seenActivityIds.add(id);
+
       liveTickerItems.unshift({
+        id: id,
         type: type,
         amount: amtStr,
-        time: 'just now',
-        icon: icon,
-        status: status
+        time: formatTickerTime(createdAt),
+        icon: icon || 'Ł',
+        status: status || ''
       });
-      if (liveTickerItems.length > 6) liveTickerItems.pop();
-      // Always refresh ticker area if home is visible
-      if (currentTab === 'home') renderHome();
+      // Keep last 20 — never auto-delete your recent withdraws
+      if (liveTickerItems.length > LIVE_TICKER_MAX) {
+        const removed = liveTickerItems.pop();
+        if (removed && removed.id) seenActivityIds.delete(removed.id);
+      }
+      saveLiveTickerToStorage();
+      if (currentTab === 'home' || currentTab === 'premium') renderHome();
+    }
+
+    // Always save locally first (permanent), then try Supabase for global share
+    async function broadcastLiveActivity(type, amount, icon, status) {
+      // Always show on this device permanently first
+      prependLiveTicker(type, amount, icon, status);
+
+      if (!db) return;
+      try {
+        const amtNum = typeof amount === 'number' ? amount : parseInt(String(amount).replace(/,/g, ''), 10) || 0;
+        const payload = {
+          type: String(type || 'Offer'),
+          amount: amtNum,
+          icon: icon || 'Ł',
+          status: status || ''
+        };
+        if (currentUser && currentUser.id) {
+          payload.user_id = currentUser.id;
+        }
+
+        // Insert without .single() so RLS select issues don't block the write
+        const { data, error } = await db.from('live_activity').insert(payload).select('id');
+
+        if (error) {
+          console.error('live_activity INSERT ERROR:', error.message, error);
+          // Retry once without user_id (in case FK/RLS blocks it)
+          const { error: err2 } = await db.from('live_activity').insert({
+            type: payload.type,
+            amount: payload.amount,
+            icon: payload.icon,
+            status: payload.status
+          });
+          if (err2) {
+            console.error('live_activity retry failed:', err2.message);
+          }
+          return;
+        }
+        if (data && data[0] && data[0].id) seenActivityIds.add(data[0].id);
+      } catch (e) {
+        console.error('broadcastLiveActivity exception', e);
+      }
+    }
+
+    // Restore permanent history + merge global feed (never wipe local)
+    async function initSharedLiveFeed() {
+      loadLiveTickerFromStorage();
+
+      if (!liveTickerItems.length) {
+        liveTickerItems = [
+          { id: 'demo1', type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł', status: 'Sent' },
+          { id: 'demo2', type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡', status: 'Sent' }
+        ];
+        seenActivityIds.add('demo1');
+        seenActivityIds.add('demo2');
+        saveLiveTickerToStorage();
+      }
+
+      if (!db) {
+        if (currentTab === 'home' || currentTab === 'premium') renderHome();
+        return;
+      }
+
+      try {
+        const { data, error } = await db
+          .from('live_activity')
+          .select('id, type, amount, icon, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(LIVE_TICKER_MAX);
+
+        if (!error && data && data.length) {
+          // Merge only — do NOT clear liveTickerItems
+          data.reverse().forEach(row => {
+            prependLiveTicker(
+              row.type,
+              row.amount,
+              row.icon || 'Ł',
+              row.status || '',
+              row.id,
+              row.created_at
+            );
+          });
+        }
+      } catch (e) {
+        console.warn('live_activity fetch failed', e);
+      }
+
+      if (currentTab === 'home' || currentTab === 'premium') renderHome();
+
+      try {
+        if (liveFeedChannel) {
+          db.removeChannel(liveFeedChannel);
+          liveFeedChannel = null;
+        }
+        liveFeedChannel = db
+          .channel('live_activity_feed')
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'live_activity' },
+            (payload) => {
+              const row = payload.new;
+              if (!row) return;
+              prependLiveTicker(
+                row.type,
+                row.amount,
+                row.icon || 'Ł',
+                row.status || '',
+                row.id,
+                row.created_at
+              );
+            }
+          )
+          .subscribe();
+      } catch (e) {
+        console.warn('Realtime subscribe failed', e);
+      }
     }
 
     // 2. Comprehensive Offer Database
@@ -804,7 +974,7 @@
         status: 'complete'
       });
 
-      prependLiveTicker('Offer', coins, '⚡', 'Complete');
+      broadcastLiveActivity('Offer', coins, '⚡', 'Complete');
       playCompletedCustomAudio();
       triggerDollahFloatingToast({
         time: 'just now',
@@ -812,7 +982,6 @@
         status: 'Complete',
         coins: coins.toLocaleString()
       });
-      if (currentTab === 'home') renderHome();
     };
 
     // CASHOUT ENGINE
@@ -941,10 +1110,10 @@
 
         closeCashoutModal();
 
-        // Push to live ticker bar immediately on withdraw
+        // Push to SHARED live ticker for all users
         const shortMethod = selectedCashoutCrypto.includes('Binance') ? 'Binance' : 'LTC';
         const tickerIcon = selectedCashoutCrypto.includes('Binance') ? '🟡' : 'Ł';
-        prependLiveTicker(shortMethod, amount, tickerIcon, 'Pending');
+        broadcastLiveActivity(shortMethod, amount, tickerIcon, 'Pending');
 
         triggerDollahFloatingToast({
           time: 'just now',
@@ -955,7 +1124,6 @@
 
         await fetchUserWithdrawals();
         if (currentTab === 'profile') renderProfile();
-        if (currentTab === 'home') renderHome();
       } catch (e) {
         alert("Withdrawal Error: " + e.message);
       } finally {
@@ -1006,10 +1174,10 @@
                 message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
                 status: 'completed'
               });
-              // Automatically push to live ticker bar on home screen when payout completes
+              // Broadcast completed payout to SHARED live bar for all users
               const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
               const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
-              prependLiveTicker(shortMethod, fw.amount, tickerIcon, 'Sent');
+              broadcastLiveActivity(shortMethod, fw.amount, tickerIcon, 'Sent');
             }
           });
 
@@ -1105,6 +1273,9 @@
     }
 
     async function initAuth() {
+      // Shared live bar works for guests + logged-in users
+      initSharedLiveFeed();
+
       if (!db) return;
       try {
         const { data: { session } } = await db.auth.getSession();
