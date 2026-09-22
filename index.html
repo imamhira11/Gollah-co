@@ -269,7 +269,7 @@
     </aside>
   </div>
 
-  <!-- FLOATING TOAST (Longer Duration) -->
+  <!-- FLOATING TOAST (Longer Duration: 20 seconds) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
       <span id="floating-time" class="text-[10px] text-slate-400 font-medium">just now</span>
@@ -489,7 +489,7 @@
       console.warn("Supabase local active");
     }
 
-    // Live Ticker State for Home Screen
+    // Live Ticker State for Home Screen (Dollah.co style offerwall grid & live stream integration)
     let liveTickerItems = [
       { type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł' },
       { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
@@ -674,7 +674,7 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO 1: Pending Submit Pop Sound
+    // SOUND 1: Pending Submit Pop Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     function playPendingTaakSound() {
@@ -701,7 +701,7 @@
       } catch (e) {}
     }
 
-    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
+    // SOUND 2: Completed Custom Audio ("cashout.mp3")
     function playCompletedCustomAudio() {
       try {
         const audio = new Audio('cashout.mp3');
@@ -736,8 +736,8 @@
       card.classList.add('toast-animate-in');
 
       clearTimeout(floatingToastTimer);
-      // LONGER DURATION: Toast stays visible for 10 seconds (10000ms)
-      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 10000);
+      // EXTENDED DURATION: 20 seconds (20000ms)
+      floatingToastTimer = setTimeout(() => card.classList.add('hidden'), 20000);
       if (window.lucide) lucide.createIcons();
     }
 
@@ -1377,219 +1377,6 @@
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
       if (window.lucide) lucide.createIcons();
-    }
-
-    function renderHome() {
-      const container = document.getElementById('app-content');
-      let filtered = ALL_OFFERS;
-      if (currentCategory === 'featured') {
-        filtered = ALL_OFFERS.filter(o => o.featured);
-      } else if (currentCategory !== 'all') {
-        filtered = ALL_OFFERS.filter(o => o.category === currentCategory);
-      }
-
-      if (searchQuery) {
-        filtered = filtered.filter(o => 
-          o.name.toLowerCase().includes(searchQuery) || 
-          o.provider.toLowerCase().includes(searchQuery) ||
-          o.category.toLowerCase().includes(searchQuery)
-        );
-      }
-
-      const categoryTitleMap = {
-        'featured': '🔥 Featured Tasks & Surveys',
-        'all': '⚡ All Active Rewarded Tasks',
-        'apps': '📱 Best Mobile Apps',
-        'games': '🎮 High-Paying Game Quests',
-        'surveys': '📝 Fast Rewarded Surveys',
-        'gpt': '💡 GPT Tasks & Quizzes',
-        'signups': '✍️ High-Reward Sign Ups'
-      };
-
-      const title = categoryTitleMap[currentCategory] || 'Active Offers';
-
-      let offersHTML = '';
-      filtered.forEach(o => {
-        offersHTML += `
-          <div onclick="openOfferModal('${o.id}')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-lg group">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-10 h-10 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-xs text-[#00d672] group-hover:bg-[#00d672] group-hover:text-black transition">
-                ${o.icon}
-              </div>
-              <span class="text-[10px] bg-[#1a2530] text-slate-400 px-2 py-0.5 rounded font-mono font-semibold">${o.provider}</span>
-            </div>
-            <div>
-              <h4 class="text-xs font-bold text-white block truncate mb-1">${o.name}</h4>
-              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${o.tag || o.category}</span>
-            </div>
-            <div class="pt-3 mt-3 border-t border-[#1d2a37] flex items-center justify-between">
-              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ${o.coins.toLocaleString()}</span>
-              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">+${Math.floor(o.coins / 1000)} XP</span>
-            </div>
-          </div>
-        `;
-      });
-
-      // Render live ticker items dynamically from liveTickerItems array
-      let tickerHTML = '';
-      liveTickerItems.forEach(t => {
-        tickerHTML += `
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
-            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
-          </div>
-        `;
-      });
-
-      container.innerHTML = `
-        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
-          ${tickerHTML}
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> ${title}
-            </h2>
-            <button onclick="filterCategory('all')" class="text-xs text-slate-400 hover:text-[#00d672] cursor-pointer transition">View all offers ›</button>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            ${offersHTML}
-          </div>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderProfile() {
-      const container = document.getElementById('app-content');
-
-      let displayedWithdrawals = userWithdrawals;
-      if (profileFilter === 'pending') {
-        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
-      } else if (profileFilter === 'completed') {
-        displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
-      }
-
-      let listHTML = '';
-      if (displayedWithdrawals.length === 0) {
-        listHTML = `
-          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
-            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
-            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
-          </div>
-        `;
-      } else {
-        listHTML = displayedWithdrawals.map(w => {
-          const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
-          const isBinance = (w.method || '').includes('Binance');
-          return `
-            <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
-              <span class="col-span-4 font-bold text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
-                  ${isBinance ? '🟡' : 'Ł'}
-                </span> 
-                ${w.method}
-              </span>
-              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
-              <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
-              <span class="col-span-2 text-right">
-                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
-                  ${w.status}
-                </span>
-              </span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      container.innerHTML = `
-        <div class="flex flex-col gap-5">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
-          </h2>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
-          </div>
-
-          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">Withdrawals History:</span>
-              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
-              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
-              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
-            </div>
-            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            ${listHTML}
-          </div>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function changeProfileFilter(filter) {
-      profileFilter = filter;
-      renderProfile();
-    }
-
-    function renderShop() {
-      const container = document.getElementById('app-content');
-      container.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-base font-bold text-white">Withdraw Options</h2>
-            <p class="text-xs text-slate-400">Cash out coins directly to your personal crypto wallet.</p>
-          </div>
-          <span class="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-xl border border-emerald-500/30">
-            Min 300 Coins
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
-                Ł
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-sm">Litecoin (LTC)</h3>
-                <span class="text-[11px] text-emerald-400 font-semibold">Min 300 Coins (Instant Transfer)</span>
-              </div>
-            </div>
-            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
-              Withdraw
-            </button>
-          </div>
-
-          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
-                🟡
-              </div>
-              <div>
-                <h3 class="font-bold text-white text-sm">Binance Pay</h3>
-                <span class="text-[11px] text-slate-400 font-semibold">Min 300 Coins (UID / Email / BEP20)</span>
-              </div>
-            </div>
-            <button class="bg-[#1a2734] group-hover:bg-[#00d672] group-hover:text-black text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition">
-              Withdraw
-            </button>
-          </div>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function toggleProfileDropdown() {
-      document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
     renderHome();
