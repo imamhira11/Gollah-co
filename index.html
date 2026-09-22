@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dollah | The #1 Rewards Platform</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#0c111a',
+              surface: '#111824',
+              card: '#161f2f',
+              elevated: '#1a2436',
+              border: '#1f2b3e',
+              borderLight: '#2a3a52',
+              green: '#00e676',
+              greenDark: '#00c853',
+              purple: '#605df6',
+              gold: '#f59e0b',
+              red: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-green': '0 0 20px -2px rgba(0, 230, 118, 0.45)',
+            'glow-purple': '0 0 18px -2px rgba(96, 93, 246, 0.45)',
+            'glow-gold': '0 0 16px -2px rgba(245, 158, 11, 0.45)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      box-sizing: border-box;
+    }
+    input, textarea {
+      user-select: text;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Mobile frame container */
+    .mobile-frame {
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px #1f2b3e;
+      border-radius: 36px;
+      overflow: hidden;
+      min-height: 900px;
+      background-color: #0c111a;
+    }
+    @media (max-width: 640px) {
+      .mobile-frame {
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+      }
+    }
+    /* Subtle ticker marquee animation */
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 24s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+    /* Floating notification transition */
+    .toast-pop {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-pop.hidden-toast {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-[#06090e] text-slate-100 min-h-screen font-sans flex flex-col items-center justify-start p-0 sm:p-4 md:p-6 overflow-x-hidden">
+
+  <!-- Desktop frame toggle bar -->
+  <aside aria-label="Desktop preview switcher" class="hidden sm:flex items-center gap-3 mb-4 bg-app-surface/90 border border-app-border px-4 py-2 rounded-full text-xs backdrop-blur-md shadow-lg z-50">
+    <span class="text-slate-400 font-medium">Dollah.co Preview:</span>
+    <button onclick="toggleMobileView(true)" id="btn-mobile-view" class="px-3 py-1 rounded-full bg-app-green text-black font-extrabold transition flex items-center gap-1.5 shadow-sm">
+      <i class="fa-solid fa-mobile-screen-button"></i> Mobile App Shell
+    </button>
+    <button onclick="toggleMobileView(false)" id="btn-full-view" class="px-3 py-1 rounded-full text-slate-400 hover:text-white transition flex items-center gap-1.5">
+      <i class="fa-solid fa-desktop"></i> Full Width
+    </button>
+    <div class="h-3 w-px bg-slate-700 mx-1"></div>
+    <button onclick="addDemoCoins()" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1">
+      <i class="fa-solid fa-plus-circle"></i> +5,000 Coins
+    </button>
+  </aside>
+
+  <main id="app-wrapper" class="mobile-frame w-full bg-app-bg text-slate-200 relative flex flex-col transition-all duration-300">
+    
+    <!-- STICKY TOP NAVBAR -->
+    <header class="sticky top-0 z-40 bg-[#0c111a]/95 backdrop-blur-md border-b border-app-border/70 px-3.5 py-2.5 flex items-center justify-between">
+      
+      <!-- Brand Logo: Exact Dollah green loop @ icon -->
+      <button onclick="switchTab('home')" class="flex items-center gap-2 group cursor-pointer focus:outline-none">
+        <div class="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center transition-transform group-hover:scale-105">
+          <svg class="w-6 h-6 text-app-green drop-shadow-[0_0_8px_rgba(0,230,118,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
+          </svg>
+        </div>
+        <span class="font-black text-lg tracking-tight text-white hidden xs:inline">dollah<span class="text-app-green">.co</span></span>
+      </button>
+
+      <!-- Right Top Navigation: Coins Pill, Purple Wallet, Profile Avatar with Red Badge -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Coins Balance Pill (Exact dollah.co style) -->
+        <div onclick="showCustomToast('Current Balance: 40,850 Coins ($40.85 USD)', 'info')" class="flex items-center gap-1.5 bg-[#131b28] hover:bg-[#182334] active:scale-95 border border-app-border px-2.5 py-1.5 rounded-full cursor-pointer transition shadow-inner">
+          <div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-300 shadow-glow-gold flex items-center justify-center text-[8px] font-black text-black">
+            ¢
+          </div>
+          <span id="user-balance-nav" class="font-extrabold text-xs tracking-tight text-white">40,850</span>
+          <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 ml-0.5"></i>
+        </div>
+
+        <!-- Purple Wallet Button (Exact dollah.co style) -->
+        <button onclick="switchTab('shop')" title="Wallet & Cashout" class="w-8 h-8 rounded-xl bg-app-purple hover:bg-indigo-600 active:scale-90 text-white flex items-center justify-center transition shadow-glow-purple">
+          <i class="fa-solid fa-wallet text-xs"></i>
+        </button>
+
+        <!-- User Profile Avatar with Red Notification Counter (Exact: 47 / lvl 122) -->
+        <div class="relative">
+          <button onclick="toggleProfileDropdown()" id="profile-toggle-btn" class="flex items-center gap-1 bg-[#131b28] hover:bg-[#192436] border border-app-border p-0.5 pr-1.5 rounded-full transition active:scale-95 focus:outline-none">
+            <div class="relative">
+              <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu&backgroundColor=ffb74d" alt="Avatar" class="w-7 h-7 rounded-full bg-amber-100/10 object-cover border border-amber-400/40">
+              <!-- Exact Red Badge showing 47 as in user screenshot -->
+              <span id="notif-badge-nav" class="absolute -top-1 -right-1.5 bg-app-red text-white text-[9px] font-black px-1 rounded-full min-w-[15px] h-[15px] flex items-center justify-center border border-app-bg shadow-sm">
+                47
+              </span>
+            </div>
+            <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 ml-0.5"></i>
+          </button>
+
+          <!-- USER PROFILE DROPDOWN MENU (Exact screenshot replica) -->
+          <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-64 bg-[#141c2a] border border-app-border rounded-2xl p-4 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl">
+            
+            <!-- User Avatar & Level -->
+            <div class="flex flex-col items-center mb-3">
+              <div class="relative">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu&backgroundColor=ffb74d" alt="Kaallu" class="w-14 h-14 rounded-full border-2 border-slate-700 bg-slate-800 shadow-md">
+                <span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-app-red text-white text-[10px] font-bold px-2 py-0.2 rounded-full whitespace-nowrap shadow-sm">
+                  lvl 122
+                </span>
+              </div>
+              <h4 class="font-extrabold text-white text-base mt-2.5 tracking-wide">Kaallu</h4>
+              
+              <!-- Address Pill with Copy (From Screenshot: 40BhBaNDEyXa...) -->
+              <div onclick="copyAddress()" class="flex items-center gap-1.5 bg-[#0f141e] border border-app-border px-2.5 py-1 rounded-lg text-[11px] text-slate-400 hover:text-white cursor-pointer mt-1 active:scale-95 transition">
+                <span class="font-mono">40BhBaNDEyXa...</span>
+                <i class="fa-regular fa-copy text-[10px] text-app-green"></i>
+              </div>
+            </div>
+
+            <!-- Level Progress Bar -->
+            <div class="mb-3.5 bg-[#0e131d] p-2 rounded-xl border border-app-border/60">
+              <div class="flex justify-between text-[11px] text-slate-400 font-semibold mb-1">
+                <span>lvl 122</span>
+                <span>lvl 123</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-app-green h-full rounded-full transition-all duration-500 shadow-glow-green" style="width: 72%;"></div>
+              </div>
+            </div>
+
+            <!-- Menu List (Notifications, Devices, Bonus Code, Profile, Referrals, Logout) -->
+            <div class="space-y-1 text-xs font-semibold">
+              <button onclick="openModal('notifications-modal')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-app-card text-slate-300 hover:text-white transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-bell text-slate-400 w-4"></i> Notifications</span>
+                <span class="bg-app-red text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">47</span>
+              </button>
+
+              <button onclick="openModal('devices-modal')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-app-card text-slate-300 hover:text-white transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-mobile-screen text-slate-400 w-4"></i> Devices</span>
+              </button>
+
+              <button onclick="openModal('bonus-code-modal')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-app-card text-slate-300 hover:text-white transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-heart text-slate-400 w-4"></i> Bonus Code</span>
+              </button>
+
+              <button onclick="switchTab('profile')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-app-card text-slate-300 hover:text-white transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-user text-slate-400 w-4"></i> Profile</span>
+              </button>
+
+              <button onclick="openModal('referrals-modal')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-app-card text-slate-300 hover:text-white transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-users text-slate-400 w-4"></i> Referrals</span>
+              </button>
+
+              <div class="pt-1 border-t border-app-border/40 mt-1">
+                <button onclick="showCustomToast('Dollah session active', 'info')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition">
+                  <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Logout
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- LIVE CASHOUT TICKER CARDS (Exact LTC / seconds ago / 2m ago from screenshots) -->
+    <section aria-label="Recent Live Cashouts" class="bg-[#0b1018] border-b border-app-border/40 py-1.5 overflow-hidden relative">
+      <div class="animate-marquee gap-2 pl-3">
+        
+        <div class="flex items-center gap-2 bg-[#131b28] border border-app-border/80 rounded-xl px-2.5 py-1 text-[11px] shadow-sm">
+          <div class="w-5 h-5 rounded bg-slate-700/80 flex items-center justify-center font-bold text-white text-[10px]">Ł</div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-200">LTC</span>
+              <span class="text-[10px] text-slate-400">seconds ago</span>
+            </div>
+          </div>
+          <span class="font-black text-white text-xs ml-1 bg-slate-800 px-1.5 py-0.5 rounded">3,486</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-[#131b28] border border-app-border/80 rounded-xl px-2.5 py-1 text-[11px] shadow-sm">
+          <div class="w-5 h-5 rounded bg-slate-700/80 flex items-center justify-center font-bold text-white text-[10px]">Ł</div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-200">LTC</span>
+              <span class="text-[10px] text-slate-400">2m ago</span>
+            </div>
+          </div>
+          <span class="font-black text-white text-xs ml-1 bg-slate-800 px-1.5 py-0.5 rounded">21,400</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-[#131b28] border border-app-border/80 rounded-xl px-2.5 py-1 text-[11px] shadow-sm">
+          <div class="w-5 h-5 rounded bg-slate-700/80 flex items-center justify-center font-bold text-white text-[10px]">Ł</div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-200">LTC</span>
+              <span class="text-[10px] text-slate-400">2m ago</span>
+            </div>
+          </div>
+          <span class="font-black text-white text-xs ml-1 bg-slate-800 px-1.5 py-0.5 rounded">2,573</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-[#131b28] border border-app-border/80 rounded-xl px-2.5 py-1 text-[11px] shadow-sm">
+          <div class="w-5 h-5 rounded bg-amber-600/30 flex items-center justify-center font-bold text-amber-400 text-[10px]">₿</div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-200">BTC</span>
+              <span class="text-[10px] text-slate-400">3m ago</span>
+            </div>
+          </div>
+          <span class="font-black text-white text-xs ml-1 bg-slate-800 px-1.5 py-0.5 rounded">15,000</span>
+        </div>
+
+        <!-- Loop duplicates -->
+        <div class="flex items-center gap-2 bg-[#131b28] border border-app-border/80 rounded-xl px-2.5 py-1 text-[11px] shadow-sm">
+          <div class="w-5 h-5 rounded bg-slate-700/80 flex items-center justify-center font-bold text-white text-[10px]">Ł</div>
+          <div class="flex flex-col leading-tight">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-200">LTC</span>
+              <span class="text-[10px] text-slate-400">seconds ago</span>
+            </div>
+          </div>
+          <span class="font-black text-white text-xs ml-1 bg-slate-800 px-1.5 py-0.5 rounded">3,486</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT VIEW AREA -->
+    <div id="views-container" class="flex-1 pb-24 px-3.5 pt-3">
+      
+      <!-- ================= TAB 1: HOME (Providers & Offers) ================= -->
+      <section id="view-home" class="space-y-4">
+        
+        <!-- Search Bar (Exact screenshot style) -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="offer-search-input" onkeyup="filterOffers(this.value)" placeholder="Search" class="w-full bg-[#121926] border border-app-border/90 focus:border-app-green/60 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 outline-none transition">
+        </div>
+
+        <!-- Providers Header -->
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cubes-stacked text-slate-400 text-xs"></i>
+            <h3 class="font-bold text-sm tracking-wide text-white">Providers</h3>
+          </div>
+          <div class="flex gap-1">
+            <button class="w-6 h-6 rounded-lg bg-[#141b28] border border-app-border flex items-center justify-center text-slate-500 hover:text-white text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="w-6 h-6 rounded-lg bg-[#141b28] border border-app-border flex items-center justify-center text-slate-500 hover:text-white text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Providers Horizontal Slider (Lootably +50%, Monlix Hot, Adgate Hot, Offertoro) -->
+        <div class="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 pt-0.5">
+          
+          <!-- Lootably Card -->
+          <div onclick="openProviderModal('Lootably', '#3730a3', '+50%')" class="min-w-[115px] sm:min-w-[125px] h-36 rounded-2xl bg-gradient-to-b from-[#3730a3] to-[#1e1b4b] border border-indigo-400/30 p-2.5 flex flex-col justify-between cursor-pointer hover:brightness-110 active:scale-95 transition relative shadow-lg">
+            <span class="self-end bg-indigo-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full">+50%</span>
+            <div class="flex flex-col items-center justify-center my-auto">
+              <span class="font-black text-white text-sm tracking-tight">lootably</span>
+            </div>
+            <span class="text-center text-[11px] font-bold text-slate-200">Lootably</span>
+          </div>
+
+          <!-- Monlix Card -->
+          <div onclick="openProviderModal('Monlix', '#10b981', 'Hot')" class="min-w-[115px] sm:min-w-[125px] h-36 rounded-2xl bg-gradient-to-b from-[#10b981] to-[#047857] border border-emerald-400/30 p-2.5 flex flex-col justify-between cursor-pointer hover:brightness-110 active:scale-95 transition relative shadow-lg">
+            <span class="self-end bg-rose-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full">Hot</span>
+            <div class="flex flex-col items-center justify-center my-auto">
+              <i class="fa-solid fa-code-fork text-2xl text-white transform -rotate-45"></i>
+            </div>
+            <span class="text-center text-[11px] font-bold text-white">Monlix</span>
+          </div>
+
+          <!-- Adgate Card -->
+          <div onclick="openProviderModal('Adgate', '#0284c7', 'Hot')" class="min-w-[115px] sm:min-w-[125px] h-36 rounded-2xl bg-gradient-to-b from-[#0284c7] to-[#0369a1] border border-sky-400/30 p-2.5 flex flex-col justify-between cursor-pointer hover:brightness-110 active:scale-95 transition relative shadow-lg">
+            <span class="self-end bg-rose-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full">Hot</span>
+            <div class="flex flex-col items-center justify-center my-auto">
+              <i class="fa-solid fa-globe text-2xl text-white"></i>
+            </div>
+            <span class="text-center text-[11px] font-bold text-white">Adgate</span>
+          </div>
+
+          <!-- Offertoro Card -->
+          <div onclick="openProviderModal('Offertoro', '#7c3aed', 'Hot')" class="min-w-[115px] sm:min-w-[125px] h-36 rounded-2xl bg-gradient-to-b from-[#7c3aed] to-[#4c1d95] border border-violet-400/30 p-2.5 flex flex-col justify-between cursor-pointer hover:brightness-110 active:scale-95 transition relative shadow-lg">
+            <span class="self-end bg-purple-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full">Top</span>
+            <div class="flex flex-col items-center justify-center my-auto">
+              <i class="fa-solid fa-bolt text-2xl text-white"></i>
+            </div>
+            <span class="text-center text-[11px] font-bold text-white">Offertoro</span>
+          </div>
+
+        </div>
+
+        <!-- Filter Pill Controls: [Offers], [Global ▾], [50 ¢ ▾] (From user screenshot) -->
+        <div class="flex items-center gap-2 pt-1 text-xs">
+          <button class="bg-app-green text-black font-extrabold px-3 py-1.5 rounded-xl shadow-glow-green active:scale-95 transition">
+            Offers
+          </button>
+          
+          <button class="bg-[#141b28] border border-app-border text-slate-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:text-white transition">
+            <i class="fa-solid fa-globe text-[11px] text-slate-400"></i>
+            <span>Global</span>
+            <i class="fa-solid fa-chevron-down text-[8px] text-slate-500 ml-1"></i>
+          </button>
+
+          <button class="bg-[#141b28] border border-app-border text-slate-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:text-white transition">
+            <div class="w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center text-[7px] text-black font-bold">¢</div>
+            <span>50</span>
+            <i class="fa-solid fa-chevron-down text-[8px] text-slate-500 ml-1"></i>
+          </button>
+        </div>
+
+        <!-- Offers Header Line -->
+        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1 pt-1">
+          <span>Offer</span>
+          <span>Reward</span>
+        </div>
+
+        <!-- Exact Offers Task List from Screenshots -->
+        <div class="space-y-2" id="offers-list">
+          
+          <!-- Task 1: Animals and Coins (25,000 Coins) -->
+          <div class="offer-card flex items-center justify-between p-3 rounded-2xl bg-[#141c2a] hover:bg-[#182334] border border-app-border transition cursor-pointer" onclick="simulateCompleteTask('Animals and Coins', 25000, 'game')">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=120&q=80" alt="Animals and Coins" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h4 class="font-bold text-white text-xs tracking-tight">Animals And Coins</h4>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-500"></i>
+                </div>
+                <p class="text-[11px] text-slate-400">Complete Island 65</p>
+                <span class="text-[10px] text-indigo-400 font-semibold">Lootably</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black font-black text-[7px] flex items-center justify-center">¢</span>
+              <span class="text-amber-400 font-black text-xs">25,000</span>
+            </div>
+          </div>
+
+          <!-- Task 2: Merge Dragons (1,500 Coins) -->
+          <div class="offer-card flex items-center justify-between p-3 rounded-2xl bg-[#141c2a] hover:bg-[#182334] border border-app-border transition cursor-pointer" onclick="simulateCompleteTask('Merge Dragons', 1500, 'game')">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=120&q=80" alt="Merge Dragons" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h4 class="font-bold text-white text-xs tracking-tight">Merge Dragons</h4>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-500"></i>
+                </div>
+                <p class="text-[11px] text-slate-400">Reach Dragon Power 450</p>
+                <span class="text-[10px] text-sky-400 font-semibold">Adgate Media</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black font-black text-[7px] flex items-center justify-center">¢</span>
+              <span class="text-amber-400 font-black text-xs">1,500</span>
+            </div>
+          </div>
+
+          <!-- Task 3: Uphold (21,400 Coins) -->
+          <div class="offer-card flex items-center justify-between p-3 rounded-2xl bg-[#141c2a] hover:bg-[#182334] border border-app-border transition cursor-pointer" onclick="simulateCompleteTask('Uphold: Buy BTC, ETH', 21400, 'crypto')">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-app-green text-xl font-black">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h4 class="font-bold text-white text-xs tracking-tight">Uphold: Buy BTC, ETH</h4>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-500"></i>
+                </div>
+                <p class="text-[11px] text-slate-400">First Deposit $10</p>
+                <span class="text-[10px] text-emerald-400 font-semibold">Lootably</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black font-black text-[7px] flex items-center justify-center">¢</span>
+              <span class="text-amber-400 font-black text-xs">21,400</span>
+            </div>
+          </div>
+
+          <!-- Task 4: At Yarisi (336 Coins - from user screenshot) -->
+          <div class="offer-card flex items-center justify-between p-3 rounded-2xl bg-[#141c2a] hover:bg-[#182334] border border-app-border transition cursor-pointer" onclick="simulateCompleteTask('At Yarışı', 336, 'game')">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">
+                <i class="fa-solid fa-horse"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h4 class="font-bold text-white text-xs tracking-tight">At Yarışı</h4>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-500"></i>
+                </div>
+                <p class="text-[11px] text-slate-400">Play & score 500 points</p>
+                <span class="text-[10px] text-slate-400 font-semibold">Monlix</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black font-black text-[7px] flex items-center justify-center">¢</span>
+              <span class="text-amber-400 font-black text-xs">336</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: PROFILE (/profile Screenshot) ================= -->
+      <section id="view-profile" class="hidden space-y-3">
+        
+        <!-- Exact Top Sub-tabs from user screenshot: Earnings, Withdrawals, In-Progress, On-Hold -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <button onclick="setProfileSubTab('earnings')" id="subtab-earnings" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-app-green text-black transition shadow-glow-green">
+            Earnings
+          </button>
+          <button onclick="setProfileSubTab('withdrawals')" id="subtab-withdrawals" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition">
+            Withdrawals
+          </button>
+          <button onclick="setProfileSubTab('inprogress')" id="subtab-inprogress" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition">
+            In-Progress
+          </button>
+          <button onclick="setProfileSubTab('onhold')" id="subtab-onhold" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition">
+            On-Hold
+          </button>
+        </div>
+
+        <!-- Exact dollah.co/profile Table View Header: Name and Reward -->
+        <div class="flex items-center justify-between px-2 pt-2 text-[11px] font-bold text-slate-400">
+          <span>Name</span>
+          <span>Reward</span>
+        </div>
+
+        <!-- History List (Exact items from screenshots with Released badges) -->
+        <div class="space-y-1.5" id="profile-history-list">
+          
+          <!-- Leaderboard (15,000) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-app-green text-xs font-black">
+                @
+              </div>
+              <div>
+                <h5 class="font-bold text-white text-xs">Leaderboard</h5>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              15,000
+            </div>
+          </div>
+
+          <!-- Earn 10000 coins - daily (500) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-app-green text-xs font-black">
+                @
+              </div>
+              <div>
+                <h5 class="font-bold text-white text-xs">Earn 10000 coins - daily</h5>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              500
+            </div>
+          </div>
+
+          <!-- Earn 5000 coins - daily (250) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-app-green text-xs font-black">
+                @
+              </div>
+              <div>
+                <h5 class="font-bold text-white text-xs">Earn 5000 coins - daily</h5>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              250
+            </div>
+          </div>
+
+          <!-- Earn 1000 coins - daily (100) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-app-green text-xs font-black">
+                @
+              </div>
+              <div>
+                <h5 class="font-bold text-white text-xs">Earn 1000 coins - daily</h5>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              100
+            </div>
+          </div>
+
+          <!-- Animals and Coins (10,000) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=80&q=80" class="w-6 h-6 rounded-lg object-cover">
+              <div>
+                <div class="flex items-center gap-1">
+                  <h5 class="font-bold text-white text-xs">Animals and Co...</h5>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-500"></i>
+                </div>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              10,000
+            </div>
+          </div>
+
+          <!-- Animals and Coins (7,500) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=80&q=80" class="w-6 h-6 rounded-lg object-cover">
+              <div>
+                <div class="flex items-center gap-1">
+                  <h5 class="font-bold text-white text-xs">Animals and Co...</h5>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-500"></i>
+                </div>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              7,500
+            </div>
+          </div>
+
+          <!-- Leaderboard (500) -->
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#141c2a] border border-app-border/80 text-xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-app-green text-xs font-black">
+                @
+              </div>
+              <div>
+                <h5 class="font-bold text-white text-xs">Leaderboard</h5>
+                <span class="text-[10px] text-slate-500">Released</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-black text-amber-400 text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              500
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: RANKING / LEADERBOARD ================= -->
+      <section id="view-ranking" class="hidden space-y-4">
+        
+        <!-- Podium Top 3 (Exact Screenshot replica: SinfulMa, Kaallu with crown, Mordant) -->
+        <div class="grid grid-cols-3 gap-2 pt-2 items-end">
+          
+          <!-- 2nd Place (SinfulMa... 22,400) -->
+          <div class="bg-[#141c2a] border border-app-border rounded-2xl p-3 flex flex-col items-center text-center h-[175px] justify-between relative shadow-md">
+            <div class="flex flex-col items-center">
+              <div class="relative mb-1">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=SinfulMa&backgroundColor=ff80ab" alt="SinfulMa" class="w-12 h-12 rounded-full border border-pink-500 bg-slate-800">
+                <span class="absolute -top-1 -right-1 bg-slate-400 text-black font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">2</span>
+              </div>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="text-xs font-bold text-slate-200 truncate max-w-[70px]">SinfulMa...</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-500"></i>
+              </div>
+            </div>
+            <span class="text-xs font-black text-app-green">22,400</span>
+          </div>
+
+          <!-- 1st Place (Center elevated: Kaallu 25,000 + Gold Crown) -->
+          <div class="bg-[#182335] border-2 border-emerald-500/50 rounded-2xl p-3 flex flex-col items-center text-center h-[200px] justify-between relative shadow-xl transform -translate-y-2">
+            <div class="flex flex-col items-center">
+              <div class="text-amber-400 text-sm -mb-1 animate-bounce">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <div class="relative mb-1">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Kaallu&backgroundColor=ffb74d" alt="Kaallu" class="w-14 h-14 rounded-full border-2 border-amber-400 bg-slate-800 shadow-glow-gold">
+                <span class="absolute -top-1 -right-1 bg-amber-400 text-black font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center">1</span>
+              </div>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="text-xs font-bold text-white">Kaallu</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-400"></i>
+              </div>
+            </div>
+            <div class="flex flex-col items-center">
+              <span class="text-sm font-black text-app-green">25,000</span>
+              <span class="text-[9px] text-amber-400 font-bold">+15,000 Prize</span>
+            </div>
+          </div>
+
+          <!-- 3rd Place (Mordant... 10,151) -->
+          <div class="bg-[#141c2a] border border-app-border rounded-2xl p-3 flex flex-col items-center text-center h-[160px] justify-between relative shadow-md">
+            <div class="flex flex-col items-center">
+              <div class="relative mb-1">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Mordant&backgroundColor=80d8ff" alt="Mordant" class="w-12 h-12 rounded-full border border-cyan-400 bg-slate-800">
+                <span class="absolute -top-1 -right-1 bg-amber-700 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
+              </div>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="text-xs font-bold text-slate-200 truncate max-w-[70px]">Mordant...</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-500"></i>
+              </div>
+            </div>
+            <span class="text-xs font-black text-app-green">10,151</span>
+          </div>
+
+        </div>
+
+        <!-- You earned & Ends in Bar (From screenshot) -->
+        <div class="bg-[#121926] border border-app-border rounded-2xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-slate-300">You earned</span>
+            <span class="w-3 h-3 rounded-full bg-amber-400 text-black font-black text-[7px] flex items-center justify-center">¢</span>
+            <span class="text-xs font-black text-white">25,000</span>
+            <span class="text-xs text-app-green font-bold">today</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400">Ends In</span>
+            <span id="leaderboard-timer" class="font-mono font-bold text-white bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-700 text-[11px]">04h 45m 06s</span>
+          </div>
+        </div>
+
+        <!-- Prize Pool Info -->
+        <div class="bg-gradient-to-r from-indigo-950/60 to-purple-950/50 border border-indigo-500/30 rounded-2xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-app-purple/20 border border-indigo-400/30 flex items-center justify-center text-app-purple">
+              <i class="fa-solid fa-trophy text-xs"></i>
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white">Daily Race Prize Pool</h5>
+              <p class="text-[10px] text-slate-400">Top 10 users share 50,000 Coins daily</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-amber-400 font-extrabold text-xs">
+            <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+            15,000 #1
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 4: SHOP / CASHOUT ================= -->
+      <section id="view-shop" class="hidden space-y-4">
+        
+        <div class="bg-gradient-to-br from-[#162133] to-[#0f1724] border border-app-border rounded-2xl p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Available Balance</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="w-4 h-4 rounded-full bg-amber-400 text-black font-black text-[9px] flex items-center justify-center">¢</span>
+                <span id="shop-coin-display" class="text-xl font-black text-white">40,850</span>
+                <span class="text-xs text-slate-400 font-semibold">(~$<span id="shop-usd-display">40.85</span> USD)</span>
+              </div>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-app-purple/20 border border-app-purple/40 flex items-center justify-center text-app-purple text-lg shadow-glow-purple">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            1,000 Coins = $1.00 USD. Instant payouts directly to your crypto wallet or email.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div onclick="selectWithdrawMethod('Litecoin (LTC)', 'LTC', 500, 'Ł')" class="p-3 bg-[#141c2a] hover:bg-[#192436] border border-app-border rounded-2xl cursor-pointer transition active:scale-95 flex flex-col justify-between h-28">
+            <div class="flex items-start justify-between">
+              <div class="w-8 h-8 rounded-xl bg-slate-700/80 flex items-center justify-center text-white font-black text-sm shadow">Ł</div>
+              <span class="bg-emerald-500/10 text-app-green border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded-full">0% Fee</span>
+            </div>
+            <div>
+              <h5 class="font-bold text-white text-xs">Litecoin (LTC)</h5>
+              <span class="text-[10px] text-slate-400">Min: 500 Coins ($0.50)</span>
+            </div>
+          </div>
+
+          <div onclick="selectWithdrawMethod('Bitcoin (BTC)', 'BTC', 5000, '₿')" class="p-3 bg-[#141c2a] hover:bg-[#192436] border border-app-border rounded-2xl cursor-pointer transition active:scale-95 flex flex-col justify-between h-28">
+            <div class="flex items-start justify-between">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-sm shadow">₿</div>
+              <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded-full">Popular</span>
+            </div>
+            <div>
+              <h5 class="font-bold text-white text-xs">Bitcoin (BTC)</h5>
+              <span class="text-[10px] text-slate-400">Min: 5,000 Coins ($5.00)</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 5: DAILY ================= -->
+      <section id="view-daily" class="hidden space-y-4">
+        <div class="bg-gradient-to-br from-emerald-950/70 via-[#131d2b] to-[#101724] border border-emerald-500/30 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <span class="bg-app-green/20 text-app-green border border-emerald-500/30 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Streak Active</span>
+              <h3 class="text-base font-extrabold text-white mt-1">7-Day Check-in Bonus</h3>
+              <p class="text-xs text-slate-400">Check in every day to earn growing rewards</p>
+            </div>
+            <i class="fa-solid fa-calendar-check text-3xl text-app-green/60"></i>
+          </div>
+
+          <button onclick="showCustomToast('Daily bonus claimed! +100 Coins', 'success')" class="w-full bg-app-green hover:bg-emerald-400 active:scale-95 text-black font-extrabold text-xs py-2.5 rounded-xl transition shadow-glow-green">
+            Claim Today's Bonus (+100 Coins)
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: CHAT ================= -->
+      <section id="view-chat" class="hidden space-y-3">
+        <div class="flex items-center justify-between border-b border-app-border/60 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-app-green animate-ping"></span>
+            <h4 class="font-bold text-xs text-white">Global Chat</h4>
+          </div>
+          <span class="text-[10px] text-slate-400">142 Online</span>
+        </div>
+
+        <div id="chat-messages" class="space-y-2 h-[420px] overflow-y-auto no-scrollbar pr-1 text-xs">
+          <div class="flex items-start gap-2 bg-[#121925] p-2 rounded-xl border border-app-border/40">
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=CryptoKing&backgroundColor=bbf7d0" class="w-6 h-6 rounded-full bg-slate-800">
+            <div class="flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-amber-400 text-[11px]">CryptoKing</span>
+                <span class="text-[9px] text-slate-500">2m ago</span>
+              </div>
+              <p class="text-slate-300 text-[11px] mt-0.5">Lootably Animals and coins offer credited instantly for me! 🔥</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- FLOATING LIVE PUBLIC ACTIVITY NOTIFICATION POPUP (Seen across all screenshots right above bottom navigation!) -->
+    <div id="floating-live-toast" class="toast-pop absolute bottom-16 left-3.5 right-3.5 z-40 bg-[#162130]/95 border border-slate-700/80 rounded-2xl p-3 shadow-2xl backdrop-blur-xl">
+      <div class="flex items-center justify-between">
+        
+        <div class="flex items-center gap-3">
+          <!-- Square Icon (LTC or Game thumbnail) -->
+          <div id="live-toast-icon" class="w-11 h-11 rounded-xl bg-slate-700 flex items-center justify-center font-bold text-white text-lg shadow">
+            Ł
+          </div>
+
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h5 id="live-toast-title" class="font-black text-white text-xs">LTC</h5>
+              <!-- Either green check circle OR purple PENDING tag -->
+              <span id="live-toast-badge-check" class="w-4 h-4 rounded-full bg-emerald-500 text-black text-[9px] flex items-center justify-center font-black">✓</span>
+              <span id="live-toast-badge-pending" class="hidden bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">PENDING</span>
+            </div>
+            <p id="live-toast-sub" class="text-[11px] text-slate-400">Pending approval</p>
+            <div class="flex items-center gap-1 mt-0.5 text-amber-400 font-black text-xs">
+              <span class="w-3 h-3 rounded-full bg-amber-400 text-black text-[7px] flex items-center justify-center font-bold">¢</span>
+              <span id="live-toast-amount">38,010</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="handleToastAction()" class="bg-[#1b273b] hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-600 transition">
+          View
+        </button>
+
+      </div>
+    </div>
+
+    <!-- BOTTOM TAB NAVIGATION BAR (Screenshots: Ranking [$50], Shop, Home, Daily [3], Chat) -->
+    <nav aria-label="Bottom Navigation" class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-[#0c111a]/95 backdrop-blur-lg border-t border-app-border/80 px-2 py-2 flex items-center justify-around shadow-2xl">
+      
+      <!-- 1. Ranking Tab ($50 Purple Badge) -->
+      <button onclick="switchTab('ranking')" id="tab-btn-ranking" class="relative flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition py-1 px-2.5">
+        <span class="absolute -top-1 right-1 bg-app-purple text-white text-[9px] font-black px-1.5 rounded-full shadow-sm">
+          $50
+        </span>
+        <i class="fa-solid fa-star text-base"></i>
+        <span class="text-[10px] font-semibold">Ranking</span>
+      </button>
+
+      <!-- 2. Shop Tab -->
+      <button onclick="switchTab('shop')" id="tab-btn-shop" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition py-1 px-2.5">
+        <i class="fa-brands fa-bitcoin text-base"></i>
+        <span class="text-[10px] font-semibold">Shop</span>
+      </button>
+
+      <!-- 3. Home Tab (Active default) -->
+      <button onclick="switchTab('home')" id="tab-btn-home" class="flex flex-col items-center gap-0.5 text-app-green transition py-1 px-2.5">
+        <i class="fa-solid fa-house text-lg drop-shadow-[0_0_8px_rgba(0,230,118,0.5)]"></i>
+        <span class="text-[10px] font-black text-app-green">Home</span>
+      </button>
+
+      <!-- 4. Daily Tab (Red '3' Badge) -->
+      <button onclick="switchTab('daily')" id="tab-btn-daily" class="relative flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition py-1 px-2.5">
+        <span class="absolute -top-1 right-2 bg-app-red text-white text-[9px] font-black px-1.5 rounded-full shadow-sm">
+          3
+        </span>
+        <i class="fa-solid fa-gamepad text-base"></i>
+        <span class="text-[10px] font-semibold">Daily</span>
+      </button>
+
+      <!-- 5. Chat Tab -->
+      <button onclick="switchTab('chat')" id="tab-btn-chat" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition py-1 px-2.5">
+        <i class="fa-solid fa-comment-dots text-base"></i>
+        <span class="text-[10px] font-semibold">Chat</span>
+      </button>
+
+    </nav>
+
+    <!-- WITHDRAWAL MODAL -->
+    <div id="withdraw-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[#141b27] border border-app-border rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-app-border/60 pb-3">
+          <div class="flex items-center gap-2">
+            <span id="withdraw-method-icon" class="text-xl text-amber-400 font-black">Ł</span>
+            <h4 id="withdraw-modal-title" class="font-black text-white text-sm">Withdraw to Litecoin</h4>
+          </div>
+          <button onclick="closeModal('withdraw-modal')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-[11px] font-bold text-slate-300">Amount in Coins</label>
+          <input type="number" id="withdraw-coins-input" value="2500" class="w-full bg-[#0d131d] border border-app-border rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-app-green">
+        </div>
+        <button onclick="submitWithdrawal()" class="w-full bg-app-green hover:bg-emerald-400 text-black font-black text-xs py-2.5 rounded-xl transition shadow-glow-green">
+          Confirm Cashout
+        </button>
+      </div>
+    </div>
+
+    <!-- PROVIDER MODAL -->
+    <div id="provider-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+      <div class="bg-[#121824] border border-app-border rounded-3xl max-w-md w-full p-4 shadow-2xl space-y-3">
+        <div class="flex items-center justify-between border-b border-app-border/60 pb-2.5">
+          <h4 id="provider-modal-title" class="font-black text-white text-sm">Lootably Offerwall</h4>
+          <button onclick="closeModal('provider-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="w-full h-64 bg-[#090d14] rounded-2xl border border-app-border p-4 flex flex-col justify-between">
+          <p class="text-xs text-slate-300">Test offerwall postback simulation:</p>
+          <div class="p-2.5 rounded-xl bg-[#131b27] border border-slate-700/80 flex items-center justify-between">
+            <div>
+              <h5 class="text-xs font-bold text-white">Board Kings Island Level 40</h5>
+              <span class="text-[10px] text-slate-400">Mobile Game</span>
+            </div>
+            <button onclick="completeSimulatedOffer('Board Kings', 3500)" class="bg-app-green text-black font-black text-[10px] px-2.5 py-1.5 rounded-lg active:scale-95 shadow">
+              +3,500 ¢
+            </button>
+          </div>
+          <button onclick="closeModal('provider-modal')" class="w-full bg-slate-800 text-white text-xs py-2 rounded-xl">Close</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* App state */
+    const state = {
+      coins: 40850,
+      totalEarned: 40850,
+      activeTab: 'home',
+      notificationIndex: 0
+    };
+
+    /* Notification events queue matching all screenshots */
+    const publicEvents = [
+      {
+        type: 'crypto-pending',
+        title: 'LTC',
+        subtitle: 'Pending approval',
+        coins: '38,010',
+        badge: 'pending',
+        iconText: 'Ł'
+      },
+      {
+        type: 'game',
+        title: 'Animals And Coins',
+        subtitle: 'Complete',
+        coins: '125',
+        badge: 'check',
+        iconImg: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=80&q=80'
+      },
+      {
+        type: 'crypto-sent',
+        title: 'LTC',
+        subtitle: 'Sent',
+        coins: '2,573',
+        badge: 'check',
+        iconText: 'Ł'
+      },
+      {
+        type: 'game',
+        title: 'Merge Dragons',
+        subtitle: 'Complete',
+        coins: '1,500',
+        badge: 'check',
+        iconImg: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=80&q=80'
+      }
+    ];
+
+    /* Cycle floating public activity notification every 5 seconds */
+    function cycleLiveNotification() {
+      const toast = document.getElementById('floating-live-toast');
+      if (!toast) return;
+
+      toast.classList.add('hidden-toast');
+
+      setTimeout(() => {
+        const item = publicEvents[state.notificationIndex];
+        state.notificationIndex = (state.notificationIndex + 1) % publicEvents.length;
+
+        document.getElementById('live-toast-title').innerText = item.title;
+        document.getElementById('live-toast-sub').innerText = item.subtitle;
+        document.getElementById('live-toast-amount').innerText = item.coins;
+
+        const checkBadge = document.getElementById('live-toast-badge-check');
+        const pendingBadge = document.getElementById('live-toast-badge-pending');
+        const iconBox = document.getElementById('live-toast-icon');
+
+        if (item.badge === 'pending') {
+          checkBadge.classList.add('hidden');
+          pendingBadge.classList.remove('hidden');
+        } else {
+          checkBadge.classList.remove('hidden');
+          pendingBadge.classList.add('hidden');
+        }
+
+        if (item.iconImg) {
+          iconBox.innerHTML = `<img src="${item.iconImg}" class="w-full h-full object-cover rounded-xl">`;
+        } else {
+          iconBox.innerHTML = item.iconText;
+        }
+
+        toast.classList.remove('hidden-toast');
+      }, 400);
+    }
+
+    function handleToastAction() {
+      switchTab('profile');
+    }
+
+    /* Switch Bottom Navigation Tabs */
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+
+      const views = ['home', 'ranking', 'shop', 'daily', 'profile', 'chat'];
+      views.forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.add('hidden');
+      });
+
+      const activeEl = document.getElementById('view-' + tabId);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      const tabBtns = ['ranking', 'shop', 'home', 'daily', 'chat'];
+      tabBtns.forEach(btnKey => {
+        const btn = document.getElementById('tab-btn-' + btnKey);
+        if (btn) {
+          if (btnKey === tabId) {
+            btn.classList.add('text-app-green');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('text-app-green');
+            btn.classList.add('text-slate-400');
+          }
+        }
+      });
+
+      document.getElementById('profile-dropdown').classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* Subtab switching inside /profile view */
+    function setProfileSubTab(sub) {
+      const tabs = ['earnings', 'withdrawals', 'inprogress', 'onhold'];
+      tabs.forEach(t => {
+        const el = document.getElementById('subtab-' + t);
+        if (el) {
+          if (t === sub) {
+            el.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-app-green text-black transition shadow-glow-green';
+          } else {
+            el.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition';
+          }
+        }
+      });
+    }
+
+    /* Profile Dropdown Toggle */
+    function toggleProfileDropdown() {
+      document.getElementById('profile-dropdown').classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      const btn = document.getElementById('profile-toggle-btn');
+      const menu = document.getElementById('profile-dropdown');
+      if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    function openProviderModal(name) {
+      document.getElementById('provider-modal-title').innerText = name + ' Offerwall';
+      openModal('provider-modal');
+    }
+
+    function completeSimulatedOffer(title, coins) {
+      state.coins += coins;
+      updateBalances();
+      closeModal('provider-modal');
+      showCustomToast(`Completed ${title}! +${coins.toLocaleString()} Coins`, 'success');
+    }
+
+    function simulateCompleteTask(name, coins, type) {
+      state.coins += coins;
+      updateBalances();
+      showCustomToast(`Started ${name}! +${coins.toLocaleString()} Coins awarded.`, 'success');
+    }
+
+    function updateBalances() {
+      const val = state.coins.toLocaleString();
+      document.getElementById('user-balance-nav').innerText = val;
+      const shopVal = document.getElementById('shop-coin-display');
+      if (shopVal) shopVal.innerText = val;
+      const shopUsd = document.getElementById('shop-usd-display');
+      if (shopUsd) shopUsd.innerText = (state.coins / 1000).toFixed(2);
+    }
+
+    function addDemoCoins() {
+      state.coins += 5000;
+      updateBalances();
+      showCustomToast('Added +5,000 Coins!', 'success');
+    }
+
+    function selectWithdrawMethod(name, symbol, min, icon) {
+      document.getElementById('withdraw-modal-title').innerText = 'Withdraw to ' + name;
+      document.getElementById('withdraw-method-icon').innerText = icon;
+      document.getElementById('withdraw-coins-input').value = min;
+      openModal('withdraw-modal');
+    }
+
+    function submitWithdrawal() {
+      const amt = parseInt(document.getElementById('withdraw-coins-input').value) || 0;
+      if (amt > state.coins) {
+        showCustomToast('Insufficient balance!', 'error');
+        return;
+      }
+      state.coins -= amt;
+      updateBalances();
+      closeModal('withdraw-modal');
+      showCustomToast(`Withdrawal of ${amt} coins submitted!`, 'success');
+    }
+
+    function copyAddress() {
+      const temp = document.createElement('input');
+      temp.value = '40BhBaNDEyXa...';
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showCustomToast('Copied address to clipboard!', 'info');
+    }
+
+    function showCustomToast(msg, type) {
+      const b = document.createElement('div');
+      b.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl text-xs font-bold text-white shadow-2xl backdrop-blur-md border ${type === 'error' ? 'bg-red-600/90 border-red-400' : 'bg-slate-800/90 border-slate-600'} transition-all duration-300`;
+      b.innerText = msg;
+      document.body.appendChild(b);
+      setTimeout(() => {
+        b.style.opacity = '0';
+        setTimeout(() => b.remove(), 400);
+      }, 2500);
+    }
+
+    function filterOffers(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('.offer-card').forEach(c => {
+        c.style.display = c.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function toggleMobileView(isMobile) {
+      const wrap = document.getElementById('app-wrapper');
+      const btnM = document.getElementById('btn-mobile-view');
+      const btnF = document.getElementById('btn-full-view');
+      if (isMobile) {
+        wrap.classList.add('mobile-frame');
+        btnM.className = 'px-3 py-1 rounded-full bg-app-green text-black font-extrabold transition flex items-center gap-1.5 shadow-sm';
+        btnF.className = 'px-3 py-1 rounded-full text-slate-400 hover:text-white transition flex items-center gap-1.5';
+      } else {
+        wrap.classList.remove('mobile-frame');
+        btnF.className = 'px-3 py-1 rounded-full bg-app-green text-black font-extrabold transition flex items-center gap-1.5 shadow-sm';
+        btnM.className = 'px-3 py-1 rounded-full text-slate-400 hover:text-white transition flex items-center gap-1.5';
+      }
+    }
+
+    window.onload = function () {
+      updateBalances();
+      setInterval(cycleLiveNotification, 4500);
+    };
+  </script>
+</body>
+</html>
