@@ -14,6 +14,8 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       user-select: none;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
     }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: #0b1116; }
@@ -41,51 +43,225 @@
     .toast-animate-in {
       animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
+    .modal-backdrop {
+      background: rgba(4, 8, 12, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    @keyframes modalIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-card {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      animation: modalIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 24px 64px rgba(0,0,0,0.55),
+        0 0 80px rgba(0, 214, 114, 0.06);
+    }
+    /* Only TOP thin strip — moving colors (not 4 sides) */
+    .modal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(
+        90deg,
+        #00d672,
+        #34d399,
+        #22d3ee,
+        #a78bfa,
+        #f472b6,
+        #fbbf24,
+        #00d672
+      );
+      background-size: 200% 100%;
+      animation: topStripFlow 3s linear infinite;
+      pointer-events: none;
+      z-index: 6;
+    }
+    @keyframes topStripFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .auth-input:focus {
+      border-color: #00d672 !important;
+      box-shadow: 0 0 0 3px rgba(0, 214, 114, 0.12);
+    }
+    .auth-submit-btn {
+      background: linear-gradient(135deg, #00e67a 0%, #00d672 45%, #00b85c 100%);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s;
+    }
+    .auth-submit-btn:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 8px 28px rgba(0, 214, 114, 0.35);
+      transform: translateY(-1px);
+    }
+    .auth-submit-btn:active { transform: translateY(0); }
+    .notif-item {
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+    .notif-item:hover {
+      transform: translateX(2px);
+      border-color: rgba(0, 214, 114, 0.35) !important;
+    }
+
+    /* Polished live-feed controls */
+    .feed-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: #0e1620;
+      border: 1px solid #1e2a38;
+      border-radius: 12px;
+      padding: 3px;
+      gap: 2px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .feed-toggle-btn {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 9px;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+    }
+    .feed-toggle-btn:hover { color: #fff; }
+    .feed-toggle-btn.active {
+      background: linear-gradient(135deg, #00d672 0%, #00b85c 100%);
+      color: #061910;
+      box-shadow: 0 2px 10px rgba(0, 214, 114, 0.35);
+    }
+    .feed-dropdown-wrap { position: relative; }
+    .feed-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0e1620;
+      border: 1px solid #1e2a38;
+      border-radius: 12px;
+      padding: 7px 12px 7px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      min-width: 148px;
+    }
+    .feed-dropdown-btn:hover {
+      border-color: #00d672;
+      box-shadow: 0 0 0 1px rgba(0, 214, 114, 0.15);
+    }
+    .feed-dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 40;
+      min-width: 180px;
+      background: #141d26;
+      border: 1px solid #22303e;
+      border-radius: 14px;
+      padding: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03);
+      display: none;
+    }
+    .feed-dropdown-menu.open { display: block; animation: toastSlideIn 0.2s ease; }
+    .feed-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      transition: background 0.15s, color 0.15s;
+    }
+    .feed-dropdown-item:hover { background: #1a2530; color: #fff; }
+    .feed-dropdown-item.selected {
+      background: rgba(0, 214, 114, 0.12);
+      color: #00d672;
+    }
+    .feed-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0f171f;
+      border: 1px solid #1a2530;
+      border-radius: 14px;
+      padding: 11px 14px;
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    }
+    .feed-row:hover {
+      border-color: rgba(0, 214, 114, 0.4);
+      background: #121b24;
+      transform: translateY(-1px);
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.01em;
+    }
+    .section-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
 
-  <!-- TOP HEADER -->
-  <header class="h-14 bg-[#10171e] border-b border-[#18232e] px-4 flex items-center justify-between z-30 shrink-0 sticky top-0">
-    <div class="flex items-center gap-4 flex-1 max-w-xl">
-      <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigate('home');">
-        <div class="w-7 h-7 rounded-lg bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-md shadow-emerald-500/20">
+  <!-- TOP HEADER — logo only left of sidebar line; search starts after (red line) -->
+  <header class="h-16 sm:h-[68px] bg-[#0e151c] border-b border-[#18232e] flex items-center z-30 shrink-0 sticky top-0">
+    <!-- Logo zone aligns with left sidebar (w-56 on lg) -->
+    <div class="shrink-0 h-full flex items-center px-4 lg:w-56 lg:border-r lg:border-[#18232e]">
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-base shadow-md shadow-emerald-500/25">
           G
         </div>
         <span class="text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
-
-      <div class="relative w-full max-w-xs hidden sm:block">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
-        <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search tasks, surveys, games..." class="w-full bg-[#16202a] border border-[#202c38] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-      </div>
     </div>
 
-    <div class="flex items-center gap-2.5">
-      <div class="hidden md:flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-        <span>Network Verified</span>
+    <!-- Content starts AFTER sidebar line: search + actions -->
+    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-3 px-4 sm:px-5">
+      <div class="relative flex-1 max-w-lg hidden sm:block">
+        <i data-lucide="search" class="w-[18px] h-[18px] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search" class="w-full bg-[#16202a] border border-[#1e2a38] rounded-full py-2.5 pl-11 pr-5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00d672]/60 transition" />
       </div>
 
-      <div class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 cursor-pointer" onclick="navigate('shop')">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+      <!-- Right: actions -->
+      <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
+      <!-- Coins pill -->
+      <button type="button" onclick="navigate('shop')" class="flex items-center gap-2 bg-[#16202a] border border-[#1e2a38] hover:border-amber-500/40 px-3 sm:px-3.5 py-2 rounded-full text-sm font-bold text-amber-400 transition">
+        <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-sm flex items-center justify-center text-[10px] text-amber-950 font-black">●</span>
         <span id="header-coins">0</span>
-        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
-      </div>
-
-      <button onclick="navigate('shop')" class="w-8 h-8 rounded-xl bg-[#6366f1] flex items-center justify-center text-white hover:bg-[#5558e6] transition shadow-md shadow-indigo-950/40" title="Cashout Wallet">
-        <i data-lucide="wallet" class="w-4 h-4"></i>
+        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 hidden sm:inline"></i>
       </button>
 
+      <!-- Wallet (purple like dollah) -->
+      <button type="button" onclick="navigate('shop')" class="w-10 h-10 rounded-xl bg-[#6c5ce7] hover:bg-[#5b4bd1] flex items-center justify-center text-white transition shadow-md shadow-indigo-900/40" title="Wallet">
+        <i data-lucide="wallet" class="w-[18px] h-[18px]"></i>
+      </button>
+
+      <!-- Profile -->
       <div class="relative">
-        <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl relative">
-          <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
-          <span id="header-notif-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border border-[#10171e] shadow">0</span>
+        <button type="button" onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1.5 pr-2 rounded-full transition relative">
+          <img id="header-avatar-img" src="avatars/1.png" class="w-8 h-8 rounded-full object-cover bg-[#202c38] ring-2 ring-[#00d672]/30" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden sm:block"></i>
+          <!-- Mobile only: notif badge on avatar -->
+          <span id="header-notif-badge" class="sm:hidden hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e151c] flex items-center justify-center shadow">0</span>
         </button>
 
-        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
+        <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
             <div class="flex items-center gap-1.5 mt-0.5">
@@ -115,12 +291,13 @@
           </div>
 
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
-            <button onclick="openNotificationsModal()" class="flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
+            <!-- Mobile: notifications inside dropdown -->
+            <button onclick="openNotificationsModal()" class="sm:hidden flex items-center justify-between py-2 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left transition">
               <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-rose-400"></i> Notifications</span>
               <span id="dropdown-notif-pill" class="hidden bg-rose-500 text-white font-bold text-[10px] px-1.5 py-0.2 rounded-full">0</span>
             </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
-              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History & Withdrawals
+              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile
             </button>
             <button onclick="openLegalModal('contact')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300 text-left">
               <i data-lucide="life-buoy" class="w-4 h-4 text-blue-400"></i> Help & Support
@@ -128,6 +305,18 @@
             <div id="auth-button-slot"></div>
           </div>
         </div>
+      </div>
+
+      <!-- Desktop only: Notification bell in top bar (like dollah) -->
+      <button type="button" onclick="openNotificationsModal()" class="hidden sm:flex relative w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] hover:border-rose-500/40 items-center justify-center text-slate-300 hover:text-white transition" title="Notifications">
+        <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+        <span id="desktop-notif-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e151c] items-center justify-center shadow">0</span>
+      </button>
+
+      <!-- Desktop: extra icons like dollah -->
+      <button type="button" onclick="filterCategory('games'); navigate('home');" class="hidden md:flex w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 items-center justify-center text-slate-400 hover:text-white transition" title="Games">
+        <i data-lucide="gamepad-2" class="w-[18px] h-[18px]"></i>
+      </button>
       </div>
     </div>
   </header>
@@ -195,40 +384,86 @@
         <button onclick="openLegalModal('terms')" class="text-emerald-400 hover:underline font-bold text-[10px] hidden md:inline">Compliance Policy</button>
       </div>
 
+      <!-- GLOBAL LIVE TICKER — always visible on every page -->
+      <div id="global-live-ticker" class="sticky top-0 z-20 bg-[#0b1116]/95 backdrop-blur-sm border-b border-[#1b2633] px-4 py-2.5 flex items-center gap-2 overflow-x-auto custom-scroll shrink-0">
+        <span class="text-[10px] text-slate-600 font-medium shrink-0">Loading…</span>
+      </div>
+
       <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
 
-      <footer class="bg-[#090e13] border-t border-[#16202a] p-6 lg:p-8 mt-auto shrink-0 select-none">
-        <div class="max-w-6xl mx-auto flex flex-col gap-6">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm">G</div>
-              <div>
-                <span class="text-base font-black text-white tracking-tight block">Gollah Rewards</span>
-                <span class="text-[11px] text-slate-400">Certified Web3 Gamification & CPA Loyalty Aggregator</span>
+      <footer class="bg-gradient-to-b from-[#0a1016] to-[#070b10] border-t border-[#1a2530] mt-auto shrink-0 select-none">
+        <div class="max-w-6xl mx-auto px-5 lg:px-8 pt-10 pb-6">
+          <!-- Top grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 mb-10">
+            <!-- Brand -->
+            <div class="flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm shadow-lg shadow-emerald-500/20">G</div>
+                <div>
+                  <span class="text-[15px] font-black text-white tracking-tight block leading-tight">Gollah</span>
+                  <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Rewards Platform</span>
+                </div>
+              </div>
+              <p class="text-[12px] text-slate-500 leading-relaxed max-w-xs">
+                Certified Web3 gamification & CPA loyalty aggregator. Earn coins from verified offers and cash out to crypto.
+              </p>
+            </div>
+
+            <!-- Platform -->
+            <div class="flex flex-col gap-3">
+              <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Platform</span>
+              <div class="flex flex-col gap-2">
+                <button onclick="navigate('home')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Home & Offers</button>
+                <button onclick="navigate('shop')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Cashout Wallet</button>
+                <button onclick="navigate('profile')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Profile & History</button>
+                <button onclick="navigate('premium')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Premium Tasks</button>
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 text-[10px] font-mono">
-              <span class="bg-[#121c25] text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-3 h-3"></i> FraudShield Active
-              </span>
-              <span class="bg-[#121c25] text-blue-400 px-2.5 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1.5">
-                <i data-lucide="lock" class="w-3 h-3"></i> SSL 256-Bit Encrypted
-              </span>
-              <span class="bg-[#121c25] text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
-                <i data-lucide="zap" class="w-3 h-3"></i> Instant Postbacks
-              </span>
+            <!-- Legal -->
+            <div class="flex flex-col gap-3">
+              <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Legal</span>
+              <div class="flex flex-col gap-2">
+                <button onclick="openLegalModal('terms')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Terms of Service</button>
+                <button onclick="openLegalModal('privacy')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Privacy Policy</button>
+                <button onclick="openLegalModal('antifraud')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Anti-Fraud Guidelines</button>
+              </div>
+            </div>
+
+            <!-- Support -->
+            <div class="flex flex-col gap-3">
+              <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Support</span>
+              <div class="flex flex-col gap-2">
+                <button onclick="openLegalModal('contact')" class="text-[12px] text-slate-500 hover:text-[#00d672] transition text-left">Contact Support</button>
+                <span class="text-[12px] text-slate-500 flex items-center gap-1.5">
+                  <i data-lucide="mail" class="w-3 h-3 text-[#00d672]"></i>
+                  <span class="text-emerald-400/90 font-mono text-[11px]">support@gollah.co</span>
+                </span>
+                <span class="text-[11px] text-slate-600 mt-1">Min cashout · 300 coins</span>
+              </div>
             </div>
           </div>
 
-          <div class="border-t border-[#16202a] pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-            <div class="flex flex-wrap items-center justify-center gap-5">
-              <button onclick="openLegalModal('terms')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Terms of Service</button>
-              <button onclick="openLegalModal('privacy')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Privacy Policy</button>
-              <button onclick="openLegalModal('antifraud')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Anti-Fraud & Quality Guidelines</button>
-              <button onclick="openLegalModal('contact')" class="hover:text-[#00d672] transition underline-offset-4 hover:underline">Contact Support Desk</button>
-            </div>
-            <p class="text-[11px] text-slate-400">© 2026 Gollah Inc. All rights reserved.</p>
+          <!-- Trust badges -->
+          <div class="flex flex-wrap items-center gap-2.5 mb-8">
+            <span class="inline-flex items-center gap-1.5 bg-[#0e1620] text-emerald-400/90 px-3 py-1.5 rounded-lg border border-emerald-500/15 text-[11px] font-semibold">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> FraudShield Active
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-[#0e1620] text-blue-400/90 px-3 py-1.5 rounded-lg border border-blue-500/15 text-[11px] font-semibold">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i> SSL 256-Bit
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-[#0e1620] text-amber-400/90 px-3 py-1.5 rounded-lg border border-amber-500/15 text-[11px] font-semibold">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> Instant Postbacks
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-[#0e1620] text-slate-400 px-3 py-1.5 rounded-lg border border-[#1e2a38] text-[11px] font-semibold">
+              <i data-lucide="badge-check" class="w-3.5 h-3.5 text-[#00d672]"></i> Network Verified
+            </span>
+          </div>
+
+          <!-- Bottom bar -->
+          <div class="border-t border-[#16202a] pt-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-[11px] text-slate-600">© 2026 Gollah Inc. All rights reserved.</p>
+            <p class="text-[11px] text-slate-600">Built for verified human engagement · Fair reward delivery</p>
           </div>
         </div>
       </footer>
@@ -287,27 +522,35 @@
 
   <!-- NOTIFICATIONS MODAL -->
   <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
-          <h3 class="font-bold text-base text-white">Notifications & Alerts</h3>
+    <div class="modal-card bg-[#111920] border border-[#1c2836] w-full max-w-[420px] rounded-[20px] max-h-[85vh] flex flex-col">
+      <div class="relative flex items-center justify-between px-5 py-4 border-b border-[#1c2836]">
+        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-400/40 to-transparent"></div>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500/25 to-rose-600/10 border border-rose-500/20 flex items-center justify-center shadow-inner">
+            <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-[15px] text-white leading-tight tracking-tight">Notifications</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">Cashouts · offers · system</p>
+          </div>
         </div>
-        <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="closeNotificationsModal()" class="w-9 h-9 rounded-xl bg-[#1a2430]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
 
-      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2.5 max-h-[60vh]"></div>
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2 p-4 max-h-[55vh] min-h-[160px]"></div>
 
-      <div class="pt-2 border-t border-[#202c38] flex justify-between items-center text-xs">
-        <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-white">Clear All</button>
-        <button onclick="closeNotificationsModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-4 py-1.5 rounded-xl transition">Done</button>
+      <div class="px-5 py-3.5 border-t border-[#1c2836] flex items-center justify-between gap-3 bg-[#0c1218]/80">
+        <button onclick="clearAllNotifications()" class="text-[12px] font-semibold text-slate-500 hover:text-slate-200 transition px-2 py-1.5 rounded-lg hover:bg-white/5">Clear all</button>
+        <button onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2 rounded-xl">Done</button>
       </div>
     </div>
   </div>
 
   <!-- IN-APP CASHOUT MODAL -->
   <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+    <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <div class="flex items-center gap-3">
           <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
@@ -356,7 +599,7 @@
 
   <!-- OFFER DETAILS MODAL -->
   <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+    <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-[#202c38] pb-4">
         <div class="flex items-center gap-3">
           <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#1e2c3a] flex items-center justify-center font-black text-emerald-400 text-sm">
@@ -411,58 +654,78 @@
     </div>
   </div>
 
-  <!-- AUTH MODAL -->
+  <!-- AUTH MODAL (Login / Signup) -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-3xl p-7 flex flex-col gap-4 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
-        <div>
-          <h3 id="auth-modal-title" class="font-black text-base text-white">Welcome Back</h3>
-          <p id="auth-modal-subtitle" class="text-[11px] text-slate-400">Secure access to your rewards balance</p>
-        </div>
-        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
+    <div class="modal-card bg-[#111920] border border-[#1c2836] w-full max-w-[400px] rounded-[20px] relative">
+      <div class="pointer-events-none absolute -top-24 -right-16 w-48 h-48 rounded-full bg-[#00d672]/10 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-20 -left-10 w-40 h-40 rounded-full bg-teal-500/10 blur-3xl"></div>
 
-      <div id="auth-error-banner" class="hidden bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-[11px] text-rose-300 flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
-        <span id="auth-error-text">An error occurred</span>
-      </div>
-      
-      <div class="flex flex-col gap-3.5">
-        <div id="auth-username-container" class="hidden">
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Username</label>
-          <input id="auth-username-input" type="text" placeholder="e.g. Kaallu99" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+      <div class="relative p-6 sm:p-7 flex flex-col gap-5">
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#00e67a] to-[#00b85c] flex items-center justify-center text-black font-black text-lg shadow-lg shadow-emerald-500/30">G</div>
+            <div>
+              <h3 id="auth-modal-title" class="font-black text-[18px] text-white leading-tight tracking-tight">Welcome Back</h3>
+              <p id="auth-modal-subtitle" class="text-[12px] text-slate-500 mt-0.5">Sign in to your rewards account</p>
+            </div>
+          </div>
+          <button onclick="closeAuthModal()" class="w-9 h-9 rounded-xl bg-[#1a2430]/90 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
 
-        <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Email Address</label>
-          <input id="auth-email-input" type="email" placeholder="name@example.com" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
+        <div id="auth-error-banner" class="hidden bg-rose-500/10 border border-rose-500/25 rounded-xl px-3.5 py-2.5 text-[12px] text-rose-300 flex items-center gap-2.5">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+          <span id="auth-error-text">An error occurred</span>
         </div>
 
-        <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Password</label>
-          <div class="relative flex items-center">
-            <input id="auth-pass-input" type="password" placeholder="At least 6 characters" class="w-full bg-[#0d141b] border border-[#202c38] rounded-xl pl-3.5 pr-10 py-3 text-xs text-white focus:outline-none focus:border-[#00d672]" />
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none">
-              <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
-            </button>
+        <div class="flex flex-col gap-4">
+          <div id="auth-username-container" class="hidden">
+            <label class="text-[12px] font-semibold text-slate-400 block mb-1.5">Username</label>
+            <input id="auth-username-input" type="text" placeholder="Choose a username" class="auth-input w-full bg-[#0b1218] border border-[#1e2a38] rounded-xl px-4 py-3.5 text-[13px] text-white placeholder:text-slate-600 focus:outline-none transition" />
+          </div>
+
+          <div>
+            <label class="text-[12px] font-semibold text-slate-400 block mb-1.5">Email</label>
+            <input id="auth-email-input" type="email" placeholder="you@example.com" class="auth-input w-full bg-[#0b1218] border border-[#1e2a38] rounded-xl px-4 py-3.5 text-[13px] text-white placeholder:text-slate-600 focus:outline-none transition" />
+          </div>
+
+          <div>
+            <label class="text-[12px] font-semibold text-slate-400 block mb-1.5">Password</label>
+            <div class="relative flex items-center">
+              <input id="auth-pass-input" type="password" placeholder="Minimum 6 characters" class="auth-input w-full bg-[#0b1218] border border-[#1e2a38] rounded-xl pl-4 pr-11 py-3.5 text-[13px] text-white placeholder:text-slate-600 focus:outline-none transition" />
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 text-slate-500 hover:text-white focus:outline-none transition">
+                <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <button id="auth-submit-btn" onclick="submitAuthForm()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold py-3 rounded-xl transition text-xs shadow-lg shadow-emerald-950/40 mt-1">
-        Login
-      </button>
 
-      <p class="text-xs text-center text-slate-400 pt-1">
-        <span id="auth-toggle-msg">Don't have an account?</span> 
-        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[#00d672] font-semibold underline ml-1">Create Account</button>
-      </p>
+        <button id="auth-submit-btn" onclick="submitAuthForm()" class="auth-submit-btn w-full text-black font-extrabold py-3.5 rounded-xl text-[14px] tracking-wide">
+          Login
+        </button>
+
+        <div class="flex items-center gap-3">
+          <div class="flex-1 h-px bg-gradient-to-r from-transparent to-[#1e2a38]"></div>
+          <span class="text-[11px] text-slate-600 font-medium">or</span>
+          <div class="flex-1 h-px bg-gradient-to-l from-transparent to-[#1e2a38]"></div>
+        </div>
+
+        <p class="text-[13px] text-center text-slate-500">
+          <span id="auth-toggle-msg">Don't have an account?</span>
+          <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[#00d672] font-bold hover:underline ml-1">Create Account</button>
+        </p>
+
+        <p class="text-[10px] text-center text-slate-600 leading-relaxed">
+          By continuing you agree to our Terms & Privacy Policy.
+        </p>
+      </div>
     </div>
   </div>
 
   <!-- LEGAL & SUPPORT MODAL -->
   <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+    <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">Information</h3>
         <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -541,6 +804,30 @@
       }
     }
 
+    function renderGlobalLiveTicker() {
+      const el = document.getElementById('global-live-ticker');
+      if (!el) return;
+      if (!liveTickerItems.length) {
+        el.innerHTML = `<span class="text-[11px] text-slate-600 font-medium shrink-0">Live activity will appear here…</span>`;
+        return;
+      }
+      el.innerHTML = liveTickerItems.map(t => {
+        const statusLabel = t.status
+          ? `<span class="text-[9px] ${t.status === 'Pending' ? 'text-amber-400' : t.status === 'Sent' || t.status === 'Complete' ? 'text-emerald-400' : 'text-slate-500'} font-semibold">${t.status}</span>`
+          : `<span class="text-slate-500 text-[10px]">${t.time || ''}</span>`;
+        return `
+          <div class="flex items-center gap-2.5 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon || 'Ł'}</span>
+            <div class="text-[11px] leading-tight">
+              <span class="text-slate-300 font-medium block">${t.type}</span>
+              ${statusLabel}
+            </div>
+            <span class="text-white font-bold text-xs ml-1">● ${t.amount}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
     function prependLiveTicker(type, amount, icon = 'Ł', status = '', activityId = null, createdAt = null) {
       const amtStr = (typeof amount === 'number')
         ? amount.toLocaleString()
@@ -563,6 +850,8 @@
         if (removed && removed.id) seenActivityIds.delete(removed.id);
       }
       saveLiveTickerToStorage();
+      renderGlobalLiveTicker();
+      // Refresh home live-feed list if on home (not the top bar — that's global)
       if (currentTab === 'home' || currentTab === 'premium') renderHome();
     }
 
@@ -621,6 +910,8 @@
         saveLiveTickerToStorage();
       }
 
+      renderGlobalLiveTicker();
+
       if (!db) {
         if (currentTab === 'home' || currentTab === 'premium') renderHome();
         return;
@@ -650,6 +941,7 @@
         console.warn('live_activity fetch failed', e);
       }
 
+      renderGlobalLiveTicker();
       if (currentTab === 'home' || currentTab === 'premium') renderHome();
 
       try {
@@ -708,12 +1000,49 @@
     let searchQuery = '';
     let userNotifications = [];
     let userWithdrawals = [];
+    let userCompletedOffers = [];
     let currentUser = null;
     let userCoins = 0;
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
     let profileFilter = 'all';
+    let profileSection = 'earnings'; // earnings | withdrawals | inprogress | onhold
+    let liveFeedType = 'offers'; // offers | withdrawals
+    let liveFeedMinCoins = 0; // 0 | 50 | 100 | 500 | 1000
+
+    function setLiveFeedType(type) {
+      liveFeedType = type;
+      if (currentTab === 'home' || currentTab === 'premium') renderHome();
+    }
+
+    function setLiveFeedMinCoins(min) {
+      liveFeedMinCoins = Number(min) || 0;
+      if (currentTab === 'home' || currentTab === 'premium') renderHome();
+    }
+
+    function toggleLiveFeedDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('live-feed-dropdown-menu');
+      if (!menu) return;
+      menu.classList.toggle('open');
+    }
+
+    function pickLiveFeedMin(min, e) {
+      if (e) e.stopPropagation();
+      setLiveFeedMinCoins(min);
+    }
+
+    // Close custom dropdown when clicking outside
+    document.addEventListener('click', () => {
+      const menu = document.getElementById('live-feed-dropdown-menu');
+      if (menu) menu.classList.remove('open');
+    });
+
+    function parseTickerAmount(amt) {
+      if (typeof amt === 'number') return amt;
+      return parseInt(String(amt || '0').replace(/,/g, ''), 10) || 0;
+    }
 
     // PERSISTENT STORAGE ENGINE
     function loadUserDataFromStorage() {
@@ -731,6 +1060,17 @@
       } catch (e) {
         userNotifications = [];
       }
+      try {
+        const offersStored = localStorage.getItem(`gollah_completed_offers_${currentUser.id}`);
+        if (offersStored) userCompletedOffers = JSON.parse(offersStored);
+        else userCompletedOffers = [];
+      } catch (e) {
+        userCompletedOffers = [];
+      }
+      try {
+        const wStored = localStorage.getItem(`gollah_withdrawals_${currentUser.id}`);
+        if (wStored) userWithdrawals = JSON.parse(wStored);
+      } catch (e) {}
       updateNotificationsBadge();
     }
 
@@ -748,17 +1088,58 @@
       } catch (e) {}
     }
 
+    function saveCompletedOffersToStorage() {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(`gollah_completed_offers_${currentUser.id}`, JSON.stringify(userCompletedOffers));
+      } catch (e) {}
+    }
+
+    function formatOfferTime(ts) {
+      if (!ts) return 'just now';
+      try {
+        const sec = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+        if (sec < 60) return 'just now';
+        if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+        if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+        if (sec < 2592000) return Math.floor(sec / 86400) + 'd ago';
+        return Math.floor(sec / 2592000) + 'mo ago';
+      } catch (e) {
+        return 'just now';
+      }
+    }
+
     function updateNotificationsBadge() {
       const unreadCount = userNotifications.filter(n => !n.isRead).length;
       const headerBadge = document.getElementById('header-notif-badge');
       const dropdownPill = document.getElementById('dropdown-notif-pill');
+      const desktopBadge = document.getElementById('desktop-notif-badge');
 
       if (unreadCount > 0) {
-        if (headerBadge) { headerBadge.innerText = unreadCount; headerBadge.classList.remove('hidden'); }
-        if (dropdownPill) { dropdownPill.innerText = unreadCount; dropdownPill.classList.remove('hidden'); }
+        if (headerBadge) {
+          headerBadge.innerText = unreadCount;
+          headerBadge.classList.remove('hidden');
+          headerBadge.classList.add('flex');
+        }
+        if (dropdownPill) {
+          dropdownPill.innerText = unreadCount;
+          dropdownPill.classList.remove('hidden');
+        }
+        if (desktopBadge) {
+          desktopBadge.innerText = unreadCount;
+          desktopBadge.classList.remove('hidden');
+          desktopBadge.classList.add('flex');
+        }
       } else {
-        if (headerBadge) headerBadge.classList.add('hidden');
+        if (headerBadge) {
+          headerBadge.classList.add('hidden');
+          headerBadge.classList.remove('flex');
+        }
         if (dropdownPill) dropdownPill.classList.add('hidden');
+        if (desktopBadge) {
+          desktopBadge.classList.add('hidden');
+          desktopBadge.classList.remove('flex');
+        }
       }
     }
 
@@ -779,7 +1160,15 @@
       list.innerHTML = '';
 
       if (userNotifications.length === 0) {
-        list.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">No notifications yet.</div>`;
+        list.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-[#1a2530] border border-[#243040] flex items-center justify-center mb-4">
+              <i data-lucide="bell-off" class="w-6 h-6 text-slate-500"></i>
+            </div>
+            <p class="text-[14px] font-semibold text-slate-300 mb-1">No notifications yet</p>
+            <p class="text-[12px] text-slate-600 max-w-[240px]">Offer completions, cashouts and system alerts will show up here.</p>
+          </div>
+        `;
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
@@ -793,29 +1182,37 @@
           }
 
           const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
+          const isPending = currentStatus === 'pending';
           let displayMessage = n.message;
-          if (isComplete && displayMessage.includes('Status: PENDING')) {
+          if (isComplete && displayMessage && displayMessage.includes('Status: PENDING')) {
             displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
           }
 
-          item.className = `p-3 rounded-xl border ${isComplete ? 'bg-[#0e1d18] border-[#00d672]/40' : 'bg-[#121c26] border-[#1d2b38]'} flex items-start justify-between gap-3`;
+          item.className = `notif-item p-3.5 rounded-xl border flex items-start justify-between gap-3 ${
+            isComplete
+              ? 'bg-emerald-500/5 border-emerald-500/25'
+              : isPending
+                ? 'bg-amber-500/5 border-amber-500/20'
+                : 'bg-[#0c1218] border-[#1a2530]'
+          }`;
           item.innerHTML = `
-            <div class="flex-1 flex flex-col gap-0.5">
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold text-white text-xs">${n.title}</span>
-                <span class="text-[10px] text-slate-500">• ${n.time}</span>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold text-white text-[13px]">${n.title}</span>
+                <span class="text-[11px] text-slate-600">${n.time || ''}</span>
               </div>
-              <p class="text-xs text-slate-300 leading-snug">${displayMessage}</p>
+              <p class="text-[12px] text-slate-400 leading-relaxed">${displayMessage || ''}</p>
             </div>
-            
             <div class="shrink-0 pt-0.5">
               ${isComplete ? `
-                <div class="w-5 h-5 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/30" title="Complete">
-                  ✓
+                <div class="w-7 h-7 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/25" title="Complete">✓</div>
+              ` : isPending ? `
+                <div class="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center" title="Pending">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                 </div>
               ` : `
-                <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs" title="Pending">
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <div class="w-7 h-7 rounded-full bg-[#1a2530] text-slate-400 flex items-center justify-center" title="Info">
+                  <i data-lucide="info" class="w-3.5 h-3.5"></i>
                 </div>
               `}
             </div>
@@ -958,11 +1355,27 @@
       window.open(trackingUrl, '_blank');
     }
 
-    window.creditOfferPostback = async function(offerName, coins) {
+    window.creditOfferPostback = async function(offerName, coins, providerName) {
       if (!currentUser) return;
       userCoins += coins;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
       const newLvl = updateLevelAndXpUI(userCoins);
+
+      // Match provider from known offers if not passed
+      let provider = providerName || 'Network';
+      const matched = ALL_OFFERS.find(o => o.name === offerName || o.name.toLowerCase() === String(offerName).toLowerCase());
+      if (matched) provider = matched.provider;
+
+      // Save to permanent completed-offers history (Profile → Earnings)
+      userCompletedOffers.unshift({
+        id: 'o_' + Date.now(),
+        name: offerName,
+        provider: provider,
+        coins: coins,
+        status: 'complete',
+        created_at: new Date().toISOString()
+      });
+      saveCompletedOffersToStorage();
 
       if (db) {
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
@@ -982,6 +1395,8 @@
         status: 'Complete',
         coins: coins.toLocaleString()
       });
+
+      if (currentTab === 'profile') renderProfile();
     };
 
     // CASHOUT ENGINE
@@ -1330,6 +1745,7 @@
         userCoins = 0;
         userNotifications = [];
         userWithdrawals = [];
+        userCompletedOffers = [];
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-email-display').innerText = "guest@gollah.co";
         document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
@@ -1378,8 +1794,8 @@
       if (isSignupMode) usernameBox.classList.remove('hidden');
       else usernameBox.classList.add('hidden');
 
-      document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create New Account" : "Welcome Back";
-      document.getElementById('auth-modal-subtitle').innerText = isSignupMode ? "Sign up in seconds and start earning rewards!" : "Secure access to your rewards balance";
+      document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create Account" : "Welcome Back";
+      document.getElementById('auth-modal-subtitle').innerText = isSignupMode ? "Join Gollah and start earning rewards" : "Sign in to your rewards account";
       document.getElementById('auth-submit-btn').innerText = isSignupMode ? "Sign Up Free" : "Login";
       document.getElementById('auth-toggle-msg').innerText = isSignupMode ? "Already have an account?" : "Don't have an account?";
       document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Create Account";
@@ -1549,6 +1965,7 @@
 
     function navigate(view) {
       currentTab = view;
+      try { sessionStorage.setItem('gollah_current_tab', view); } catch (e) {}
       document.getElementById('profile-dropdown').classList.add('hidden');
       ['home', 'premium', 'shop', 'ranking', 'profile'].forEach(v => {
         const el = document.getElementById('nav-' + v);
@@ -1560,6 +1977,15 @@
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
       if (window.lucide) lucide.createIcons();
+    }
+
+    function restoreLastTab() {
+      let saved = 'home';
+      try {
+        const t = sessionStorage.getItem('gollah_current_tab');
+        if (t && ['home', 'premium', 'shop', 'ranking', 'profile'].includes(t)) saved = t;
+      } catch (e) {}
+      navigate(saved);
     }
 
     function filterByProvider(providerName) {
@@ -1638,24 +2064,6 @@
         `;
       });
 
-      // Render live ticker items dynamically from liveTickerItems array
-      let tickerHTML = '';
-      liveTickerItems.forEach(t => {
-        const statusLabel = t.status
-          ? `<span class="text-[9px] ${t.status === 'Pending' ? 'text-amber-400' : t.status === 'Sent' || t.status === 'Complete' ? 'text-emerald-400' : 'text-slate-500'} font-semibold">${t.status}</span>`
-          : `<span class="text-slate-500 text-[10px]">${t.time}</span>`;
-        tickerHTML += `
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0 animate-pulse-once">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
-            <div class="text-[11px] leading-tight">
-              <span class="text-slate-300 font-medium block">${t.type}</span>
-              ${statusLabel}
-            </div>
-            <span class="text-white font-bold text-xs ml-2">● ${t.amount}</span>
-          </div>
-        `;
-      });
-
       // Providers section (Lootably, Monlix, Adgate, OfferToro, etc.)
       const providers = [
         { name: 'Lootably', label: 'Lootably', bg: 'bg-[#2a1f4d]', text: 'text-white', badge: '+50%', badgeBg: 'bg-violet-500', logo: 'L' },
@@ -1690,10 +2098,6 @@
       });
 
       container.innerHTML = `
-        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
-          ${tickerHTML}
-        </div>
-
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -1725,13 +2129,155 @@
             ${offersHTML}
           </div>
         </div>
+
+        <!-- LIVE PUBLIC FEED — polished toggle + pro dropdown -->
+        <div class="flex flex-col gap-3.5 mt-4 pt-4 border-t border-[#1a2530]">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-col gap-0.5">
+              <h3 class="section-title flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00d672]"></span>
+                </span>
+                Live Feed
+              </h3>
+              <span class="section-sub pl-4">Public activity · updates in realtime</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <div class="feed-toggle">
+                <button type="button" onclick="setLiveFeedType('offers')" class="feed-toggle-btn ${liveFeedType === 'offers' ? 'active' : ''}">Offers</button>
+                <button type="button" onclick="setLiveFeedType('withdrawals')" class="feed-toggle-btn ${liveFeedType === 'withdrawals' ? 'active' : ''}">Withdrawals</button>
+              </div>
+              <div class="feed-dropdown-wrap" onclick="event.stopPropagation()">
+                <button type="button" class="feed-dropdown-btn" onclick="toggleLiveFeedDropdown(event)">
+                  <i data-lucide="filter" class="w-3.5 h-3.5 text-[#00d672]"></i>
+                  <span>${liveFeedMinCoins === 0 ? 'All amounts' : 'Min ' + liveFeedMinCoins.toLocaleString()}</span>
+                  <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 ml-auto"></i>
+                </button>
+                <div id="live-feed-dropdown-menu" class="feed-dropdown-menu">
+                  ${[0, 50, 100, 500, 1000].map(v => `
+                    <button type="button" class="feed-dropdown-item ${liveFeedMinCoins === v ? 'selected' : ''}" onclick="pickLiveFeedMin(${v}, event)">
+                      <span>${v === 0 ? 'All amounts' : 'Min ' + v.toLocaleString() + ' coins'}</span>
+                      ${liveFeedMinCoins === v ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="live-offer-feed" class="flex flex-col gap-2 max-h-[340px] overflow-y-auto custom-scroll pr-1">
+            ${(() => {
+              const isWithdrawalType = (t) => {
+                const ty = (t.type || '').toLowerCase();
+                return ty === 'ltc' || ty === 'binance' || ty.includes('withdraw') || ty.includes('cashout');
+              };
+              const isOfferType = (t) => {
+                const ty = (t.type || '').toLowerCase();
+                return ty === 'offer' || (!isWithdrawalType(t) && (t.status || '').toLowerCase() === 'complete');
+              };
+
+              let feedItems = liveTickerItems.filter(t => {
+                if (liveFeedType === 'offers') return isOfferType(t);
+                return isWithdrawalType(t);
+              });
+
+              if (liveFeedMinCoins > 0) {
+                feedItems = feedItems.filter(t => parseTickerAmount(t.amount) >= liveFeedMinCoins);
+              }
+
+              feedItems = feedItems.slice(0, 30);
+
+              if (!feedItems.length) {
+                const modeLabel = liveFeedType === 'offers' ? 'offer completions' : 'withdrawals';
+                const minLabel = liveFeedMinCoins > 0 ? ` (≥ ${liveFeedMinCoins.toLocaleString()} coins)` : '';
+                return `<div class="py-10 px-6 text-center bg-[#0f171f] border border-dashed border-[#1e2a38] rounded-2xl">
+                  <p class="text-[13px] text-slate-400 font-medium mb-1">No ${modeLabel}${minLabel} yet</p>
+                  <p class="text-[11px] text-slate-600">New public activity will show up here live.</p>
+                </div>`;
+              }
+              return feedItems.map(t => {
+                const isOffer = isOfferType(t);
+                const isPending = (t.status || '') === 'Pending';
+                return `
+                  <div class="feed-row">
+                    <span class="w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] flex items-center justify-center text-sm font-bold shrink-0">${t.icon || (isOffer ? '⚡' : 'Ł')}</span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[13px] font-semibold text-white truncate">${isOffer ? 'Offer completed' : t.type}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isPending ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'}">${t.status || 'Complete'}</span>
+                      </div>
+                      <span class="text-[11px] text-slate-500 mt-0.5 block">${t.time || 'just now'}</span>
+                    </div>
+                    <span class="text-[13px] font-bold text-amber-400 shrink-0 tabular-nums">● ${t.amount}</span>
+                  </div>
+                `;
+              }).join('');
+            })()}
+          </div>
+        </div>
       `;
       if (window.lucide) lucide.createIcons();
     }
 
+    function changeProfileSection(section) {
+      profileSection = section;
+      renderProfile();
+    }
+
+    function changeProfileFilter(filter) {
+      profileFilter = filter;
+      renderProfile();
+    }
+
     function renderProfile() {
       const container = document.getElementById('app-content');
+      const offersCompleted = userCompletedOffers.length;
+      const coinsEarned = userCompletedOffers.reduce((sum, o) => sum + (Number(o.coins) || 0), 0);
+      const pendingWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
 
+      // --- Earnings list (completed offers) ---
+      let earningsHTML = '';
+      if (!userCompletedOffers.length) {
+        earningsHTML = `
+          <div class="p-10 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="gift" class="w-7 h-7 mx-auto mb-2 text-slate-600"></i>
+            <p class="font-semibold text-slate-300 mb-1">No completed offers yet</p>
+            <p>Finish tasks on Home — they will appear here permanently.</p>
+          </div>
+        `;
+      } else {
+        earningsHTML = `
+          <div class="overflow-x-auto custom-scroll">
+            <div class="min-w-[640px] flex flex-col gap-2">
+              <div class="grid grid-cols-12 gap-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <span class="col-span-4">Name</span>
+                <span class="col-span-2">Provider</span>
+                <span class="col-span-2">Reward</span>
+                <span class="col-span-2">Time</span>
+                <span class="col-span-2 text-right">Status</span>
+              </div>
+              ${userCompletedOffers.map(o => `
+                <div class="grid grid-cols-12 items-center gap-2 bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672]/40 p-3 rounded-xl text-xs transition">
+                  <span class="col-span-4 font-bold text-white flex items-center gap-2 truncate">
+                    <span class="w-8 h-8 rounded-lg bg-[#1e2c3a] text-[#00d672] flex items-center justify-center text-[10px] font-black shrink-0">${(o.name || 'O').slice(0, 2).toUpperCase()}</span>
+                    <span class="truncate">${o.name}</span>
+                  </span>
+                  <span class="col-span-2">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 text-[10px] font-bold">${(o.provider || 'N').slice(0, 2).toUpperCase()}</span>
+                  </span>
+                  <span class="col-span-2 text-amber-400 font-bold">● ${(Number(o.coins) || 0).toLocaleString()}</span>
+                  <span class="col-span-2 text-slate-400">${formatOfferTime(o.created_at)}</span>
+                  <span class="col-span-2 text-right">
+                    <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Complete</span>
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // --- Withdrawals list ---
       let displayedWithdrawals = userWithdrawals;
       if (profileFilter === 'pending') {
         displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'PENDING');
@@ -1739,31 +2285,31 @@
         displayedWithdrawals = userWithdrawals.filter(w => (w.status || '').toUpperCase() === 'COMPLETED');
       }
 
-      let listHTML = '';
-      if (displayedWithdrawals.length === 0) {
-        listHTML = `
-          <div class="p-8 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
-            <i data-lucide="wallet" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
-            No ${profileFilter !== 'all' ? profileFilter : ''} cashout history found.
+      let withdrawalsHTML = '';
+      if (!displayedWithdrawals.length) {
+        withdrawalsHTML = `
+          <div class="p-10 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="wallet" class="w-7 h-7 mx-auto mb-2 text-slate-600"></i>
+            No withdrawals yet. <button onclick="navigate('shop')" class="text-[#00d672] font-bold hover:underline ml-1">Cash out</button>
           </div>
         `;
       } else {
-        listHTML = displayedWithdrawals.map(w => {
+        withdrawalsHTML = displayedWithdrawals.map(w => {
           const isCompleted = (w.status || '').toUpperCase() === 'COMPLETED';
           const isBinance = (w.method || '').includes('Binance');
           return `
             <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
               <span class="col-span-4 font-bold text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-xs font-bold">
+                <span class="w-8 h-8 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-sm font-bold">
                   ${isBinance ? '🟡' : 'Ł'}
-                </span> 
+                </span>
                 ${w.method}
               </span>
-              <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
+              <span class="col-span-2 text-amber-400 font-bold">● ${(Number(w.amount) || 0).toLocaleString()}</span>
               <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
               <span class="col-span-2 text-right">
                 <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
-                  ${w.status}
+                  ${w.status || 'PENDING'}
                 </span>
               </span>
             </div>
@@ -1771,39 +2317,73 @@
         }).join('');
       }
 
+      // Section body
+      let sectionBody = '';
+      if (profileSection === 'earnings') {
+        sectionBody = earningsHTML;
+      } else if (profileSection === 'withdrawals') {
+        sectionBody = `
+          <div class="flex items-center gap-2 mb-3">
+            <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2.5 py-1 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
+            <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2.5 py-1 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
+            <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2.5 py-1 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
+            <button onclick="navigate('shop')" class="ml-auto text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
+          </div>
+          <div class="flex flex-col gap-2">${withdrawalsHTML}</div>
+        `;
+      } else if (profileSection === 'inprogress') {
+        sectionBody = `
+          <div class="p-10 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="loader" class="w-7 h-7 mx-auto mb-2 text-slate-600"></i>
+            No offers currently in progress.
+          </div>
+        `;
+      } else {
+        sectionBody = `
+          <div class="p-10 text-center bg-[#121b24] border border-[#1d2a37] rounded-2xl text-slate-400 text-xs">
+            <i data-lucide="pause-circle" class="w-7 h-7 mx-auto mb-2 text-slate-600"></i>
+            ${pendingWithdrawals.length ? pendingWithdrawals.length + ' withdrawal(s) pending approval.' : 'Nothing on hold.'}
+          </div>
+        `;
+      }
+
+      const tabClass = (s) =>
+        profileSection === s
+          ? 'text-xs font-bold px-3 py-1.5 rounded-full bg-[#00d672] text-black'
+          : 'text-xs font-bold px-3 py-1.5 rounded-full text-slate-400 hover:text-white hover:bg-[#1a2530]';
+
       container.innerHTML = `
         <div class="flex flex-col gap-5">
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats & Withdrawals
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Stats
           </h2>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${1 + Math.floor(Math.floor(userCoins / 1000) / 10)}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
-          </div>
-
-          <div class="flex items-center justify-between border-b border-[#1d2a37] pb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">Withdrawals History:</span>
-              <button onclick="changeProfileFilter('all')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'all' ? 'bg-[#00d672] text-black' : 'text-slate-400 hover:text-white'}">All</button>
-              <button onclick="changeProfileFilter('pending')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'pending' ? 'bg-amber-400 text-black' : 'text-slate-400 hover:text-white'}">Pending</button>
-              <button onclick="changeProfileFilter('completed')" class="text-xs font-bold px-2 py-0.5 rounded-lg ${profileFilter === 'completed' ? 'bg-emerald-400 text-black' : 'text-slate-400 hover:text-white'}">Completed</button>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-4 text-center">
+              <span class="text-xs text-slate-400 block mb-1">Balance</span>
+              <span class="text-lg font-bold text-white">${userCoins.toLocaleString()}</span>
             </div>
-            <button onclick="navigate('shop')" class="text-xs text-[#00d672] font-bold hover:underline">+ New Cashout</button>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-4 text-center">
+              <span class="text-xs text-slate-400 block mb-1">Offers Completed</span>
+              <span class="text-lg font-bold text-[#00d672]">${offersCompleted}</span>
+            </div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-4 text-center">
+              <span class="text-xs text-slate-400 block mb-1">Coins Earned</span>
+              <span class="text-lg font-bold text-amber-400">${coinsEarned.toLocaleString()}</span>
+            </div>
           </div>
 
-          <div class="flex flex-col gap-2">
-            ${listHTML}
+          <div class="flex flex-wrap items-center gap-2 border-b border-[#1d2a37] pb-3">
+            <button onclick="changeProfileSection('earnings')" class="${tabClass('earnings')}">Earnings</button>
+            <button onclick="changeProfileSection('withdrawals')" class="${tabClass('withdrawals')}">Withdrawals</button>
+            <button onclick="changeProfileSection('inprogress')" class="${tabClass('inprogress')}">In-Progress</button>
+            <button onclick="changeProfileSection('onhold')" class="${tabClass('onhold')}">On-Hold</button>
           </div>
+
+          <div>${sectionBody}</div>
         </div>
       `;
       if (window.lucide) lucide.createIcons();
-    }
-
-    function changeProfileFilter(filter) {
-      profileFilter = filter;
-      renderProfile();
     }
 
     function renderShop() {
@@ -1858,7 +2438,8 @@
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
-    renderHome();
+    restoreLastTab();
+    renderGlobalLiveTicker();
     initAuth();
     if (window.lucide) lucide.createIcons();
   </script>
