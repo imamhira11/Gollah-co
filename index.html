@@ -523,7 +523,7 @@
     let currentTab = 'home';
     let profileFilter = 'all';
 
-    // PERSISTENT STORAGE & REALTIME SYNC ENGINE
+    // PERSISTENT STORAGE ENGINE
     function loadUserDataFromStorage() {
       if (!currentUser) return;
       try {
@@ -957,62 +957,50 @@
       try {
         const { data, error } = await db.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
         if (!error && data && data.length > 0) {
-          userWithdrawals = data.map(d => ({
+          const fetchedList = data.map(d => ({
             id: d.id,
             method: d.method,
             amount: d.coins_amount,
             address: d.destination_address,
             status: (d.status || 'PENDING').toUpperCase()
           }));
+
+          // Check if any previously pending withdrawal just became COMPLETED
+          fetchedList.forEach(fw => {
+            const oldW = userWithdrawals.find(ow => ow.id === fw.id);
+            if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
+              // Play Sweet Money Sound & Trigger Popup Toast!
+              playCashoutTaakSound();
+              triggerDollahFloatingToast({
+                time: 'just now',
+                title: `${fw.method || 'Crypto'} Payout Sent`,
+                status: 'Complete',
+                coins: (fw.amount || 0).toLocaleString()
+              });
+              addNotification({
+                title: `${fw.method || 'Crypto'} Paid!`,
+                message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
+                status: 'completed'
+              });
+            }
+          });
+
+          userWithdrawals = fetchedList;
           saveWithdrawalsToStorage();
           if (currentTab === 'profile') renderProfile();
         }
       } catch (e) {}
     }
 
-    // REALTIME SUPABASE LISTENER: Triggers instant popup toast + sound when admin sets COMPLETED in Supabase
-    let realtimeChannel = null;
-    function setupRealtimeWithdrawalListener() {
-      if (!db || !currentUser) return;
-      if (realtimeChannel) db.removeChannel(realtimeChannel);
-
-      realtimeChannel = db.channel('public:withdrawals:' + currentUser.id)
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'withdrawals',
-          filter: `user_id=eq.${currentUser.id}`
-        }, payload => {
-          const updatedRow = payload.new;
-          if (updatedRow && (updatedRow.status || '').toUpperCase() === 'COMPLETED') {
-            // Find existing local item or match
-            const localW = userWithdrawals.find(w => w.id === updatedRow.id || w.amount === updatedRow.coins_amount);
-            if (localW && localW.status !== 'COMPLETED') {
-              localW.status = 'COMPLETED';
-              saveWithdrawalsToStorage();
-
-              // Play money addition sound
-              playCashoutTaakSound();
-
-              // Trigger instant popup toast
-              triggerDollahFloatingToast({
-                time: 'just now',
-                title: `${updatedRow.method || 'Crypto'} Payout Sent`,
-                status: 'Complete',
-                coins: (updatedRow.coins_amount || 0).toLocaleString()
-              });
-
-              addNotification({
-                title: `${updatedRow.method || 'Crypto'} Paid!`,
-                message: `● ${(updatedRow.coins_amount || 0).toLocaleString()} coins payout successfully broadcasted! Status: COMPLETED.`,
-                status: 'completed'
-              });
-
-              if (currentTab === 'profile') renderProfile();
-            }
-          }
-        })
-        .subscribe();
+    // AUTO-POLLING / BACKGROUND SYNC: Checks Supabase every 3 seconds for admin approval
+    let syncInterval = null;
+    function startAutoSyncEngine() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(() => {
+        if (currentUser) {
+          fetchUserWithdrawals();
+        }
+      }, 3000);
     }
 
     window.completeUserWithdrawal = async function(withdrawalId) {
@@ -1127,7 +1115,7 @@
         updateLevelAndXpUI(userCoins);
         loadUserDataFromStorage();
         await fetchUserWithdrawals();
-        setupRealtimeWithdrawalListener();
+        startAutoSyncEngine();
 
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -1484,7 +1472,7 @@
               <span class="col-span-2 text-amber-400 font-bold">● ${w.amount.toLocaleString()}</span>
               <span class="col-span-4 text-slate-400 text-[11px] truncate font-mono">${w.address || 'Address Verified'}</span>
               <span class="col-span-2 text-right">
-                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'}">
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-emerald-500/30 animate-pulse'}">
                   ${w.status}
                 </span>
               </span>
