@@ -32,14 +32,6 @@
       animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
-
-    /* CSS SPRITE ENGINE FOR MEMOJI AVATARS */
-    .memoji-avatar {
-      background-image: url('avatars.jpg');
-      background-repeat: no-repeat;
-      border-radius: 9999px;
-      display: inline-block;
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
@@ -86,7 +78,7 @@
       <!-- Profile Avatar Button -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl">
-          <div id="header-avatar-box" class="w-6 h-6 memoji-avatar"></div>
+          <img id="header-avatar-img" src="avatars/1.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
@@ -94,7 +86,7 @@
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
-              <div id="dropdown-avatar-box" class="w-14 h-14 memoji-avatar border-2 border-[#00d672] mb-1"></div>
+              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
               <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
             </div>
             <span id="profile-level-badge" class="text-[10px] bg-slate-700 text-white font-black px-1.5 py-0.2 rounded">Lvl 1</span>
@@ -120,7 +112,7 @@
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
             </button>
             <div id="auth-button-slot">
-              <!-- Injected via Auth State -->
+              <!-- Injected dynamically -->
             </div>
           </div>
         </div>
@@ -321,20 +313,20 @@
     </div>
   </div>
 
-  <!-- EXACT MEMOJI AVATAR SHEET SELECTOR MODAL -->
+  <!-- MEMOJI AVATAR SELECTOR MODAL (1.png to 17.png) -->
   <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <div>
           <h3 class="font-black text-base text-white flex items-center gap-1.5">😊 Complete Your Profile</h3>
-          <p class="text-xs text-slate-400">Select your favorite Memoji Avatar</p>
+          <p class="text-xs text-slate-400">Select your favorite Memoji Face</p>
         </div>
         <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- 7 Columns Grid directly cropping the sheet image -->
-      <div id="avatar-grid-list" class="grid grid-cols-7 gap-3 overflow-y-auto custom-scroll p-2 max-h-[55vh]">
-        <!-- Injected via CSS Sprite Engine -->
+      <!-- Avatar Grid (Scrollable, Clean Images) -->
+      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
+        <!-- Injected via JS -->
       </div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-end">
@@ -355,37 +347,30 @@
         });
       }
     } catch (e) {
-      console.warn("Supabase local mode");
+      console.warn("Supabase local mode active");
     }
 
-    // 2. CSS Sprite Engine Coordinates (Columns: 7, Rows: 14)
-    // Map individual Memoji faces from avatars.jpg
-    const totalAvatars = 98;
-    let selectedAvatarIndex = 0; // Default: 1st avatar
-
-    function applyAvatarCSS(element, index, size = 24) {
-      if (!element) return;
-      const col = index % 7;
-      const row = Math.floor(index / 7);
-      
-      const posX = col * (100 / 6);
-      const posY = row * (100 / 13);
-      
-      element.style.backgroundPosition = `${posX}% ${posY}%`;
-      element.style.backgroundSize = "700% 1400%";
+    // 2. Dynamic Avatar Engine (1.png to 17.png)
+    const TOTAL_AVATARS = 17; // Future-e barale shudhu eikhaner sonkhya bariye diben
+    const avatarList = [];
+    for (let i = 1; i <= TOTAL_AVATARS; i++) {
+      avatarList.push(`avatars/${i}.png`);
     }
+
+    let selectedAvatar = avatarList[0];
 
     function renderAvatarGrid() {
       const container = document.getElementById('avatar-grid-list');
-      if (!container || container.children.length > 0) return;
+      if (!container) return;
+      container.innerHTML = '';
       
-      for (let i = 0; i < totalAvatars; i++) {
+      avatarList.forEach((url) => {
         const div = document.createElement('div');
-        div.className = "w-12 h-12 memoji-avatar border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-110";
-        applyAvatarCSS(div, i, 48);
-        div.onclick = () => chooseAvatar(i);
+        div.className = "w-14 h-14 rounded-full overflow-hidden border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-105 p-0.5 bg-[#141d26] flex items-center justify-center";
+        div.onclick = () => chooseAvatar(url);
+        div.innerHTML = `<img src="${url}" class="w-full h-full rounded-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />`;
         container.appendChild(div);
-      }
+      });
     }
 
     function openAvatarModal() {
@@ -398,13 +383,13 @@
       document.getElementById('avatar-modal').classList.add('hidden');
     }
 
-    async function chooseAvatar(index) {
-      selectedAvatarIndex = index;
-      applyAvatarCSS(document.getElementById('header-avatar-box'), index, 24);
-      applyAvatarCSS(document.getElementById('dropdown-avatar-box'), index, 56);
+    async function chooseAvatar(url) {
+      selectedAvatar = url;
+      document.getElementById('header-avatar-img').src = url;
+      document.getElementById('dropdown-avatar-img').src = url;
 
       if (db && currentUser) {
-        await db.from('profiles').update({ avatar_url: 'memoji_' + index }).eq('id', currentUser.id);
+        await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
       }
       closeAvatarModal();
     }
@@ -418,9 +403,6 @@
     let profileFilter = 'on-hold';
 
     async function initAuth() {
-      applyAvatarCSS(document.getElementById('header-avatar-box'), 0);
-      applyAvatarCSS(document.getElementById('dropdown-avatar-box'), 0);
-
       if (!db) return;
       try {
         const { data: { session } } = await db.auth.getSession();
@@ -441,15 +423,15 @@
       if (user) {
         let coins = 0;
         let displayName = user.email.split('@')[0];
-        let avatarIdx = 0;
+        let avatarUrl = avatarList[0];
 
         try {
           const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
             displayName = profile.username || displayName;
-            if (profile.avatar_url && profile.avatar_url.startsWith('memoji_')) {
-              avatarIdx = parseInt(profile.avatar_url.replace('memoji_', '')) || 0;
+            if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
+              avatarUrl = profile.avatar_url;
             }
             document.getElementById('profile-level-badge').innerText = "Lvl " + (profile.level || 1);
           }
@@ -458,10 +440,9 @@
         }
 
         userCoins = coins;
-        selectedAvatarIndex = avatarIdx;
-        applyAvatarCSS(document.getElementById('header-avatar-box'), avatarIdx);
-        applyAvatarCSS(document.getElementById('dropdown-avatar-box'), avatarIdx);
-
+        selectedAvatar = avatarUrl;
+        document.getElementById('header-avatar-img').src = avatarUrl;
+        document.getElementById('dropdown-avatar-img').src = avatarUrl;
         document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
@@ -477,8 +458,8 @@
         document.getElementById('profile-email-display').innerText = "Not logged in";
         document.getElementById('profile-level-badge').innerText = "Lvl 1";
         document.getElementById('header-coins').innerText = "0";
-        applyAvatarCSS(document.getElementById('header-avatar-box'), 0);
-        applyAvatarCSS(document.getElementById('dropdown-avatar-box'), 0);
+        document.getElementById('header-avatar-img').src = avatarList[0];
+        document.getElementById('dropdown-avatar-img').src = avatarList[0];
         
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -560,14 +541,15 @@
             return;
           }
 
-          const randomIdx = Math.floor(Math.random() * totalAvatars);
+          // Random default avatar from 1 to 17
+          const randomAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
           const { data, error } = await db.auth.signUp({ 
             email, 
             password,
             options: {
               data: {
                 user_name: username,
-                avatar_url: 'memoji_' + randomIdx
+                avatar_url: randomAvatar
               }
             }
           });
