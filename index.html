@@ -82,23 +82,26 @@
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
-        <!-- Dynamic Profile Dropdown with XP/Level System -->
+        <!-- Dynamic Profile Dropdown -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
               <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
               <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
             </div>
-            <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
+              <span id="profile-country-badge" class="text-[10px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">🌐 GLOBAL</span>
+            </div>
             <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
             <span id="profile-email-display" class="text-[11px] font-mono text-slate-400 mt-0.5 truncate max-w-[200px]">Not logged in</span>
           </div>
 
-          <!-- XP & Level Progress Bar -->
+          <!-- XP Progress -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
-              <span id="xp-text">0 XP</span>
-              <span id="xp-next-level" class="text-[#00d672]">Level 1</span>
+              <span id="xp-text">0 / 10 XP</span>
+              <span id="xp-next-level" class="text-[#00d672]">Lvl 2</span>
             </div>
             <div class="w-full bg-[#202c38] h-2 rounded-full overflow-hidden">
               <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500"></div>
@@ -117,7 +120,7 @@
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
             </button>
             <div id="auth-button-slot">
-              <!-- Dynamic Button Slot -->
+              <!-- Dynamic Button -->
             </div>
           </div>
         </div>
@@ -130,7 +133,7 @@
     </div>
   </header>
 
-  <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
+  <!-- 3-COLUMN LAYOUT -->
   <div class="flex-1 flex w-full overflow-hidden">
 
     <!-- LEFT SIDEBAR -->
@@ -164,30 +167,10 @@
             <span>All</span>
             <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
           </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Apps</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Games</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Surveys</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>GPT</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
-          </div>
-          <div class="flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-white cursor-pointer rounded-lg hover:bg-[#141d26]">
-            <span>Sign ups</span>
-            <span class="text-[10px] bg-[#1a2530] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
-          </div>
         </div>
       </div>
 
-      <!-- SOUND NOTIFICATION POPUP CARD -->
+      <!-- Live Popup Alert -->
       <div id="live-bottom-card" class="hidden bg-[#121b24] border border-[#202c38] rounded-xl p-2.5 flex items-center justify-between shadow-2xl transition cursor-pointer">
         <div class="flex items-center gap-2">
           <div id="feed-icon" class="w-8 h-8 rounded-lg bg-[#1a2532] text-slate-300 font-bold flex items-center justify-center text-xs">🎮</div>
@@ -204,9 +187,9 @@
       </div>
     </aside>
 
-    <!-- CENTER FLUID STREAM -->
+    <!-- CENTER CONTENT -->
     <main id="app-content" class="flex-1 p-4 lg:p-6 overflow-y-auto custom-scroll flex flex-col gap-6">
-      <!-- Injected via Router -->
+      <!-- Injected by Router -->
     </main>
 
     <!-- RIGHT CHAT SIDEBAR -->
@@ -222,44 +205,7 @@
         </div>
       </div>
 
-      <div class="bg-[#131d27] border-b border-[#18232e] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400">
-        <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> Lootably 50% Boost Active</span>
-        <i data-lucide="chevron-right" class="w-3 h-3"></i>
-      </div>
-
       <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-slate-400">ElectrifyingNeutr</span>
-            <span class="text-[10px] text-slate-600">04:20 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">any good mobile offer working now?</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-emerald-400">laznamahfuz</span>
-            <span class="text-[10px] text-slate-600">07:41 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">how can i earn money?</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-purple-400">tauhid1002</span>
-            <span class="text-[10px] text-slate-600">04:23 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">How sir Make Money and Game Rewards offer kon Somali Ascari??</p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-rose-400">InvincibleMusket</span>
-            <span class="text-[10px] text-slate-600">22:56 pm</span>
-          </div>
-          <p class="text-slate-300 text-xs">Chk my withdrawal plz it's denied</p>
-        </div>
-
         <div>
           <div class="flex items-center justify-between text-[11px] mb-0.5">
             <span class="font-bold text-[#00d672]">The KHALID</span>
@@ -277,7 +223,7 @@
 
   </div>
 
-  <!-- AUTH MODAL WITH USERNAME & PASSWORD SHOW/HIDE -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -318,7 +264,7 @@
     </div>
   </div>
 
-  <!-- MEMOJI AVATAR SELECTOR MODAL (1.png to 17.png) -->
+  <!-- AVATAR SELECTOR MODAL -->
   <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
@@ -329,9 +275,7 @@
         <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
-        <!-- Injected via JS -->
-      </div>
+      <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]"></div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-end">
         <button onclick="closeAvatarModal()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-5 py-2 rounded-xl text-xs transition">Done</button>
@@ -351,10 +295,10 @@
         });
       }
     } catch (e) {
-      console.warn("Supabase local mode active");
+      console.warn("Supabase mode active");
     }
 
-    // 2. Dynamic Avatar Engine
+    // Dynamic Avatars
     const TOTAL_AVATARS = 17;
     const avatarList = [];
     for (let i = 1; i <= TOTAL_AVATARS; i++) {
@@ -398,27 +342,23 @@
       closeAvatarModal();
     }
 
-    // 3. User & Auth Logic (XP & LEVEL CALCULATION ENGINE)
+    // 2. XP & Country Location Engine
     let currentUser = null;
     let userCoins = 0;
-    let userEarnedTotal = 0;
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
     let profileFilter = 'on-hold';
 
-    // Core Formula: 1,000 Coins = 1 XP | 10 XP = 1 Level
     function updateLevelAndXpUI(earnedCoins) {
       const totalXp = Math.floor(earnedCoins / 1000);
       const currentLevel = 1 + Math.floor(totalXp / 10);
       const xpInCurrentLevel = totalXp % 10;
       const progressPercent = Math.min((xpInCurrentLevel / 10) * 100, 100);
 
-      // Update Level Badge
       const levelBadge = document.getElementById('profile-level-badge');
       if (levelBadge) levelBadge.innerText = `Lvl ${currentLevel}`;
 
-      // Update XP Progress Bar & Labels
       const xpText = document.getElementById('xp-text');
       const nextLevelText = document.getElementById('xp-next-level');
       const progressBar = document.getElementById('xp-progress-bar');
@@ -430,6 +370,19 @@
       if (xpNeeded) xpNeeded.innerText = `${10 - xpInCurrentLevel} XP to Lvl ${currentLevel + 1}`;
 
       return currentLevel;
+    }
+
+    async function getUserCountry() {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          return data.country_code || data.country_name || 'US';
+        }
+      } catch (e) {
+        console.warn("Country detection fallback:", e);
+      }
+      return 'US';
     }
 
     async function initAuth() {
@@ -454,13 +407,14 @@
         let coins = 0;
         let displayName = user.email.split('@')[0];
         let avatarUrl = avatarList[0];
+        let userCountry = user.user_metadata?.country || 'GLOBAL';
 
         try {
-          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url').eq('id', user.id).single();
+          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
-            userEarnedTotal = coins;
             displayName = profile.username || displayName;
+            userCountry = profile.country || userCountry;
             if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
               avatarUrl = profile.avatar_url;
             }
@@ -476,9 +430,9 @@
         document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+        document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
-        // Compute Level and XP
-        updateLevelAndXpUI(userEarnedTotal);
+        updateLevelAndXpUI(userCoins);
 
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -487,10 +441,10 @@
         `;
       } else {
         userCoins = 0;
-        userEarnedTotal = 0;
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-email-display').innerText = "Not logged in";
         document.getElementById('header-coins').innerText = "0";
+        document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
         document.getElementById('header-avatar-img').src = avatarList[0];
         document.getElementById('dropdown-avatar-img').src = avatarList[0];
         
@@ -563,11 +517,14 @@
       if (isSignupMode && (!username || username.length < 3)) return alert("Username must be at least 3 characters.");
 
       const submitBtn = document.getElementById('auth-submit-btn');
-      submitBtn.innerText = "Processing...";
+      submitBtn.innerText = "Detecting Region...";
       submitBtn.disabled = true;
 
       try {
         if (isSignupMode) {
+          const detectedCountry = await getUserCountry();
+          submitBtn.innerText = "Creating Account...";
+
           const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
           if (existingProfile) {
             alert("Username is already taken!");
@@ -583,7 +540,8 @@
             options: {
               data: {
                 user_name: username,
-                avatar_url: randomAvatar
+                avatar_url: randomAvatar,
+                country: detectedCountry
               }
             }
           });
@@ -591,12 +549,24 @@
           if (error) {
             alert("Signup Error: " + error.message);
           } else {
-            alert("Welcome to Gollah, " + username);
+            // Store country in profiles table
+            if (data.user) {
+              await db.from('profiles').upsert({
+                id: data.user.id,
+                username: username,
+                avatar_url: randomAvatar,
+                country: detectedCountry,
+                coins: 0
+              });
+            }
+
+            alert(`Welcome to Gollah, ${username}! (${detectedCountry} detected)`);
             closeAuthModal();
             syncUserSession(data.user);
             setTimeout(() => openAvatarModal(), 600);
           }
         } else {
+          submitBtn.innerText = "Signing in...";
           const { data, error } = await db.auth.signInWithPassword({ email, password });
           if (error) alert("Login Failed: " + error.message);
           else {
@@ -620,58 +590,6 @@
       alert("Signed out successfully.");
     }
 
-    // Audio & Action Popup
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    function playSound(type = 'coin') {
-      try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        if (type === 'coin') {
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.1);
-        } else {
-          osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.setValueAtTime(1760, now + 0.15);
-        }
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.5);
-      } catch (e) {}
-    }
-
-    let popupTimer = null;
-    function triggerActionPopup(data, soundType = 'coin') {
-      const card = document.getElementById('live-bottom-card');
-      if (!card) return;
-      playSound(soundType);
-
-      document.getElementById('feed-icon').innerText = data.icon || '✓';
-      document.getElementById('feed-time').innerText = data.time || 'just now';
-      document.getElementById('feed-title').innerText = data.title;
-      document.getElementById('feed-subtitle').innerText = data.subtitle;
-      
-      const badgeEl = document.getElementById('feed-badge');
-      badgeEl.innerText = data.badge;
-      badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${data.badgeClass || 'bg-emerald-500/20 text-emerald-400'}`;
-      document.getElementById('feed-coins').innerText = `● ${data.coins}`;
-
-      card.classList.remove('hidden');
-      card.classList.remove('toast-animate-in');
-      void card.offsetWidth;
-      card.classList.add('toast-animate-in');
-
-      clearTimeout(popupTimer);
-      popupTimer = setTimeout(() => card.classList.add('hidden'), 5000);
-    }
-
     function navigate(view) {
       currentTab = view;
       document.getElementById('profile-dropdown').classList.add('hidden');
@@ -689,19 +607,6 @@
     function renderHome() {
       const container = document.getElementById('app-content');
       container.innerHTML = `
-        <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">an hour ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">1602</span>
-          </div>
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">Ł</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">LTC</span><span class="text-slate-500 text-[10px]">an hour ago</span></div>
-            <span class="text-white font-bold text-xs ml-2">632</span>
-          </div>
-        </div>
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div onclick="claimTask(2500, 'TheoremReach Surveys')" class="h-44 rounded-2xl bg-gradient-to-br from-[#3b2a82] via-[#2a1e63] to-[#191140] p-4 flex flex-col justify-between border border-[#4c3a9e]/40 shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
             <div>
@@ -709,57 +614,8 @@
               <h3 class="text-white font-black text-lg leading-tight mt-1">Complete Easy<br/>Surveys, Get<br/>Rewarded.</h3>
             </div>
             <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <span class="text-xs font-bold text-white">TheoremReach Sur...</span>
-              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● ∞</span>
-            </div>
-          </div>
-
-          <div onclick="claimTask(1138, 'Neverwinter Game')" class="h-44 rounded-2xl bg-gradient-to-t from-[#0e1620] via-[#152332] to-[#1e344a] p-4 flex flex-col justify-between border border-[#22364a] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
-            <div class="flex justify-center items-center h-20">
-              <span class="font-black text-xl text-slate-200 uppercase tracking-widest">Neverwinter</span>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <div><span class="text-xs font-bold text-white block">Neverwinter</span><span class="text-[10px] text-slate-400">Lootably</span></div>
-              <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 1,138</span>
-            </div>
-          </div>
-
-          <div onclick="claimTask(43500, 'RAID Shadow Legends')" class="h-44 rounded-2xl bg-gradient-to-t from-[#1f0f0b] via-[#3a1a12] to-[#59261a] p-4 flex flex-col justify-between border border-[#6b2e20] shadow-xl cursor-pointer hover:border-[#00d672] transition relative overflow-hidden">
-            <div class="flex justify-center items-center h-20">
-              <span class="font-black text-2xl text-amber-500 uppercase tracking-widest drop-shadow">RAID</span>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10">
-              <div><span class="text-xs font-bold text-white block">RAID Shadow Lege...</span><span class="text-[10px] text-slate-400">Adgate</span></div>
-              <span class="bg-amber-400/20 text-amber-400 font-bold text-xs px-2 py-1 rounded-lg">● 43,500</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-4 h-4 rounded-full bg-[#00d672] text-black flex items-center justify-center text-[10px] font-black">$</span> Premium
-            </h2>
-            <span class="text-xs text-slate-400 hover:text-white cursor-pointer">View all ›</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div onclick="claimTask(19136, 'Swagbucks')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-[#1e2c3a] flex items-center justify-center font-black text-blue-400 text-sm">SB</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Swagbuck...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 19,136</span>
-            </div>
-
-            <div onclick="claimTask(25600, 'Slotastic')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xs">Slotastic</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Slotastic [...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 25,600</span>
-            </div>
-
-            <div onclick="claimTask(25600, 'Grande Vegas')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-xs">Vegas</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Grande Ve...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 25,600</span>
+              <span class="text-xs font-bold text-white">TheoremReach</span>
+              <span class="text-amber-400 font-bold text-xs flex items-center gap-1">● 2,500</span>
             </div>
           </div>
         </div>
@@ -768,15 +624,13 @@
 
     function renderProfile() {
       const container = document.getElementById('app-content');
-      const currentLevel = 1 + Math.floor(Math.floor(userCoins / 1000) / 10);
       container.innerHTML = `
         <div class="flex flex-col gap-5">
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Stats
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Profile Stats
           </h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${currentLevel}</span></div>
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
           </div>
         </div>
@@ -785,27 +639,12 @@
 
     function renderShop() {
       const container = document.getElementById('app-content');
-      container.innerHTML = `
-        <h2 class="text-sm font-bold text-white mb-2">Withdraw Options</h2>
-        <div class="grid grid-cols-3 gap-3">
-          <div onclick="executeWithdraw('Litecoin (LTC)', 1000, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-blue-400 font-black">Ł</span>
-            <span class="font-bold text-xs text-white">Litecoin</span>
-            <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Instant)</span>
-          </div>
-        </div>
-      `;
+      container.innerHTML = `<h2 class="text-sm font-bold text-white mb-2">Shop & Withdraw</h2>`;
     }
 
     function renderRanking() {
       const container = document.getElementById('app-content');
-      container.innerHTML = `
-        <h2 class="text-sm font-bold text-white mb-2">Daily Leaderboard ($50)</h2>
-        <div class="p-3 bg-[#121b24] border border-[#1d2a37] rounded-xl text-xs flex justify-between">
-          <span class="font-bold text-amber-400">1. TopEarner</span>
-          <span class="font-bold text-white">● 25,000</span>
-        </div>
-      `;
+      container.innerHTML = `<h2 class="text-sm font-bold text-white mb-2">Daily Leaderboard</h2>`;
     }
 
     function toggleProfileDropdown() {
@@ -813,71 +652,11 @@
     }
 
     async function claimTask(amount, taskName = 'Task Offer') {
-      if (!currentUser) {
-        alert("Please login first!");
-        openAuthModal(false);
-        return;
-      }
+      if (!currentUser) return openAuthModal(false);
       userCoins += amount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-      
-      // Update XP & Level dynamically
       const newLevel = updateLevelAndXpUI(userCoins);
-
-      if (db) {
-        await db.from('profiles').update({ coins: userCoins, level: newLevel }).eq('id', currentUser.id);
-      }
-
-      triggerActionPopup({
-        icon: '🎮',
-        title: taskName,
-        subtitle: `+${Math.floor(amount / 1000)} XP Earned!`,
-        badge: 'COMPLETE',
-        badgeClass: 'bg-emerald-500/20 text-emerald-400',
-        coins: amount.toLocaleString()
-      }, 'coin');
-    }
-
-    async function executeWithdraw(crypto, minAmount, icon = 'Ł') {
-      if (!currentUser) {
-        alert("Please login first!");
-        openAuthModal(false);
-        return;
-      }
-      if (userCoins < minAmount) return alert(`Minimum is ${minAmount.toLocaleString()} coins.`);
-
-      userCoins -= minAmount;
-      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-      
-      if (db) await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-
-      triggerActionPopup({
-        icon: icon,
-        title: `${crypto} Cashout`,
-        subtitle: 'Pending Approval',
-        badge: 'PENDING',
-        badgeClass: 'bg-purple-500/20 text-purple-300',
-        coins: minAmount.toLocaleString()
-      }, 'cashout');
-    }
-
-    function sendLiveChat() {
-      const input = document.getElementById('chat-input');
-      const val = input.value.trim();
-      if (!val) return;
-      const stream = document.getElementById('chat-stream');
-      const sender = currentUser ? (document.getElementById('profile-username-display').innerText) : "Guest";
-      const msg = document.createElement('div');
-      msg.innerHTML = `
-        <div class="flex items-center justify-between text-[11px] mb-0.5">
-          <span class="font-bold text-[#00d672]">${sender}</span>
-          <span class="text-[10px] text-slate-600">just now</span>
-        </div>
-        <p class="text-white text-xs">${val}</p>
-      `;
-      stream.appendChild(msg);
-      input.value = '';
-      stream.scrollTop = stream.scrollHeight;
+      if (db) await db.from('profiles').update({ coins: userCoins, level: newLevel }).eq('id', currentUser.id);
     }
 
     renderHome();
