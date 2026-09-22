@@ -657,32 +657,41 @@
       alert("User ID copied to clipboard!");
     }
 
-    // AUDIO: Custom Audio Player with Auto-Fallback
+    // SOUND 1: Pending Submit Pop Sound
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
-    function playCashoutTaakSound() {
+    function playPendingTaakSound() {
       try {
-        const customAudio = new Audio('cashout.mp3');
-        const playPromise = customAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
-            // Synthesizer fallback if file is missing
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(880, now);
-            osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(now);
-            osc.stop(now + 0.055);
-          });
-        }
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.05);
+
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.055);
+      } catch (e) {}
+    }
+
+    // SOUND 2: Completed Custom Audio ("cashout.mp3" uploaded by user)
+    function playCompletedCustomAudio() {
+      try {
+        const audio = new Audio('cashout.mp3');
+        audio.play().catch(() => {
+          // Fallback beep if file is missing
+          playPendingTaakSound();
+        });
       } catch (e) {}
     }
 
@@ -773,6 +782,7 @@
         status: 'complete'
       });
 
+      playCompletedCustomAudio();
       triggerDollahFloatingToast({
         time: 'just now',
         title: offerName,
@@ -868,6 +878,9 @@
       submitBtn.disabled = true;
 
       try {
+        // Play pending submit pop sound (Sound 1)
+        playPendingTaakSound();
+
         userCoins -= amount;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
 
@@ -948,11 +961,11 @@
             status: (d.status || 'PENDING').toUpperCase()
           }));
 
-          // Compare with local cache to detect newly completed status for sound & toast popup
+          // Compare with local cache to detect newly completed status for custom completed audio (Sound 2) & toast popup
           fetchedList.forEach(fw => {
             const oldW = userWithdrawals.find(ow => ow.id === fw.id);
             if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
-              playCashoutTaakSound();
+              playCompletedCustomAudio();
               triggerDollahFloatingToast({
                 time: 'just now',
                 title: `${fw.method || 'Crypto'} Payout Sent`,
