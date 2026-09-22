@@ -234,7 +234,7 @@
       </footer>
     </div>
 
-    <!-- RIGHT CHAT SIDEBAR -->
+    <!-- RIGHT CHAT SIDEBAR (Fake online counter removed for absolute compliance safety) -->
     <aside class="w-72 shrink-0 bg-[#0d141b] border-l border-[#18232e] flex flex-col justify-between hidden xl:flex">
       <div class="p-3 border-b border-[#18232e] flex items-center justify-between text-xs font-bold text-slate-400">
         <div class="flex items-center gap-3">
@@ -243,7 +243,7 @@
         </div>
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#00d672]"></span>
-          <span>587 online</span>
+          <span class="text-[11px] text-slate-400">Live Chat</span>
         </div>
       </div>
 
@@ -948,7 +948,7 @@
             status: (d.status || 'PENDING').toUpperCase()
           }));
 
-          // Compare with local cache to detect newly completed status for sound & toast
+          // Compare with local cache to detect newly completed status for sound & toast popup
           fetchedList.forEach(fw => {
             const oldW = userWithdrawals.find(ow => ow.id === fw.id);
             if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
@@ -1532,7 +1532,7 @@
             </button>
           </div>
 
-          <link onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
+          <div onclick="openCustomCashoutModal('Binance Pay', 300, '🟡')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:bg-amber-500 group-hover:text-black flex items-center justify-center font-black text-xl transition">
                 🟡
