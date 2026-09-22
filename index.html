@@ -32,6 +32,14 @@
       animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
+
+    /* CSS SPRITE ENGINE FOR MEMOJI AVATARS */
+    .memoji-avatar {
+      background-image: url('avatars.jpg');
+      background-repeat: no-repeat;
+      border-radius: 9999px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
@@ -78,7 +86,7 @@
       <!-- Profile Avatar Button -->
       <div class="relative">
         <button onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#202c38] p-1 rounded-xl">
-          <img id="header-avatar-img" src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Sunglasses.png" class="w-6 h-6 rounded-full object-cover bg-[#202c38]" />
+          <div id="header-avatar-box" class="w-6 h-6 memoji-avatar"></div>
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
@@ -86,8 +94,8 @@
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
-              <img id="dropdown-avatar-img" src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Sunglasses.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] bg-[#0b1116] mb-1 p-0.5 object-cover" />
-              <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[9px] text-white font-bold">Edit</div>
+              <div id="dropdown-avatar-box" class="w-14 h-14 memoji-avatar border-2 border-[#00d672] mb-1"></div>
+              <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
             </div>
             <span id="profile-level-badge" class="text-[10px] bg-slate-700 text-white font-black px-1.5 py-0.2 rounded">Lvl 1</span>
             <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
@@ -106,7 +114,7 @@
 
           <div class="flex flex-col gap-1 text-xs border-t border-[#202c38] pt-2">
             <button onclick="openAvatarModal()" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300">
-              <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Avatar
+              <i data-lucide="smile" class="w-4 h-4 text-amber-400"></i> Change Memoji Face
             </button>
             <button onclick="navigate('profile')" class="flex items-center gap-2 py-1.5 px-2 hover:bg-[#1b2632] rounded-lg text-slate-300">
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
@@ -313,9 +321,9 @@
     </div>
   </div>
 
-  <!-- MEMOJI FACE AVATAR SELECTOR MODAL (EXACT MATCH TO USER SCREENSHOT) -->
+  <!-- EXACT MEMOJI AVATAR SHEET SELECTOR MODAL -->
   <div id="avatar-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+    <div class="bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-5 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <div>
           <h3 class="font-black text-base text-white flex items-center gap-1.5">😊 Complete Your Profile</h3>
@@ -324,9 +332,9 @@
         <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Avatar Grid (Scrollable) -->
-      <div id="avatar-grid-list" class="grid grid-cols-5 sm:grid-cols-6 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
-        <!-- Injected via JS -->
+      <!-- 7 Columns Grid directly cropping the sheet image -->
+      <div id="avatar-grid-list" class="grid grid-cols-7 gap-3 overflow-y-auto custom-scroll p-2 max-h-[55vh]">
+        <!-- Injected via CSS Sprite Engine -->
       </div>
 
       <div class="pt-2 border-t border-[#202c38] flex justify-end">
@@ -343,58 +351,41 @@
     try {
       if (window.supabase && typeof window.supabase.createClient === 'function') {
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true
-          }
+          auth: { persistSession: true, autoRefreshToken: true }
         });
       }
     } catch (e) {
-      console.warn("Supabase init error:", e);
+      console.warn("Supabase local mode");
     }
 
-    // 2. High-Quality 3D Memoji Avatar Catalog (Matching Screenshot)
-    const memojiAvatars = [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1528892952291-009c663ce843?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80"
-    ];
+    // 2. CSS Sprite Engine Coordinates (Columns: 7, Rows: 14)
+    // Map individual Memoji faces from avatars.jpg
+    const totalAvatars = 98;
+    let selectedAvatarIndex = 0; // Default: 1st avatar
 
-    let currentUser = null;
-    let userCoins = 0;
-    let selectedAvatar = memojiAvatars[0];
-    let isSignupMode = false;
-    let isPasswordVisible = false;
-    let currentTab = 'home';
-    let profileFilter = 'on-hold';
+    function applyAvatarCSS(element, index, size = 24) {
+      if (!element) return;
+      const col = index % 7;
+      const row = Math.floor(index / 7);
+      
+      const posX = col * (100 / 6);
+      const posY = row * (100 / 13);
+      
+      element.style.backgroundPosition = `${posX}% ${posY}%`;
+      element.style.backgroundSize = "700% 1400%";
+    }
 
-    // Populate Avatar Grid
     function renderAvatarGrid() {
       const container = document.getElementById('avatar-grid-list');
-      if (!container) return;
-      container.innerHTML = '';
-      memojiAvatars.forEach((url) => {
+      if (!container || container.children.length > 0) return;
+      
+      for (let i = 0; i < totalAvatars; i++) {
         const div = document.createElement('div');
-        div.className = "w-14 h-14 rounded-full overflow-hidden border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-105 p-0.5 bg-[#1f2c38]";
-        div.onclick = () => chooseAvatar(url);
-        div.innerHTML = `<img src="${url}" class="w-full h-full rounded-full object-cover" />`;
+        div.className = "w-12 h-12 memoji-avatar border-2 border-transparent hover:border-[#00d672] cursor-pointer transition transform hover:scale-110";
+        applyAvatarCSS(div, i, 48);
+        div.onclick = () => chooseAvatar(i);
         container.appendChild(div);
-      });
+      }
     }
 
     function openAvatarModal() {
@@ -407,19 +398,29 @@
       document.getElementById('avatar-modal').classList.add('hidden');
     }
 
-    async function chooseAvatar(url) {
-      selectedAvatar = url;
-      document.getElementById('header-avatar-img').src = url;
-      document.getElementById('dropdown-avatar-img').src = url;
+    async function chooseAvatar(index) {
+      selectedAvatarIndex = index;
+      applyAvatarCSS(document.getElementById('header-avatar-box'), index, 24);
+      applyAvatarCSS(document.getElementById('dropdown-avatar-box'), index, 56);
 
       if (db && currentUser) {
-        await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+        await db.from('profiles').update({ avatar_url: 'memoji_' + index }).eq('id', currentUser.id);
       }
       closeAvatarModal();
     }
 
-    // 3. Auth State Watcher
+    // 3. User & Auth Logic
+    let currentUser = null;
+    let userCoins = 0;
+    let isSignupMode = false;
+    let isPasswordVisible = false;
+    let currentTab = 'home';
+    let profileFilter = 'on-hold';
+
     async function initAuth() {
+      applyAvatarCSS(document.getElementById('header-avatar-box'), 0);
+      applyAvatarCSS(document.getElementById('dropdown-avatar-box'), 0);
+
       if (!db) return;
       try {
         const { data: { session } } = await db.auth.getSession();
@@ -429,7 +430,7 @@
           syncUserSession(session ? session.user : null);
         });
       } catch (err) {
-        console.error("Session init error:", err);
+        console.error("Session check:", err);
       }
     }
 
@@ -440,29 +441,30 @@
       if (user) {
         let coins = 0;
         let displayName = user.email.split('@')[0];
-        let avatarUrl = selectedAvatar;
+        let avatarIdx = 0;
 
         try {
           const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
             displayName = profile.username || displayName;
-            if (profile.avatar_url && profile.avatar_url.startsWith('http')) {
-              avatarUrl = profile.avatar_url;
+            if (profile.avatar_url && profile.avatar_url.startsWith('memoji_')) {
+              avatarIdx = parseInt(profile.avatar_url.replace('memoji_', '')) || 0;
             }
             document.getElementById('profile-level-badge').innerText = "Lvl " + (profile.level || 1);
           }
         } catch (e) {
-          console.warn("Profile fetch error:", e);
+          console.warn("Profile fetch:", e);
         }
 
         userCoins = coins;
-        selectedAvatar = avatarUrl;
+        selectedAvatarIndex = avatarIdx;
+        applyAvatarCSS(document.getElementById('header-avatar-box'), avatarIdx);
+        applyAvatarCSS(document.getElementById('dropdown-avatar-box'), avatarIdx);
+
         document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-        document.getElementById('header-avatar-img').src = avatarUrl;
-        document.getElementById('dropdown-avatar-img').src = avatarUrl;
         
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -475,8 +477,8 @@
         document.getElementById('profile-email-display').innerText = "Not logged in";
         document.getElementById('profile-level-badge').innerText = "Lvl 1";
         document.getElementById('header-coins').innerText = "0";
-        document.getElementById('header-avatar-img').src = memojiAvatars[0];
-        document.getElementById('dropdown-avatar-img').src = memojiAvatars[0];
+        applyAvatarCSS(document.getElementById('header-avatar-box'), 0);
+        applyAvatarCSS(document.getElementById('dropdown-avatar-box'), 0);
         
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
@@ -487,7 +489,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Modal & Auth Controls
     function openAuthModal(signup = false) {
       document.getElementById('profile-dropdown').classList.add('hidden');
       isSignupMode = signup;
@@ -511,11 +512,8 @@
 
     function updateAuthModalUI() {
       const usernameBox = document.getElementById('auth-username-container');
-      if (isSignupMode) {
-        usernameBox.classList.remove('hidden');
-      } else {
-        usernameBox.classList.add('hidden');
-      }
+      if (isSignupMode) usernameBox.classList.remove('hidden');
+      else usernameBox.classList.add('hidden');
 
       document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create New Account" : "Login to Gollah";
       document.getElementById('auth-submit-btn').innerText = isSignupMode ? "Sign Up Free" : "Login";
@@ -544,24 +542,9 @@
       const password = document.getElementById('auth-pass-input').value.trim();
       const username = document.getElementById('auth-username-input').value.trim();
 
-      if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
-      }
-      if (password.length < 6) {
-        alert("Password must be at least 6 characters.");
-        return;
-      }
-
-      if (isSignupMode && (!username || username.length < 3)) {
-        alert("Please enter a username with at least 3 characters.");
-        return;
-      }
-
-      if (!db) {
-        alert("Database connection is not ready.");
-        return;
-      }
+      if (!email || !password) return alert("Fill in email and password.");
+      if (password.length < 6) return alert("Password must be at least 6 characters.");
+      if (isSignupMode && (!username || username.length < 3)) return alert("Username must be at least 3 characters.");
 
       const submitBtn = document.getElementById('auth-submit-btn');
       submitBtn.innerText = "Processing...";
@@ -569,57 +552,44 @@
 
       try {
         if (isSignupMode) {
-          // Check username availability
-          const { data: existingProfile } = await db.from('profiles').select('id, username').eq('username', username).maybeSingle();
+          const { data: existingProfile } = await db.from('profiles').select('id').eq('username', username).maybeSingle();
           if (existingProfile) {
-            alert("This username is already taken! Please choose another.");
+            alert("Username is already taken!");
             submitBtn.disabled = false;
             updateAuthModalUI();
             return;
           }
 
-          // Random default Memoji face from list
-          const randomMemoji = memojiAvatars[Math.floor(Math.random() * memojiAvatars.length)];
-
+          const randomIdx = Math.floor(Math.random() * totalAvatars);
           const { data, error } = await db.auth.signUp({ 
             email, 
             password,
             options: {
               data: {
                 user_name: username,
-                avatar_url: randomMemoji
+                avatar_url: 'memoji_' + randomIdx
               }
             }
           });
           
           if (error) {
-            if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("unique")) {
-              alert("An account with this email already exists! Please click Login.");
-            } else {
-              alert("Signup Error: " + error.message);
-            }
+            alert("Signup Error: " + error.message);
           } else {
-            if (data.user && data.user.identities && data.user.identities.length === 0) {
-              alert("An account with this email already exists! Please click Login.");
-            } else {
-              alert("Account created successfully! Welcome to Gollah, " + username);
-              closeAuthModal();
-              syncUserSession(data.user);
-              // Open Avatar picker right after signup
-              setTimeout(() => openAvatarModal(), 600);
-            }
+            alert("Welcome to Gollah, " + username);
+            closeAuthModal();
+            syncUserSession(data.user);
+            setTimeout(() => openAvatarModal(), 600);
           }
         } else {
           const { data, error } = await db.auth.signInWithPassword({ email, password });
-          if (error) {
-            alert("Login Failed: " + error.message);
-          } else {
+          if (error) alert("Login Failed: " + error.message);
+          else {
             closeAuthModal();
             syncUserSession(data.user);
           }
         }
       } catch (err) {
-        alert("Authentication error: " + err.message);
+        alert("Auth error: " + err.message);
       } finally {
         submitBtn.disabled = false;
         updateAuthModalUI();
@@ -627,60 +597,44 @@
     }
 
     async function handleLogout() {
-      if (db) {
-        await db.auth.signOut();
-      }
+      if (db) await db.auth.signOut();
       currentUser = null;
       syncUserSession(null);
       document.getElementById('profile-dropdown').classList.add('hidden');
       alert("Signed out successfully.");
     }
 
-    // Audio Engine
+    // Audio & Action Popup
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
-
     function playSound(type = 'coin') {
       try {
         if (!audioCtx) audioCtx = new AudioContext();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
         if (type === 'coin') {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
           osc.frequency.setValueAtTime(987.77, now);
           osc.frequency.setValueAtTime(1318.51, now + 0.1);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.5);
         } else {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
           osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.setValueAtTime(880, now + 0.08);
-          osc.frequency.setValueAtTime(1760, now + 0.18);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.6);
+          osc.frequency.setValueAtTime(1760, now + 0.15);
         }
-      } catch (e) {
-        console.warn("Audio:", e);
-      }
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } catch (e) {}
     }
 
     let popupTimer = null;
     function triggerActionPopup(data, soundType = 'coin') {
       const card = document.getElementById('live-bottom-card');
       if (!card) return;
-
       playSound(soundType);
 
       document.getElementById('feed-icon').innerText = data.icon || '✓';
@@ -691,7 +645,6 @@
       const badgeEl = document.getElementById('feed-badge');
       badgeEl.innerText = data.badge;
       badgeEl.className = `text-[9px] font-bold px-1.5 py-0.2 rounded block mb-0.5 ${data.badgeClass || 'bg-emerald-500/20 text-emerald-400'}`;
-
       document.getElementById('feed-coins').innerText = `● ${data.coins}`;
 
       card.classList.remove('hidden');
@@ -700,31 +653,20 @@
       card.classList.add('toast-animate-in');
 
       clearTimeout(popupTimer);
-      popupTimer = setTimeout(() => {
-        card.classList.add('hidden');
-      }, 5000);
+      popupTimer = setTimeout(() => card.classList.add('hidden'), 5000);
     }
 
     function navigate(view) {
       currentTab = view;
       document.getElementById('profile-dropdown').classList.add('hidden');
-
       ['home', 'premium', 'shop', 'ranking', 'profile'].forEach(v => {
         const el = document.getElementById('nav-' + v);
-        if (el) {
-          if (v === view) {
-            el.className = "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition";
-          } else {
-            el.className = "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
-          }
-        }
+        if (el) el.className = (v === view) ? "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition" : "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
       });
-
       if (view === 'home' || view === 'premium') renderHome();
       else if (view === 'profile') renderProfile();
       else if (view === 'shop') renderShop();
       else if (view === 'ranking') renderRanking();
-
       if (window.lucide) lucide.createIcons();
     }
 
@@ -803,24 +745,6 @@
               <div><span class="text-xs font-bold text-white block truncate w-24">Grande Ve...</span><span class="text-[10px] text-slate-500">Premium</span></div>
               <span class="text-amber-400 font-bold text-xs">● 25,600</span>
             </div>
-
-            <div onclick="claimTask(64, 'Test Your Knowledge')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-xs">Edge</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Test Your ...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 64</span>
-            </div>
-
-            <div onclick="claimTask(4480, 'SiriusXM')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">Sirius</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">SiriusXM</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 4,480</span>
-            </div>
-
-            <div onclick="claimTask(1024, 'Apple Watch Quiz')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] rounded-2xl p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition">
-              <div class="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-xs">Watch</div>
-              <div><span class="text-xs font-bold text-white block truncate w-24">Apple Wat...</span><span class="text-[10px] text-slate-500">Premium</span></div>
-              <span class="text-amber-400 font-bold text-xs">● 1,024</span>
-            </div>
           </div>
         </div>
       `;
@@ -833,14 +757,10 @@
           <h2 class="text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Stats
           </h2>
-
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Offers Completed</span><span class="text-base font-bold text-white">0</span></div>
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Coins Earned</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Referrer</span><span class="text-xs font-mono font-bold text-white">None</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Referral Earnings</span><span class="text-base font-bold text-white">0</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Users Referred</span><span class="text-base font-bold text-white">0</span></div>
           </div>
         </div>
       `;
@@ -856,16 +776,6 @@
             <span class="font-bold text-xs text-white">Litecoin</span>
             <span class="text-[10px] text-[#00d672]">Min 1,000 Coins (Instant)</span>
           </div>
-          <div onclick="executeWithdraw('Tether USDT', 5000, '₮')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-emerald-400 font-black">₮</span>
-            <span class="font-bold text-xs text-white">USDT</span>
-            <span class="text-[10px] text-slate-400">Min 5,000 Coins</span>
-          </div>
-          <div onclick="executeWithdraw('Bitcoin (BTC)', 15000, '₿')" class="bg-[#121b24] border border-[#1d2a37] p-4 rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-[#00d672] transition">
-            <span class="text-2xl text-amber-400 font-black">₿</span>
-            <span class="font-bold text-xs text-white">Bitcoin</span>
-            <span class="text-[10px] text-slate-400">Min 15,000 Coins</span>
-          </div>
         </div>
       `;
     }
@@ -874,11 +784,9 @@
       const container = document.getElementById('app-content');
       container.innerHTML = `
         <h2 class="text-sm font-bold text-white mb-2">Daily Leaderboard ($50)</h2>
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center justify-between p-3 bg-[#121b24] border border-[#1d2a37] rounded-xl text-xs">
-            <span class="font-bold text-amber-400">1. TopEarner</span>
-            <span class="font-bold text-white">● 25,000</span>
-          </div>
+        <div class="p-3 bg-[#121b24] border border-[#1d2a37] rounded-xl text-xs flex justify-between">
+          <span class="font-bold text-amber-400">1. TopEarner</span>
+          <span class="font-bold text-white">● 25,000</span>
         </div>
       `;
     }
@@ -889,17 +797,13 @@
 
     async function claimTask(amount, taskName = 'Task Offer') {
       if (!currentUser) {
-        alert("Please login first to earn coins!");
+        alert("Please login first!");
         openAuthModal(false);
         return;
       }
-
       userCoins += amount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-
-      if (db) {
-        await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-      }
+      if (db) await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
 
       triggerActionPopup({
         icon: '🎮',
@@ -913,22 +817,15 @@
 
     async function executeWithdraw(crypto, minAmount, icon = 'Ł') {
       if (!currentUser) {
-        alert("Please login to request cashouts!");
+        alert("Please login first!");
         openAuthModal(false);
         return;
       }
-
-      if (userCoins < minAmount) {
-        alert(`Insufficient coins. Minimum withdrawal is ${minAmount.toLocaleString()} coins.`);
-        return;
-      }
+      if (userCoins < minAmount) return alert(`Minimum is ${minAmount.toLocaleString()} coins.`);
 
       userCoins -= minAmount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-
-      if (db) {
-        await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
-      }
+      if (db) await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
 
       triggerActionPopup({
         icon: icon,
