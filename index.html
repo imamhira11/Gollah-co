@@ -82,25 +82,30 @@
           <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 mr-1"></i>
         </button>
 
-        <!-- Dynamic Profile Dropdown -->
+        <!-- Dynamic Profile Dropdown with XP/Level System -->
         <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <div class="relative group cursor-pointer" onclick="openAvatarModal()">
               <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
               <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] text-white font-bold">Edit Face</div>
             </div>
-            <span id="profile-level-badge" class="text-[10px] bg-slate-700 text-white font-black px-1.5 py-0.2 rounded">Lvl 1</span>
+            <span id="profile-level-badge" class="text-[10px] bg-[#00d672] text-black font-black px-2 py-0.5 rounded shadow">Lvl 1</span>
             <span id="profile-username-display" class="font-bold text-white text-sm mt-1 truncate max-w-[200px]">Guest</span>
             <span id="profile-email-display" class="text-[11px] font-mono text-slate-400 mt-0.5 truncate max-w-[200px]">Not logged in</span>
           </div>
 
+          <!-- XP & Level Progress Bar -->
           <div>
             <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
-              <span>XP Progress</span>
-              <span>Level Up</span>
+              <span id="xp-text">0 XP</span>
+              <span id="xp-next-level" class="text-[#00d672]">Level 1</span>
             </div>
-            <div class="w-full bg-[#202c38] h-1.5 rounded-full overflow-hidden">
-              <div class="bg-[#00d672] h-full w-1/5"></div>
+            <div class="w-full bg-[#202c38] h-2 rounded-full overflow-hidden">
+              <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500"></div>
+            </div>
+            <div class="flex justify-between text-[9px] text-slate-500 mt-1">
+              <span>1,000 Coins = 1 XP</span>
+              <span id="xp-needed">10 XP to Lvl 2</span>
             </div>
           </div>
 
@@ -112,7 +117,7 @@
               <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> Profile History
             </button>
             <div id="auth-button-slot">
-              <!-- Injected dynamically -->
+              <!-- Dynamic Button Slot -->
             </div>
           </div>
         </div>
@@ -324,7 +329,6 @@
         <button onclick="closeAvatarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Avatar Grid (Scrollable, Clean Images) -->
       <div id="avatar-grid-list" class="grid grid-cols-4 sm:grid-cols-5 gap-3 overflow-y-auto custom-scroll p-1 max-h-[55vh]">
         <!-- Injected via JS -->
       </div>
@@ -350,8 +354,8 @@
       console.warn("Supabase local mode active");
     }
 
-    // 2. Dynamic Avatar Engine (1.png to 17.png)
-    const TOTAL_AVATARS = 17; // Future-e barale shudhu eikhaner sonkhya bariye diben
+    // 2. Dynamic Avatar Engine
+    const TOTAL_AVATARS = 17;
     const avatarList = [];
     for (let i = 1; i <= TOTAL_AVATARS; i++) {
       avatarList.push(`avatars/${i}.png`);
@@ -394,13 +398,39 @@
       closeAvatarModal();
     }
 
-    // 3. User & Auth Logic
+    // 3. User & Auth Logic (XP & LEVEL CALCULATION ENGINE)
     let currentUser = null;
     let userCoins = 0;
+    let userEarnedTotal = 0;
     let isSignupMode = false;
     let isPasswordVisible = false;
     let currentTab = 'home';
     let profileFilter = 'on-hold';
+
+    // Core Formula: 1,000 Coins = 1 XP | 10 XP = 1 Level
+    function updateLevelAndXpUI(earnedCoins) {
+      const totalXp = Math.floor(earnedCoins / 1000);
+      const currentLevel = 1 + Math.floor(totalXp / 10);
+      const xpInCurrentLevel = totalXp % 10;
+      const progressPercent = Math.min((xpInCurrentLevel / 10) * 100, 100);
+
+      // Update Level Badge
+      const levelBadge = document.getElementById('profile-level-badge');
+      if (levelBadge) levelBadge.innerText = `Lvl ${currentLevel}`;
+
+      // Update XP Progress Bar & Labels
+      const xpText = document.getElementById('xp-text');
+      const nextLevelText = document.getElementById('xp-next-level');
+      const progressBar = document.getElementById('xp-progress-bar');
+      const xpNeeded = document.getElementById('xp-needed');
+
+      if (xpText) xpText.innerText = `${xpInCurrentLevel} / 10 XP`;
+      if (nextLevelText) nextLevelText.innerText = `Lvl ${currentLevel + 1}`;
+      if (progressBar) progressBar.style.width = `${progressPercent}%`;
+      if (xpNeeded) xpNeeded.innerText = `${10 - xpInCurrentLevel} XP to Lvl ${currentLevel + 1}`;
+
+      return currentLevel;
+    }
 
     async function initAuth() {
       if (!db) return;
@@ -429,11 +459,11 @@
           const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
+            userEarnedTotal = coins;
             displayName = profile.username || displayName;
             if (profile.avatar_url && (profile.avatar_url.includes('avatars/') || profile.avatar_url.startsWith('http'))) {
               avatarUrl = profile.avatar_url;
             }
-            document.getElementById('profile-level-badge').innerText = "Lvl " + (profile.level || 1);
           }
         } catch (e) {
           console.warn("Profile fetch:", e);
@@ -447,6 +477,9 @@
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('header-coins').innerText = userCoins.toLocaleString();
         
+        // Compute Level and XP
+        updateLevelAndXpUI(userEarnedTotal);
+
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
             <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
@@ -454,13 +487,15 @@
         `;
       } else {
         userCoins = 0;
+        userEarnedTotal = 0;
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-email-display').innerText = "Not logged in";
-        document.getElementById('profile-level-badge').innerText = "Lvl 1";
         document.getElementById('header-coins').innerText = "0";
         document.getElementById('header-avatar-img').src = avatarList[0];
         document.getElementById('dropdown-avatar-img').src = avatarList[0];
         
+        updateLevelAndXpUI(0);
+
         authSlot.innerHTML = `
           <button onclick="openAuthModal(false)" class="w-full flex items-center gap-2 py-2 px-2 bg-[#00d672] hover:bg-[#00be64] text-black font-extrabold rounded-lg text-left transition mt-1 justify-center shadow-lg shadow-emerald-950/40">
             <i data-lucide="log-in" class="w-4 h-4"></i> Login / Sign Up
@@ -541,7 +576,6 @@
             return;
           }
 
-          // Random default avatar from 1 to 17
           const randomAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
           const { data, error } = await db.auth.signUp({ 
             email, 
@@ -734,6 +768,7 @@
 
     function renderProfile() {
       const container = document.getElementById('app-content');
+      const currentLevel = 1 + Math.floor(Math.floor(userCoins / 1000) / 10);
       container.innerHTML = `
         <div class="flex flex-col gap-5">
           <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -741,8 +776,8 @@
           </h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Balance</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Offers Completed</span><span class="text-base font-bold text-white">0</span></div>
-            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Coins Earned</span><span class="text-base font-bold text-white">${userCoins.toLocaleString()}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Current Level</span><span class="text-base font-bold text-[#00d672]">Level ${currentLevel}</span></div>
+            <div class="bg-[#121b24] border border-[#1d2a37] rounded-xl p-3.5 text-center"><span class="text-xs text-slate-400 block mb-1">Total XP</span><span class="text-base font-bold text-amber-400">${Math.floor(userCoins / 1000)} XP</span></div>
           </div>
         </div>
       `;
@@ -785,12 +820,18 @@
       }
       userCoins += amount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
-      if (db) await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
+      
+      // Update XP & Level dynamically
+      const newLevel = updateLevelAndXpUI(userCoins);
+
+      if (db) {
+        await db.from('profiles').update({ coins: userCoins, level: newLevel }).eq('id', currentUser.id);
+      }
 
       triggerActionPopup({
         icon: '🎮',
         title: taskName,
-        subtitle: 'Reward Verified',
+        subtitle: `+${Math.floor(amount / 1000)} XP Earned!`,
         badge: 'COMPLETE',
         badgeClass: 'bg-emerald-500/20 text-emerald-400',
         coins: amount.toLocaleString()
@@ -807,6 +848,7 @@
 
       userCoins -= minAmount;
       document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+      
       if (db) await db.from('profiles').update({ coins: userCoins }).eq('id', currentUser.id);
 
       triggerActionPopup({
