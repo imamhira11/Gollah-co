@@ -495,14 +495,19 @@
       { type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡' }
     ];
 
-    function prependLiveTicker(type, amount, icon = 'Ł') {
+    function prependLiveTicker(type, amount, icon = 'Ł', status = '') {
+      const amtStr = (typeof amount === 'number')
+        ? amount.toLocaleString()
+        : String(amount);
       liveTickerItems.unshift({
         type: type,
-        amount: amount.toLocaleString(),
+        amount: amtStr,
         time: 'just now',
-        icon: icon
+        icon: icon,
+        status: status
       });
-      if (liveTickerItems.length > 5) liveTickerItems.pop();
+      if (liveTickerItems.length > 6) liveTickerItems.pop();
+      // Always refresh ticker area if home is visible
       if (currentTab === 'home') renderHome();
     }
 
@@ -799,7 +804,7 @@
         status: 'complete'
       });
 
-      prependLiveTicker('Offer', coins.toLocaleString(), '⚡');
+      prependLiveTicker('Offer', coins, '⚡', 'Complete');
       playCompletedCustomAudio();
       triggerDollahFloatingToast({
         time: 'just now',
@@ -807,6 +812,7 @@
         status: 'Complete',
         coins: coins.toLocaleString()
       });
+      if (currentTab === 'home') renderHome();
     };
 
     // CASHOUT ENGINE
@@ -935,6 +941,11 @@
 
         closeCashoutModal();
 
+        // Push to live ticker bar immediately on withdraw
+        const shortMethod = selectedCashoutCrypto.includes('Binance') ? 'Binance' : 'LTC';
+        const tickerIcon = selectedCashoutCrypto.includes('Binance') ? '🟡' : 'Ł';
+        prependLiveTicker(shortMethod, amount, tickerIcon, 'Pending');
+
         triggerDollahFloatingToast({
           time: 'just now',
           title: `${selectedCashoutCrypto} Cashout`,
@@ -944,6 +955,7 @@
 
         await fetchUserWithdrawals();
         if (currentTab === 'profile') renderProfile();
+        if (currentTab === 'home') renderHome();
       } catch (e) {
         alert("Withdrawal Error: " + e.message);
       } finally {
@@ -994,10 +1006,10 @@
                 message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
                 status: 'completed'
               });
-              // Automatically push to live ticker bar on home screen
+              // Automatically push to live ticker bar on home screen when payout completes
               const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
               const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
-              prependLiveTicker(shortMethod, fw.amount, tickerIcon);
+              prependLiveTicker(shortMethod, fw.amount, tickerIcon, 'Sent');
             }
           });
 
@@ -1458,11 +1470,17 @@
       // Render live ticker items dynamically from liveTickerItems array
       let tickerHTML = '';
       liveTickerItems.forEach(t => {
+        const statusLabel = t.status
+          ? `<span class="text-[9px] ${t.status === 'Pending' ? 'text-amber-400' : t.status === 'Sent' || t.status === 'Complete' ? 'text-emerald-400' : 'text-slate-500'} font-semibold">${t.status}</span>`
+          : `<span class="text-slate-500 text-[10px]">${t.time}</span>`;
         tickerHTML += `
-          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
+          <div class="flex items-center gap-3 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0 animate-pulse-once">
             <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon}</span>
-            <div class="text-[11px] leading-tight"><span class="text-slate-400 font-medium block">${t.type}</span><span class="text-slate-500 text-[10px]">${t.time}</span></div>
-            <span class="text-white font-bold text-xs ml-2">${t.amount}</span>
+            <div class="text-[11px] leading-tight">
+              <span class="text-slate-300 font-medium block">${t.type}</span>
+              ${statusLabel}
+            </div>
+            <span class="text-white font-bold text-xs ml-2">● ${t.amount}</span>
           </div>
         `;
       });
