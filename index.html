@@ -2070,15 +2070,43 @@
       if (titleEl) titleEl.textContent = title || 'Notice';
       if (msgEl) msgEl.textContent = message || '';
 
+      // Private ON → red | Unlocked → green (not dark/black)
       if (mode === 'private') {
-        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0';
-        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye-off'); iconEl.className = 'w-4 h-4 text-amber-400'; }
+        el.style.background = 'linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ef4444 100%)';
+        el.style.borderColor = 'rgba(254,202,202,0.35)';
+        el.style.boxShadow = '0 12px 32px rgba(185,28,28,0.45)';
+        if (titleEl) titleEl.style.color = '#fff';
+        if (msgEl) msgEl.style.color = 'rgba(255,255,255,0.88)';
+        if (iconWrap) {
+          iconWrap.className = 'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border';
+          iconWrap.style.background = 'rgba(255,255,255,0.18)';
+          iconWrap.style.borderColor = 'rgba(255,255,255,0.3)';
+        }
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye-off'); iconEl.className = 'w-4 h-4 text-white'; }
       } else if (mode === 'public') {
-        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0';
-        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye'); iconEl.className = 'w-4 h-4 text-emerald-400'; }
+        el.style.background = 'linear-gradient(135deg, #047857 0%, #059669 45%, #10b981 100%)';
+        el.style.borderColor = 'rgba(167,243,208,0.35)';
+        el.style.boxShadow = '0 12px 32px rgba(4,120,87,0.45)';
+        if (titleEl) titleEl.style.color = '#fff';
+        if (msgEl) msgEl.style.color = 'rgba(255,255,255,0.9)';
+        if (iconWrap) {
+          iconWrap.className = 'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border';
+          iconWrap.style.background = 'rgba(255,255,255,0.18)';
+          iconWrap.style.borderColor = 'rgba(255,255,255,0.3)';
+        }
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye'); iconEl.className = 'w-4 h-4 text-white'; }
       } else {
-        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0';
-        if (iconEl) { iconEl.setAttribute('data-lucide', 'info'); iconEl.className = 'w-4 h-4 text-blue-400'; }
+        el.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)';
+        el.style.borderColor = 'rgba(191,219,254,0.3)';
+        el.style.boxShadow = '0 12px 32px rgba(37,99,235,0.4)';
+        if (titleEl) titleEl.style.color = '#fff';
+        if (msgEl) msgEl.style.color = 'rgba(255,255,255,0.9)';
+        if (iconWrap) {
+          iconWrap.className = 'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border';
+          iconWrap.style.background = 'rgba(255,255,255,0.18)';
+          iconWrap.style.borderColor = 'rgba(255,255,255,0.3)';
+        }
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'info'); iconEl.className = 'w-4 h-4 text-white'; }
       }
 
       el.classList.remove('hidden');
