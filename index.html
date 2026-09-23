@@ -3200,9 +3200,9 @@
           <!-- Profile header card -->
           <div class="bg-[#121b24] border border-[#1d2a37] rounded-2xl p-5 flex flex-col gap-4">
             <div class="flex items-center gap-4">
-              <div class="relative shrink-0">
-                <img src="${avatarSrc}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-[#00d672]/50 bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-                <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full shadow">${levelText}</span>
+              <div class="relative shrink-0" style="width:5rem;height:5rem;">
+                <img src="${avatarSrc}" class="w-full h-full rounded-full object-cover ring-2 ring-[#00d672]/50 bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+                <span class="absolute text-[10px] font-black bg-rose-500 text-white px-2.5 py-0.5 rounded-full shadow whitespace-nowrap" style="left:50%;bottom:-6px;transform:translateX(-50%);">${levelText}</span>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-[12px] text-slate-400 mb-0.5">${joinedText}</p>
