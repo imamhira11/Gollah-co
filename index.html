@@ -2611,6 +2611,12 @@
         loadUserDataFromStorage();
         await fetchUserWithdrawals();
         startAutoSyncEngine();
+        try {
+          cacheProfile(user.id, displayName, avatarUrl);
+          cacheProfile(displayName, displayName, avatarUrl);
+          updateChatLockUI();
+          renderChatStream();
+        } catch (e) {}
 
         authSlot.innerHTML = `
           <button onclick="handleLogout()" class="w-full flex items-center gap-2 py-2 px-2 hover:bg-rose-500/10 text-rose-400 font-bold rounded-lg text-left transition mt-1 border border-rose-500/20">
@@ -3627,16 +3633,116 @@
       } catch (e) {}
     }
 
-    function getChatAvatarUrl(m) {
-      const myName = getDisplayUsername();
-      if (currentUser && (m.username || '') === myName) {
-        const img = document.getElementById('header-avatar-img');
-        if (img && img.src) return img.src;
-        if (m.avatar_url) return m.avatar_url;
+    // Cache: username/user_id → { username, avatar_url }
+    const chatProfileCache = {};
+
+    function getMyProfileAvatarSrc() {
+      const img = document.getElementById('header-avatar-img') || document.getElementById('dropdown-avatar-img');
+      if (img && img.src) return img.src;
+      return '';
+    }
+
+    function isMyChatMessage(m) {
+      if (!m) return false;
+      if (currentUser && m.user_id && String(m.user_id) === String(currentUser.id)) return true;
+      const myName = String(getDisplayUsername() || '').toLowerCase().trim();
+      const msgName = String(m.username || '').toLowerCase().trim();
+      if (myName && msgName && myName === msgName) return true;
+      if (currentUser && currentUser.email) {
+        const emailUser = currentUser.email.split('@')[0].toLowerCase();
+        if (msgName && msgName === emailUser) return true;
       }
-      if (m.avatar_url) return m.avatar_url;
+      return false;
+    }
+
+    function cacheProfile(key, username, avatar_url) {
+      if (!key) return;
+      const k = String(key).toLowerCase();
+      chatProfileCache[k] = {
+        username: username || (chatProfileCache[k] && chatProfileCache[k].username) || '',
+        avatar_url: avatar_url || (chatProfileCache[k] && chatProfileCache[k].avatar_url) || ''
+      };
+    }
+
+    function getCachedProfile(m) {
+      if (m.user_id && chatProfileCache[String(m.user_id).toLowerCase()]) {
+        return chatProfileCache[String(m.user_id).toLowerCase()];
+      }
+      const un = String(m.username || '').toLowerCase();
+      if (un && chatProfileCache[un]) return chatProfileCache[un];
+      return null;
+    }
+
+    function getChatAvatarUrl(m) {
+      if (isMyChatMessage(m)) {
+        const mine = getMyProfileAvatarSrc();
+        if (mine) return mine;
+      }
+      if (m.avatar_url && String(m.avatar_url).trim()) return m.avatar_url;
+      const cached = getCachedProfile(m);
+      if (cached && cached.avatar_url) return cached.avatar_url;
       const seed = encodeURIComponent(m.username || m.user_id || 'User');
-      return 'https://api.dicebear.com/7.x/bottts/svg?seed=' + seed;
+      return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + seed;
+    }
+
+    function getChatDisplayName(m) {
+      if (isMyChatMessage(m)) return getDisplayUsername() || m.username || 'User';
+      const cached = getCachedProfile(m);
+      if (cached && cached.username) return cached.username;
+      return m.username || 'User';
+    }
+
+    // Resolve real username + avatar from profiles table for any user
+    async function resolveChatProfiles(messages) {
+      if (!db || !messages || !messages.length) return;
+      const needIds = [];
+      const needNames = [];
+      messages.forEach(m => {
+        if (isMyChatMessage(m)) return;
+        if (m.avatar_url && m.username) {
+          if (m.user_id) cacheProfile(m.user_id, m.username, m.avatar_url);
+          cacheProfile(m.username, m.username, m.avatar_url);
+          return;
+        }
+        if (m.user_id && !getCachedProfile(m)?.avatar_url) needIds.push(m.user_id);
+        else if (m.username && !getCachedProfile(m)?.avatar_url) needNames.push(m.username);
+      });
+      try {
+        if (needIds.length) {
+          const unique = [...new Set(needIds)];
+          const { data } = await db.from('profiles').select('id, username, avatar_url').in('id', unique);
+          (data || []).forEach(p => {
+            cacheProfile(p.id, p.username, p.avatar_url);
+            if (p.username) cacheProfile(p.username, p.username, p.avatar_url);
+            // Patch messages in memory
+            chatMessages.forEach(m => {
+              if (String(m.user_id) === String(p.id)) {
+                if (p.username) m.username = p.username;
+                if (p.avatar_url) m.avatar_url = p.avatar_url;
+              }
+            });
+          });
+        }
+        if (needNames.length) {
+          const unique = [...new Set(needNames.map(n => String(n)))];
+          for (const name of unique.slice(0, 15)) {
+            try {
+              const { data } = await db.from('profiles').select('id, username, avatar_url').eq('username', name).maybeSingle();
+              if (data) {
+                cacheProfile(data.id, data.username, data.avatar_url);
+                cacheProfile(data.username, data.username, data.avatar_url);
+                chatMessages.forEach(m => {
+                  if (String(m.username || '').toLowerCase() === String(name).toLowerCase()) {
+                    if (data.username) m.username = data.username;
+                    if (data.avatar_url) m.avatar_url = data.avatar_url;
+                    if (data.id) m.user_id = data.id;
+                  }
+                });
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
     }
 
     function renderChatStream() {
@@ -3647,14 +3753,14 @@
         return;
       }
       stream.innerHTML = chatMessages.map(m => {
-        const name = escapeChatHtml(m.username || 'User');
+        const name = escapeChatHtml(getChatDisplayName(m));
         const text = escapeChatHtml(m.message);
         const time = formatChatClock(m.createdAt);
-        const isMe = currentUser && (m.username || '') === getDisplayUsername();
+        const isMe = isMyChatMessage(m);
         const avatar = getChatAvatarUrl(m);
         return `
           <div class="chat-msg flex items-start gap-2.5">
-            <img src="${avatar}" alt="" class="w-7 h-7 rounded-full object-cover shrink-0 bg-[#16202a] border border-[#1e2a38] mt-0.5" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=User'" />
+            <img src="${avatar}" alt="" class="w-7 h-7 rounded-full object-cover shrink-0 bg-[#16202a] border border-[#1e2a38] mt-0.5" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=User'" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between text-[11px] mb-0.5 gap-2">
                 <span class="font-bold ${isMe ? 'text-amber-400' : 'text-[#00d672]'} truncate">${name}${isMe ? ' (you)' : ''}</span>
@@ -3668,13 +3774,28 @@
       stream.scrollTop = stream.scrollHeight;
     }
 
-    function appendChatMessage(msg) {
+    async function appendChatMessage(msg) {
       if (!msg || !msg.message) return;
       if (msg.id && chatMessages.some(m => m.id === msg.id)) return;
+      // Enrich with cache if available
+      const cached = getCachedProfile(msg);
+      if (cached) {
+        if (cached.username && !msg.username) msg.username = cached.username;
+        if (cached.avatar_url && !msg.avatar_url) msg.avatar_url = cached.avatar_url;
+      }
+      if (msg.username && msg.avatar_url) {
+        cacheProfile(msg.user_id || msg.username, msg.username, msg.avatar_url);
+      }
       chatMessages.push(msg);
       if (chatMessages.length > 80) chatMessages = chatMessages.slice(-80);
       saveChatToStorage();
       renderChatStream();
+      // Lookup real profile pic/name for other users
+      if (!isMyChatMessage(msg) && (!msg.avatar_url || !msg.username)) {
+        await resolveChatProfiles([msg]);
+        renderChatStream();
+        saveChatToStorage();
+      }
     }
 
     async function sendLiveChat() {
@@ -3707,15 +3828,19 @@
       }
       lastChatSendAt = now;
 
-      const avatarImg = document.getElementById('header-avatar-img');
+      const avatarUrl = getMyProfileAvatarSrc();
+      const uname = getDisplayUsername();
       const msg = {
         id: 'local_' + now + '_' + Math.random().toString(36).slice(2, 7),
-        username: getDisplayUsername(),
+        username: uname,
         message: text,
         user_id: currentUser.id,
-        avatar_url: avatarImg ? avatarImg.src : '',
+        avatar_url: avatarUrl,
         createdAt: new Date().toISOString()
       };
+      // Cache own profile so name + pic always match for everyone
+      cacheProfile(currentUser.id, uname, avatarUrl);
+      cacheProfile(uname, uname, avatarUrl);
 
       input.value = '';
       appendChatMessage(msg);
@@ -3773,18 +3898,28 @@
       })();
     }
 
-    function initLiveChat() {
+    async function initLiveChat() {
       loadChatFromStorage();
       renderChatStream();
       updateChatLockUI();
       subscribeLiveChat();
+      // Match every message to real registered profile name + picture
+      try {
+        await resolveChatProfiles(chatMessages);
+        renderChatStream();
+        saveChatToStorage();
+      } catch (e) {}
     }
 
     restoreLastTab();
     renderGlobalLiveTicker();
     initAuth();
     initLiveChat();
-    setInterval(updateChatLockUI, 4000);
+    setInterval(() => {
+      updateChatLockUI();
+      // Refresh avatars after profile/session loads
+      if (document.getElementById('chat-stream')) renderChatStream();
+    }, 4000);
     if (window.lucide) lucide.createIcons();
   </script>
 </body>
