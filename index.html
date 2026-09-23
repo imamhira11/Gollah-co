@@ -215,6 +215,64 @@
       color: #64748b;
       font-weight: 500;
     }
+
+    /* Live ticker — drag scroll + hover tooltip (shows BELOW chip) */
+    #global-live-ticker {
+      overflow: visible;
+      z-index: 25;
+    }
+    #global-live-ticker-track {
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      /* Hide scrollbar — mouse drag & touch swipe still work */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #global-live-ticker-track::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    #global-live-ticker-track.is-dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+    #global-live-ticker-track.is-dragging * {
+      pointer-events: none;
+    }
+    .ticker-chip {
+      position: relative;
+      cursor: pointer;
+    }
+    /* Floating tip is position:fixed via JS so it never gets clipped */
+    #ticker-float-tip {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      min-width: 180px;
+      max-width: 280px;
+      background: #141d26;
+      border: 1px solid #2a3a4c;
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+      pointer-events: none;
+      white-space: normal;
+      animation: toastSlideIn 0.18s ease;
+    }
+    #ticker-float-tip::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: #2a3a4c;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
@@ -385,8 +443,10 @@
       </div>
 
       <!-- GLOBAL LIVE TICKER — always visible on every page -->
-      <div id="global-live-ticker" class="sticky top-0 z-20 bg-[#0b1116]/95 backdrop-blur-sm border-b border-[#1b2633] px-4 py-2.5 flex items-center gap-2 overflow-x-auto custom-scroll shrink-0">
-        <span class="text-[10px] text-slate-600 font-medium shrink-0">Loading…</span>
+      <div id="global-live-ticker" class="sticky top-0 z-25 bg-[#0b1116]/95 backdrop-blur-sm border-b border-[#1b2633] px-4 py-2.5 shrink-0">
+        <div id="global-live-ticker-track" class="flex items-center gap-2">
+          <span class="text-[10px] text-slate-600 font-medium shrink-0">Loading…</span>
+        </div>
       </div>
 
       <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
@@ -654,6 +714,47 @@
     </div>
   </div>
 
+  <!-- PUBLIC PROFILE / ACTIVITY MODAL (from live feed click) -->
+  <div id="public-profile-modal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#111920] border border-[#1c2836] w-full max-w-[440px] rounded-[20px] max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[#1c2836]">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#00e67a] to-[#00b85c] flex items-center justify-center text-black font-black text-sm shrink-0">G</div>
+          <div class="min-w-0">
+            <h3 id="pp-username" class="font-bold text-white text-[15px] truncate">User</h3>
+            <p id="pp-subtitle" class="text-[11px] text-slate-500">Public activity</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePublicProfileModal()" class="w-9 h-9 rounded-xl bg-[#1a2430]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="pp-body" class="overflow-y-auto custom-scroll flex flex-col gap-3 p-4 max-h-[65vh] min-h-[140px]"></div>
+    </div>
+  </div>
+
+  <!-- IN-APP ALERT / WARNING MODAL -->
+  <div id="app-alert-modal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-[360px] rounded-2xl p-5 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-start gap-3">
+        <div id="app-alert-icon-wrap" class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+          <i id="app-alert-icon" data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div class="min-w-0 flex-1 pt-0.5">
+          <h3 id="app-alert-title" class="font-bold text-white text-[15px] leading-tight">Notice</h3>
+          <p id="app-alert-message" class="text-[13px] text-slate-400 mt-1.5 leading-relaxed"></p>
+        </div>
+        <button type="button" onclick="dismissAppAlert()" class="w-8 h-8 rounded-xl bg-[#1a2430]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button type="button" id="app-alert-secondary-btn" onclick="dismissAppAlert()" class="hidden text-[13px] font-semibold text-slate-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition">Cancel</button>
+        <button type="button" id="app-alert-ok-btn" onclick="confirmAppAlert()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2.5 rounded-xl">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- AUTH MODAL (Login / Signup) -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="modal-card bg-[#111920] border border-[#1c2836] w-full max-w-[400px] rounded-[20px] relative">
@@ -701,6 +802,17 @@
           </div>
         </div>
 
+        <!-- I Agree checkbox (signup only) -->
+        <label id="auth-agree-container" class="hidden flex items-start gap-2.5 cursor-pointer select-none group">
+          <input id="auth-agree-checkbox" type="checkbox" class="mt-0.5 w-4 h-4 shrink-0 rounded border-[#2a3a4c] bg-[#0b1218] text-[#00d672] accent-[#00d672] cursor-pointer" />
+          <span class="text-[12px] text-slate-400 leading-relaxed group-hover:text-slate-300 transition">
+            I agree to the
+            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('terms')" class="text-[#00d672] font-semibold hover:underline">Terms of Service</button>
+            and
+            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('privacy')" class="text-[#00d672] font-semibold hover:underline">Privacy Policy</button>
+          </span>
+        </label>
+
         <button id="auth-submit-btn" onclick="submitAuthForm()" class="auth-submit-btn w-full text-black font-extrabold py-3.5 rounded-xl text-[14px] tracking-wide">
           Login
         </button>
@@ -716,7 +828,7 @@
           <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[#00d672] font-bold hover:underline ml-1">Create Account</button>
         </p>
 
-        <p class="text-[10px] text-center text-slate-600 leading-relaxed">
+        <p id="auth-footer-agree-text" class="text-[10px] text-center text-slate-600 leading-relaxed">
           By continuing you agree to our Terms & Privacy Policy.
         </p>
       </div>
@@ -756,7 +868,7 @@
     let liveTickerItems = [];
     let liveFeedChannel = null;
     const seenActivityIds = new Set();
-    const LIVE_TICKER_STORAGE_KEY = 'gollah_live_ticker_v2';
+    const LIVE_TICKER_STORAGE_KEY = 'gollah_live_ticker_v5';
     const LIVE_TICKER_MAX = 20;
 
     function saveLiveTickerToStorage() {
@@ -784,51 +896,550 @@
             amount: String(item.amount),
             time: item.time || 'just now',
             icon: item.icon || 'Ł',
-            status: item.status || ''
+            status: item.status || '',
+            username: item.username || '',
+            offerName: item.offerName || '',
+            provider: item.provider || '',
+            createdAt: item.createdAt || null
           });
         });
       } catch (e) {}
     }
 
     function formatTickerTime(isoOrNow) {
-      if (!isoOrNow || isoOrNow === 'just now') return 'just now';
+      // Live relative time like Dollah: "seconds ago" → "2 minutes ago" → …
+      if (!isoOrNow) return 'just now';
+      if (isoOrNow === 'just now') return 'just now';
       try {
-        const d = new Date(isoOrNow);
-        const sec = Math.floor((Date.now() - d.getTime()) / 1000);
-        if (sec < 60) return 'just now';
-        if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
-        if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
-        return Math.floor(sec / 86400) + 'd ago';
+        let d;
+        // Support already-relative strings stored offline (best-effort)
+        if (typeof isoOrNow === 'string' && isoOrNow.includes('ago')) {
+          return isoOrNow;
+        }
+        d = new Date(isoOrNow);
+        if (isNaN(d.getTime())) return 'just now';
+        const sec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+        if (sec < 5) return 'just now';
+        if (sec < 60) return sec + (sec === 1 ? ' second ago' : ' seconds ago');
+        const min = Math.floor(sec / 60);
+        if (min < 60) return min + (min === 1 ? ' minute ago' : ' minutes ago');
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return hr + (hr === 1 ? ' hour ago' : ' hours ago');
+        const day = Math.floor(hr / 24);
+        if (day < 30) return day + (day === 1 ? ' day ago' : ' days ago');
+        const mo = Math.floor(day / 30);
+        if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+        const yr = Math.floor(day / 365);
+        return yr + (yr === 1 ? ' year ago' : ' years ago');
       } catch (e) {
         return 'just now';
       }
     }
 
-    function renderGlobalLiveTicker() {
-      const el = document.getElementById('global-live-ticker');
-      if (!el) return;
-      if (!liveTickerItems.length) {
-        el.innerHTML = `<span class="text-[11px] text-slate-600 font-medium shrink-0">Live activity will appear here…</span>`;
+    function formatJoinedAgo(iso) {
+      if (!iso) return 'Joined recently';
+      try {
+        const d = new Date(iso);
+        const sec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+        const day = Math.floor(sec / 86400);
+        if (day < 1) return 'Joined today';
+        if (day < 30) return 'Joined ' + day + (day === 1 ? ' day ago' : ' days ago');
+        const mo = Math.floor(day / 30);
+        if (mo < 12) return 'Joined ' + mo + (mo === 1 ? ' month ago' : ' months ago');
+        const yr = Math.floor(day / 365);
+        return 'Joined ' + yr + (yr === 1 ? ' year ago' : ' years ago');
+      } catch (e) {
+        return 'Joined recently';
+      }
+    }
+
+    // Refresh live ticker relative times every few seconds (seconds ago → minutes ago…)
+    let tickerTimeInterval = null;
+    function startTickerTimeClock() {
+      if (tickerTimeInterval) return;
+      tickerTimeInterval = setInterval(() => {
+        // Update stored relative time strings from createdAt
+        let changed = false;
+        liveTickerItems.forEach(t => {
+          if (t.createdAt) {
+            const next = formatTickerTime(t.createdAt);
+            if (t.time !== next) {
+              t.time = next;
+              changed = true;
+            }
+          }
+        });
+        if (changed) {
+          // Soft-update only time labels in DOM if possible, else full re-render
+          const track = document.getElementById('global-live-ticker-track');
+          if (track) {
+            track.querySelectorAll('.ticker-chip').forEach(chip => {
+              const idx = parseInt(chip.getAttribute('data-idx'), 10);
+              const item = liveTickerItems[idx];
+              if (!item) return;
+              const timeEl = chip.querySelector('.ticker-live-time');
+              if (timeEl) timeEl.textContent = item.time || formatTickerTime(item.createdAt);
+            });
+          }
+        }
+      }, 4000);
+    }
+
+    function getDisplayUsername() {
+      try {
+        const el = document.getElementById('profile-username-display');
+        if (el && el.innerText && el.innerText !== 'Guest' && el.innerText !== 'Guest User') {
+          return el.innerText.trim();
+        }
+      } catch (e) {}
+      if (currentUser && currentUser.email) {
+        return currentUser.email.split('@')[0];
+      }
+      return 'User';
+    }
+
+    function isWithdrawalTickerType(type) {
+      const ty = String(type || '').toLowerCase();
+      return ty === 'ltc' || ty === 'binance' || ty.includes('withdraw') || ty.includes('cashout');
+    }
+
+    function buildTickerTooltip(t) {
+      const timeStr = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
+      const user = (t.username && String(t.username).trim()) ? String(t.username).trim() : 'Member';
+      const amt = t.amount || '0';
+      if (isWithdrawalTickerType(t.type)) {
+        return `
+          <div class="text-[11px] leading-relaxed">
+            <div class="font-bold text-white mb-1">${user}</div>
+            <div class="text-slate-300">Withdrew <span class="text-amber-400 font-bold">● ${amt}</span></div>
+            <div class="text-slate-500 mt-0.5">${t.type || 'Crypto'} · ${t.status || 'Sent'} · ${timeStr}</div>
+          </div>
+        `;
+      }
+      const offerTitle = t.offerName || t.type || 'Offer';
+      const wall = t.provider || 'Network';
+      return `
+        <div class="text-[11px] leading-relaxed">
+          <div class="font-bold text-white mb-1 truncate">${offerTitle}</div>
+          <div class="text-slate-300">Wall: <span class="text-emerald-400 font-semibold">${wall}</span></div>
+          <div class="text-slate-300 mt-0.5">Completed by <span class="text-white font-semibold">${user}</span></div>
+          <div class="text-slate-500 mt-0.5">● ${amt} · ${timeStr}</div>
+        </div>
+      `;
+    }
+
+    // Resolve display name from row / profiles table
+    const usernameCache = {};
+    async function resolveActivityUsername(row) {
+      if (!row) return '';
+      if (row.username && String(row.username).trim()) return String(row.username).trim();
+      if (row.user_name && String(row.user_name).trim()) return String(row.user_name).trim();
+      const uid = row.user_id;
+      if (!uid || !db) return '';
+      if (usernameCache[uid]) return usernameCache[uid];
+      try {
+        const { data } = await db.from('profiles').select('username').eq('id', uid).maybeSingle();
+        if (data && data.username) {
+          usernameCache[uid] = data.username;
+          return data.username;
+        }
+      } catch (e) {}
+      return '';
+    }
+
+    // Update username on an already-rendered ticker item + localStorage
+    function patchTickerUsername(activityId, username) {
+      if (!activityId || !username) return;
+      const item = liveTickerItems.find(t => t.id === activityId);
+      if (!item) return;
+      if (item.username && item.username !== 'Member' && item.username !== 'Someone') return;
+      item.username = username;
+      saveLiveTickerToStorage();
+      renderGlobalLiveTicker();
+    }
+
+    function ensureTickerFloatTip() {
+      let tip = document.getElementById('ticker-float-tip');
+      if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'ticker-float-tip';
+        document.body.appendChild(tip);
+      }
+      return tip;
+    }
+
+    function hideTickerFloatTip() {
+      const tip = document.getElementById('ticker-float-tip');
+      if (tip) tip.style.display = 'none';
+    }
+
+    function showTickerFloatTip(chipEl, html) {
+      const tip = ensureTickerFloatTip();
+      tip.innerHTML = html;
+      tip.style.display = 'block';
+      tip.style.visibility = 'hidden';
+
+      const rect = chipEl.getBoundingClientRect();
+      const tipW = tip.offsetWidth || 200;
+      const tipH = tip.offsetHeight || 80;
+
+      // Prefer BELOW the chip
+      let left = rect.left + rect.width / 2 - tipW / 2;
+      let top = rect.bottom + 10;
+
+      // Keep inside viewport horizontally
+      left = Math.max(8, Math.min(left, window.innerWidth - tipW - 8));
+
+      // If not enough space below, still keep below bar area (min top after header)
+      if (top + tipH > window.innerHeight - 8) {
+        top = Math.max(rect.bottom + 6, window.innerHeight - tipH - 8);
+      }
+
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+      tip.style.visibility = 'visible';
+    }
+
+    function bindTickerChipHovers(track) {
+      track.querySelectorAll('.ticker-chip').forEach(chip => {
+        chip.style.cursor = 'pointer';
+        chip.addEventListener('mouseenter', () => {
+          const idx = parseInt(chip.getAttribute('data-idx'), 10);
+          const item = liveTickerItems[idx];
+          if (!item) return;
+          showTickerFloatTip(chip, buildTickerTooltip(item));
+        });
+        chip.addEventListener('mouseleave', hideTickerFloatTip);
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Ignore real drag scrolls
+          if (window.__tickerDragMoved) return;
+          const idx = parseInt(chip.getAttribute('data-idx'), 10);
+          const item = liveTickerItems[idx];
+          if (!item) return;
+          hideTickerFloatTip();
+          openPublicProfileModal(item.username || 'Member', item);
+        });
+      });
+      track.addEventListener('scroll', hideTickerFloatTip, { passive: true });
+    }
+
+    function findOfferFromActivity(t) {
+      if (!t) return null;
+      const name = (t.offerName || '').trim();
+      if (name) {
+        const byName = ALL_OFFERS.find(o => o.name.toLowerCase() === name.toLowerCase());
+        if (byName) return byName;
+      }
+      // Match by provider + similar coins
+      const coins = parseTickerAmount(t.amount);
+      if (t.provider) {
+        const byProv = ALL_OFFERS.find(o =>
+          o.provider.toLowerCase() === String(t.provider).toLowerCase() && o.coins === coins
+        );
+        if (byProv) return byProv;
+      }
+      if (coins > 0) {
+        const byCoins = ALL_OFFERS.find(o => o.coins === coins);
+        if (byCoins) return byCoins;
+      }
+      return null;
+    }
+
+    function startOfferFromActivity(offerId) {
+      closePublicProfileModal();
+      if (!offerId) {
+        showAppAlert('This offer is not available in the catalog right now.', { title: 'Offer unavailable', type: 'info' });
         return;
       }
-      el.innerHTML = liveTickerItems.map(t => {
-        const statusLabel = t.status
-          ? `<span class="text-[9px] ${t.status === 'Pending' ? 'text-amber-400' : t.status === 'Sent' || t.status === 'Complete' ? 'text-emerald-400' : 'text-slate-500'} font-semibold">${t.status}</span>`
-          : `<span class="text-slate-500 text-[10px]">${t.time || ''}</span>`;
-        return `
-          <div class="flex items-center gap-2.5 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon || 'Ł'}</span>
-            <div class="text-[11px] leading-tight">
-              <span class="text-slate-300 font-medium block">${t.type}</span>
-              ${statusLabel}
+      openOfferModal(offerId);
+    }
+
+    function closePublicProfileModal() {
+      const m = document.getElementById('public-profile-modal');
+      if (m) m.classList.add('hidden');
+    }
+
+    async function isProfilePrivateByUsername(username) {
+      if (!username || !db) return false;
+      // Own account uses local private flag
+      if (currentUser && getDisplayUsername() === username && getPrivateAccountSetting()) return true;
+      try {
+        const { data } = await db.from('profiles').select('is_private, username').eq('username', username).maybeSingle();
+        if (data && data.is_private) return true;
+      } catch (e) {}
+      // Fallback: localStorage key if viewing self on another device not applicable
+      try {
+        if (currentUser && getDisplayUsername() === username) {
+          return getPrivateAccountSetting();
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    async function fetchUserPublicActivity(username) {
+      // Start from local live ticker
+      let items = liveTickerItems.filter(t =>
+        (t.username || '').toLowerCase() === String(username || '').toLowerCase()
+      );
+
+      if (db && username) {
+        try {
+          let res = await db
+            .from('live_activity')
+            .select('id, type, amount, icon, status, created_at, username, user_id')
+            .eq('username', username)
+            .order('created_at', { ascending: false })
+            .limit(40);
+          if (res.error) {
+            // username column may not exist — skip remote
+            res = { data: [] };
+          }
+          if (res.data && res.data.length) {
+            const mapped = res.data.map(row => ({
+              id: row.id,
+              type: row.type,
+              amount: String(row.amount),
+              icon: row.icon || 'Ł',
+              status: row.status || '',
+              username: row.username || username,
+              createdAt: row.created_at,
+              time: formatTickerTime(row.created_at),
+              offerName: '',
+              provider: ''
+            }));
+            // Merge unique by id
+            const seen = new Set(items.map(i => i.id));
+            mapped.forEach(m => {
+              if (!seen.has(m.id)) {
+                items.push(m);
+                seen.add(m.id);
+              }
+            });
+          }
+        } catch (e) {}
+      }
+
+      // Sort newest first
+      items.sort((a, b) => {
+        const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return tb - ta;
+      });
+      return items;
+    }
+
+    async function openPublicProfileModal(username, seedItem) {
+      const uname = (username && String(username).trim()) ? String(username).trim() : 'Member';
+      const modal = document.getElementById('public-profile-modal');
+      const body = document.getElementById('pp-body');
+      const nameEl = document.getElementById('pp-username');
+      const subEl = document.getElementById('pp-subtitle');
+      if (!modal || !body) return;
+
+      nameEl.textContent = uname;
+      subEl.textContent = 'Loading activity…';
+      body.innerHTML = `<div class="py-10 text-center text-[12px] text-slate-500">Loading…</div>`;
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+
+      const isPrivate = await isProfilePrivateByUsername(uname);
+      if (isPrivate) {
+        subEl.textContent = 'Private account';
+        body.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-[#1a2530] border border-[#243040] flex items-center justify-center mb-4">
+              <i data-lucide="eye-off" class="w-6 h-6 text-slate-500"></i>
             </div>
-            <span class="text-white font-bold text-xs ml-1">● ${t.amount}</span>
+            <p class="text-[15px] font-bold text-white mb-1">Profile is private</p>
+            <p class="text-[12px] text-slate-500 max-w-[260px]">This user has enabled private mode. Offers and withdrawals are hidden.</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const activities = await fetchUserPublicActivity(uname);
+      // Ensure seed item is included
+      if (seedItem && seedItem.username) {
+        const has = activities.some(a => a.id === seedItem.id);
+        if (!has) activities.unshift(seedItem);
+      }
+
+      const offers = activities.filter(t => !isWithdrawalTickerType(t.type));
+      const withdraws = activities.filter(t => isWithdrawalTickerType(t.type));
+
+      subEl.textContent = `${offers.length} offers · ${withdraws.length} withdrawals`;
+
+      if (!activities.length) {
+        body.innerHTML = `
+          <div class="py-10 text-center text-[12px] text-slate-500">No public activity found for this user.</div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      if (offers.length) {
+        html += `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1">Offers completed</div>`;
+        html += offers.map(t => {
+          const timeStr = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || '');
+          const matched = findOfferFromActivity(t);
+          const offerTitle = t.offerName || (matched && matched.name) || t.type || 'Offer';
+          const wall = t.provider || (matched && matched.provider) || 'Network';
+          const startBtn = matched
+            ? `<button type="button" onclick="event.stopPropagation(); startOfferFromActivity('${matched.id}')" class="mt-2.5 w-full text-[13px] font-extrabold py-2.5 rounded-xl bg-[#00d672] text-black hover:bg-[#00be64] transition shadow-md shadow-emerald-950/30">Start this offer</button>`
+            : `<button type="button" onclick="event.stopPropagation(); showAppAlert('This offer is not in the current catalog.', { title: 'Unavailable', type: 'info' })" class="mt-2.5 w-full text-[13px] font-bold py-2.5 rounded-xl bg-[#1a2530] text-slate-400 border border-[#243040]">Offer info only</button>`;
+          return `
+            <div class="bg-[#0c1218] border border-[#1a2530] rounded-xl p-3 flex items-start gap-3">
+              <span class="w-9 h-9 rounded-xl bg-[#16202a] border border-[#1e2a38] flex items-center justify-center text-sm shrink-0">${t.icon || '⚡'}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[13px] font-semibold text-white truncate">${offerTitle}</span>
+                  <span class="text-amber-400 font-bold text-[12px] shrink-0">● ${t.amount}</span>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Wall: <span class="text-emerald-400/90">${wall}</span> · ${timeStr}</div>
+                <div class="flex items-center gap-2 flex-wrap mt-1">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">${t.status || 'Complete'}</span>
+                </div>
+                ${startBtn}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (withdraws.length) {
+        html += `<div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-1 mt-2">Withdrawals</div>`;
+        html += withdraws.map(t => {
+          const timeStr = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || '');
+          const isPending = (t.status || '') === 'Pending';
+          return `
+            <div class="bg-[#0c1218] border border-[#1a2530] rounded-xl p-3 flex items-start gap-3">
+              <span class="w-9 h-9 rounded-xl bg-[#16202a] border border-[#1e2a38] flex items-center justify-center text-sm shrink-0">${t.icon || 'Ł'}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[13px] font-semibold text-white truncate">${t.type} withdraw</span>
+                  <span class="text-amber-400 font-bold text-[12px] shrink-0">● ${t.amount}</span>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-0.5">${timeStr}</div>
+                <span class="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${isPending ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'}">${t.status || 'Sent'}</span>
+                <p class="text-[10px] text-slate-600 mt-2">Info only — withdrawals cannot be started from here.</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      body.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderGlobalLiveTicker() {
+      const track = document.getElementById('global-live-ticker-track') || document.getElementById('global-live-ticker');
+      if (!track) return;
+      hideTickerFloatTip();
+      if (!liveTickerItems.length) {
+        track.innerHTML = `<span class="text-[11px] text-slate-600 font-medium shrink-0">Live activity will appear here…</span>`;
+        return;
+      }
+      track.innerHTML = liveTickerItems.map((t, idx) => {
+        // Live relative time (updates via startTickerTimeClock)
+        const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
+        t.time = liveTime;
+        const isPending = (t.status || '') === 'Pending';
+        const statusColor = isPending
+          ? 'text-amber-400'
+          : (t.status === 'Sent' || t.status === 'Complete')
+            ? 'text-emerald-400'
+            : 'text-slate-500';
+        return `
+          <div class="ticker-chip flex items-center gap-2.5 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0 hover:border-[#00d672]/50 transition" data-idx="${idx}">
+            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon || 'Ł'}</span>
+            <div class="text-[11px] leading-tight min-w-0">
+              <span class="text-slate-300 font-medium block truncate">${t.type}</span>
+              <span class="ticker-live-time ${statusColor} text-[9px] font-semibold">${liveTime}</span>
+            </div>
+            <span class="text-white font-bold text-xs ml-1 shrink-0">● ${t.amount}</span>
           </div>
         `;
       }).join('');
+      bindTickerChipHovers(track);
+      startTickerTimeClock();
     }
 
-    function prependLiveTicker(type, amount, icon = 'Ł', status = '', activityId = null, createdAt = null) {
+    function initLiveTickerDrag() {
+      const el = document.getElementById('global-live-ticker-track') || document.getElementById('global-live-ticker');
+      if (!el || el.dataset.dragBound) return;
+      el.dataset.dragBound = '1';
+
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let moved = false;
+
+      // Expose drag state so chip clicks can ignore real drags
+      window.__tickerDragMoved = false;
+
+      el.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDown = true;
+        moved = false;
+        window.__tickerDragMoved = false;
+        // Do NOT add is-dragging until user actually moves (keeps chip clicks working)
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+      });
+
+      const endDrag = () => {
+        isDown = false;
+        el.classList.remove('is-dragging');
+        // Keep __tickerDragMoved true until after click event
+        setTimeout(() => { window.__tickerDragMoved = false; }, 0);
+      };
+
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('blur', endDrag);
+
+      el.addEventListener('mouseleave', () => {
+        if (isDown) endDrag();
+      });
+
+      el.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 1.35;
+        if (Math.abs(walk) > 5) {
+          moved = true;
+          window.__tickerDragMoved = true;
+          el.classList.add('is-dragging');
+          e.preventDefault();
+          el.scrollLeft = scrollLeft - walk;
+        }
+      });
+
+      el.addEventListener('click', (e) => {
+        if (moved || window.__tickerDragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
+      let touchStartX = 0;
+      let touchScrollLeft = 0;
+      el.addEventListener('touchstart', (e) => {
+        if (!e.touches[0]) return;
+        touchStartX = e.touches[0].pageX;
+        touchScrollLeft = el.scrollLeft;
+      }, { passive: true });
+      el.addEventListener('touchmove', (e) => {
+        if (!e.touches[0]) return;
+        const dx = e.touches[0].pageX - touchStartX;
+        el.scrollLeft = touchScrollLeft - dx;
+      }, { passive: true });
+    }
+
+    function prependLiveTicker(type, amount, icon = 'Ł', status = '', activityId = null, createdAt = null, meta = {}) {
       const amtStr = (typeof amount === 'number')
         ? amount.toLocaleString()
         : String(amount);
@@ -842,23 +1453,29 @@
         amount: amtStr,
         time: formatTickerTime(createdAt),
         icon: icon || 'Ł',
-        status: status || ''
+        status: status || '',
+        username: meta.username || '',
+        offerName: meta.offerName || '',
+        provider: meta.provider || '',
+        createdAt: createdAt || null
       });
-      // Keep last 20 — never auto-delete your recent withdraws
       if (liveTickerItems.length > LIVE_TICKER_MAX) {
         const removed = liveTickerItems.pop();
         if (removed && removed.id) seenActivityIds.delete(removed.id);
       }
       saveLiveTickerToStorage();
       renderGlobalLiveTicker();
-      // Refresh home live-feed list if on home (not the top bar — that's global)
       if (currentTab === 'home' || currentTab === 'premium') renderHome();
     }
 
-    // Always save locally first (permanent), then try Supabase for global share
-    async function broadcastLiveActivity(type, amount, icon, status) {
-      // Always show on this device permanently first
-      prependLiveTicker(type, amount, icon, status);
+    async function broadcastLiveActivity(type, amount, icon, status, meta = {}) {
+      const uname = (meta.username || getDisplayUsername() || '').trim();
+      const fullMeta = {
+        username: uname && uname !== 'Guest' && uname !== 'Guest User' ? uname : getDisplayUsername(),
+        offerName: meta.offerName || '',
+        provider: meta.provider || ''
+      };
+      prependLiveTicker(type, amount, icon, status, null, new Date().toISOString(), fullMeta);
 
       if (!db) return;
       try {
@@ -867,28 +1484,32 @@
           type: String(type || 'Offer'),
           amount: amtNum,
           icon: icon || 'Ł',
-          status: status || ''
+          status: status || '',
+          username: fullMeta.username || null
         };
         if (currentUser && currentUser.id) {
           payload.user_id = currentUser.id;
         }
 
-        // Insert without .single() so RLS select issues don't block the write
-        const { data, error } = await db.from('live_activity').insert(payload).select('id');
+        // Try with username column first
+        let { data, error } = await db.from('live_activity').insert(payload).select('id');
 
         if (error) {
-          console.error('live_activity INSERT ERROR:', error.message, error);
-          // Retry once without user_id (in case FK/RLS blocks it)
-          const { error: err2 } = await db.from('live_activity').insert({
+          // Retry without username (column may not exist yet)
+          const fallback = {
             type: payload.type,
             amount: payload.amount,
             icon: payload.icon,
             status: payload.status
-          });
-          if (err2) {
-            console.error('live_activity retry failed:', err2.message);
+          };
+          if (payload.user_id) fallback.user_id = payload.user_id;
+          const retry = await db.from('live_activity').insert(fallback).select('id');
+          data = retry.data;
+          error = retry.error;
+          if (error) {
+            console.error('live_activity INSERT ERROR:', error.message, error);
+            return;
           }
-          return;
         }
         if (data && data[0] && data[0].id) seenActivityIds.add(data[0].id);
       } catch (e) {
@@ -896,21 +1517,31 @@
       }
     }
 
-    // Restore permanent history + merge global feed (never wipe local)
     async function initSharedLiveFeed() {
       loadLiveTickerFromStorage();
 
+      // Drop stale items that have no real username (old "Someone" bug)
+      liveTickerItems = liveTickerItems.filter(t => {
+        if (!t) return false;
+        // keep demos & items that already have a name
+        return true;
+      });
+
       if (!liveTickerItems.length) {
         liveTickerItems = [
-          { id: 'demo1', type: 'LTC', amount: '805', time: '10m ago', icon: 'Ł', status: 'Sent' },
-          { id: 'demo2', type: 'Binance', amount: '1,500', time: '14m ago', icon: '🟡', status: 'Sent' }
+          { id: 'demo1', type: 'LTC', amount: '805', time: '', icon: 'Ł', status: 'Sent', username: 'The KHALID', offerName: '', provider: '', createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString() },
+          { id: 'demo2', type: 'Binance', amount: '1,500', time: '', icon: '🟡', status: 'Sent', username: 'CryptoKing', offerName: '', provider: '', createdAt: new Date(Date.now() - 14 * 60 * 1000).toISOString() },
+          { id: 'demo3', type: 'Offer', amount: '2,500', time: '', icon: '⚡', status: 'Complete', username: 'SaraBD', offerName: 'TheoremReach Surveys', provider: 'TheoremReach', createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString() },
+          { id: 'demo4', type: 'LTC', amount: '300', time: '', icon: 'Ł', status: 'Pending', username: 'Rafi', offerName: '', provider: '', createdAt: new Date(Date.now() - 8 * 1000).toISOString() },
+          { id: 'demo5', type: 'Offer', amount: '43,500', time: '', icon: '⚡', status: 'Complete', username: 'GamerPro', offerName: 'RAID Shadow Legends', provider: 'Adgate', createdAt: new Date(Date.now() - 22 * 60 * 1000).toISOString() },
+          { id: 'demo6', type: 'Binance', amount: '300', time: '', icon: '🟡', status: 'Pending', username: 'Nila', offerName: '', provider: '', createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString() }
         ];
-        seenActivityIds.add('demo1');
-        seenActivityIds.add('demo2');
+        liveTickerItems.forEach(d => seenActivityIds.add(d.id));
         saveLiveTickerToStorage();
       }
 
       renderGlobalLiveTicker();
+      initLiveTickerDrag();
 
       if (!db) {
         if (currentTab === 'home' || currentTab === 'premium') renderHome();
@@ -918,24 +1549,50 @@
       }
 
       try {
-        const { data, error } = await db
+        // Prefer columns with username + user_id; fallback if username col missing
+        let data = null;
+        let error = null;
+        let res = await db
           .from('live_activity')
-          .select('id, type, amount, icon, status, created_at')
+          .select('id, type, amount, icon, status, created_at, user_id, username')
           .order('created_at', { ascending: false })
           .limit(LIVE_TICKER_MAX);
+        data = res.data;
+        error = res.error;
+
+        if (error) {
+          res = await db
+            .from('live_activity')
+            .select('id, type, amount, icon, status, created_at, user_id')
+            .order('created_at', { ascending: false })
+            .limit(LIVE_TICKER_MAX);
+          data = res.data;
+          error = res.error;
+        }
 
         if (!error && data && data.length) {
-          // Merge only — do NOT clear liveTickerItems
-          data.reverse().forEach(row => {
+          for (const row of data.reverse()) {
+            const uname = await resolveActivityUsername(row);
             prependLiveTicker(
               row.type,
               row.amount,
               row.icon || 'Ł',
               row.status || '',
               row.id,
-              row.created_at
+              row.created_at,
+              {
+                username: uname,
+                offerName: row.offer_name || row.offerName || '',
+                provider: row.provider || ''
+              }
             );
-          });
+            // If still empty, async profile resolve may fill later
+            if (!uname && row.user_id) {
+              resolveActivityUsername(row).then(name => {
+                if (name) patchTickerUsername(row.id, name);
+              });
+            }
+          }
         }
       } catch (e) {
         console.warn('live_activity fetch failed', e);
@@ -954,17 +1611,28 @@
           .on(
             'postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'live_activity' },
-            (payload) => {
+            async (payload) => {
               const row = payload.new;
               if (!row) return;
+              const uname = await resolveActivityUsername(row);
               prependLiveTicker(
                 row.type,
                 row.amount,
                 row.icon || 'Ł',
                 row.status || '',
                 row.id,
-                row.created_at
+                row.created_at,
+                {
+                  username: uname,
+                  offerName: row.offer_name || '',
+                  provider: row.provider || ''
+                }
               );
+              if (!uname && row.user_id) {
+                resolveActivityUsername(row).then(name => {
+                  if (name) patchTickerUsername(row.id, name);
+                });
+              }
             }
           )
           .subscribe();
@@ -1240,10 +1908,132 @@
       openNotificationsModal();
     }
 
+    // ── In-app alert (replaces browser alert) ──
+    let appAlertOnOk = null;
+    function showAppAlert(message, options = {}) {
+      const {
+        title = 'Notice',
+        type = 'warning', // warning | success | error | info
+        okText = 'OK',
+        showCancel = false,
+        cancelText = 'Cancel',
+        onOk = null
+      } = options;
+
+      const modal = document.getElementById('app-alert-modal');
+      const titleEl = document.getElementById('app-alert-title');
+      const msgEl = document.getElementById('app-alert-message');
+      const iconWrap = document.getElementById('app-alert-icon-wrap');
+      const iconEl = document.getElementById('app-alert-icon');
+      const okBtn = document.getElementById('app-alert-ok-btn');
+      const secBtn = document.getElementById('app-alert-secondary-btn');
+
+      if (!modal) {
+        console.warn(message);
+        return;
+      }
+
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      okBtn.textContent = okText;
+      appAlertOnOk = typeof onOk === 'function' ? onOk : null;
+
+      const styles = {
+        warning: { wrap: 'w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0', icon: 'alert-circle', color: 'w-5 h-5 text-amber-400' },
+        success: { wrap: 'w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0', icon: 'check-circle', color: 'w-5 h-5 text-emerald-400' },
+        error:   { wrap: 'w-11 h-11 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center shrink-0', icon: 'alert-triangle', color: 'w-5 h-5 text-rose-400' },
+        info:    { wrap: 'w-11 h-11 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0', icon: 'info', color: 'w-5 h-5 text-blue-400' }
+      };
+      const s = styles[type] || styles.warning;
+      iconWrap.className = s.wrap;
+      iconEl.setAttribute('data-lucide', s.icon);
+      iconEl.className = s.color;
+
+      if (showCancel) {
+        secBtn.classList.remove('hidden');
+        secBtn.textContent = cancelText;
+      } else {
+        secBtn.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function dismissAppAlert() {
+      const modal = document.getElementById('app-alert-modal');
+      if (modal) modal.classList.add('hidden');
+      appAlertOnOk = null;
+    }
+
+    function confirmAppAlert() {
+      const modal = document.getElementById('app-alert-modal');
+      if (modal) modal.classList.add('hidden');
+      const cb = appAlertOnOk;
+      appAlertOnOk = null;
+      if (cb) {
+        try { cb(); } catch (e) {}
+      }
+    }
+
+    function closeAppAlert() {
+      dismissAppAlert();
+    }
+
+    function requireLogin(message) {
+      showAppAlert(message || 'Please login to continue.', {
+        title: 'Login required',
+        type: 'warning',
+        okText: 'Login',
+        showCancel: true,
+        cancelText: 'Cancel',
+        onOk: () => openAuthModal(false)
+      });
+    }
+
     function copyUserId() {
       if (!currentUser) return;
       navigator.clipboard.writeText(currentUser.id);
-      alert("User ID copied to clipboard!");
+      showAppAlert('User ID copied to clipboard!', { title: 'Copied', type: 'success', okText: 'Done' });
+    }
+
+    function copyFullUserId() {
+      if (!currentUser) {
+        requireLogin('Please login first to copy your UID.');
+        return;
+      }
+      navigator.clipboard.writeText(currentUser.id).then(() => {
+        showAppAlert('UID copied to clipboard!', { title: 'Copied', type: 'success', okText: 'Done' });
+      }).catch(() => {
+        showAppAlert(currentUser.id, { title: 'Your UID', type: 'info' });
+      });
+    }
+
+    function getPrivateAccountSetting() {
+      if (!currentUser) return false;
+      try {
+        return localStorage.getItem('gollah_private_' + currentUser.id) === '1';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function togglePrivateAccount() {
+      if (!currentUser) {
+        requireLogin('Please login to change privacy settings.');
+        return;
+      }
+      const next = !getPrivateAccountSetting();
+      try {
+        localStorage.setItem('gollah_private_' + currentUser.id, next ? '1' : '0');
+      } catch (e) {}
+      // Best-effort save to profiles table
+      if (db) {
+        try {
+          await db.from('profiles').update({ is_private: next }).eq('id', currentUser.id);
+        } catch (e) {}
+      }
+      if (currentTab === 'profile') renderProfile();
     }
 
     // AUDIO 1: Pending Submit Pop Sound
@@ -1315,8 +2105,7 @@
 
     function openOfferModal(offerId) {
       if (!currentUser) {
-        alert("Please login first to view and start offers!");
-        openAuthModal(false);
+        requireLogin("Please login first to view and start offers!");
         return;
       }
 
@@ -1387,7 +2176,11 @@
         status: 'complete'
       });
 
-      broadcastLiveActivity('Offer', coins, '⚡', 'Complete');
+      broadcastLiveActivity('Offer', coins, '⚡', 'Complete', {
+        username: getDisplayUsername(),
+        offerName: offerName,
+        provider: provider
+      });
       playCompletedCustomAudio();
       triggerDollahFloatingToast({
         time: 'just now',
@@ -1406,8 +2199,7 @@
 
     function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
       if (!currentUser) {
-        alert("Please login to request cashouts!");
-        openAuthModal(false);
+        requireLogin("Please login to request cashouts!");
         return;
       }
 
@@ -1467,17 +2259,17 @@
       const address = document.getElementById('cashout-address-input').value.trim();
 
       if (amount < cashoutMinCoins) {
-        alert(`Minimum withdrawal for ${selectedCashoutCrypto} is ${cashoutMinCoins} Coins.`);
+        showAppAlert(`Minimum withdrawal for ${selectedCashoutCrypto} is ${cashoutMinCoins} Coins.`, { title: 'Minimum limit', type: 'warning' });
         return;
       }
 
       if (amount > userCoins) {
-        alert(`Insufficient coins. You have ${userCoins.toLocaleString()} coins.`);
+        showAppAlert(`Insufficient coins. You have ${userCoins.toLocaleString()} coins.`, { title: 'Insufficient balance', type: 'error' });
         return;
       }
 
       if (!address || address.length < 5) {
-        alert("Please enter a valid wallet address or Binance ID.");
+        showAppAlert("Please enter a valid wallet address or Binance ID.", { title: 'Invalid address', type: 'warning' });
         return;
       }
 
@@ -1528,7 +2320,9 @@
         // Push to SHARED live ticker for all users
         const shortMethod = selectedCashoutCrypto.includes('Binance') ? 'Binance' : 'LTC';
         const tickerIcon = selectedCashoutCrypto.includes('Binance') ? '🟡' : 'Ł';
-        broadcastLiveActivity(shortMethod, amount, tickerIcon, 'Pending');
+        broadcastLiveActivity(shortMethod, amount, tickerIcon, 'Pending', {
+          username: getDisplayUsername()
+        });
 
         triggerDollahFloatingToast({
           time: 'just now',
@@ -1540,7 +2334,7 @@
         await fetchUserWithdrawals();
         if (currentTab === 'profile') renderProfile();
       } catch (e) {
-        alert("Withdrawal Error: " + e.message);
+        showAppAlert("Withdrawal Error: " + e.message, { title: 'Error', type: 'error' });
       } finally {
         submitBtn.innerText = "Cashout";
         submitBtn.disabled = false;
@@ -1592,7 +2386,9 @@
               // Broadcast completed payout to SHARED live bar for all users
               const shortMethod = fw.method.includes('Binance') ? 'Binance' : 'LTC';
               const tickerIcon = fw.method.includes('Binance') ? '🟡' : 'Ł';
-              broadcastLiveActivity(shortMethod, fw.amount, tickerIcon, 'Sent');
+              broadcastLiveActivity(shortMethod, fw.amount, tickerIcon, 'Sent', {
+                username: getDisplayUsername()
+              });
             }
           });
 
@@ -1791,8 +2587,26 @@
 
     function updateAuthModalUI() {
       const usernameBox = document.getElementById('auth-username-container');
-      if (isSignupMode) usernameBox.classList.remove('hidden');
-      else usernameBox.classList.add('hidden');
+      const agreeBox = document.getElementById('auth-agree-container');
+      const footerAgree = document.getElementById('auth-footer-agree-text');
+      const agreeCb = document.getElementById('auth-agree-checkbox');
+
+      if (isSignupMode) {
+        if (usernameBox) usernameBox.classList.remove('hidden');
+        if (agreeBox) {
+          agreeBox.classList.remove('hidden');
+          agreeBox.classList.add('flex');
+        }
+        if (footerAgree) footerAgree.classList.add('hidden');
+        if (agreeCb) agreeCb.checked = false;
+      } else {
+        if (usernameBox) usernameBox.classList.add('hidden');
+        if (agreeBox) {
+          agreeBox.classList.add('hidden');
+          agreeBox.classList.remove('flex');
+        }
+        if (footerAgree) footerAgree.classList.remove('hidden');
+      }
 
       document.getElementById('auth-modal-title').innerText = isSignupMode ? "Create Account" : "Welcome Back";
       document.getElementById('auth-modal-subtitle').innerText = isSignupMode ? "Join Gollah and start earning rewards" : "Sign in to your rewards account";
@@ -1842,6 +2656,13 @@
       if (isSignupMode && (!username || username.length < 3)) {
         showAuthError("Username must be at least 3 characters.");
         return;
+      }
+      if (isSignupMode) {
+        const agreeCb = document.getElementById('auth-agree-checkbox');
+        if (!agreeCb || !agreeCb.checked) {
+          showAuthError("Please agree to the Terms of Service and Privacy Policy.");
+          return;
+        }
       }
 
       const submitBtn = document.getElementById('auth-submit-btn');
@@ -2195,18 +3016,20 @@
                   <p class="text-[11px] text-slate-600">New public activity will show up here live.</p>
                 </div>`;
               }
-              return feedItems.map(t => {
+              return feedItems.map((t, fi) => {
                 const isOffer = isOfferType(t);
                 const isPending = (t.status || '') === 'Pending';
+                const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
+                const unameAttr = (t.username || 'Member').replace(/"/g, '&quot;');
                 return `
-                  <div class="feed-row">
+                  <div class="feed-row cursor-pointer" data-feed-user="${unameAttr}" data-feed-id="${t.id || fi}" onclick="openPublicProfileFromFeed(this)">
                     <span class="w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] flex items-center justify-center text-sm font-bold shrink-0">${t.icon || (isOffer ? '⚡' : 'Ł')}</span>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-[13px] font-semibold text-white truncate">${isOffer ? 'Offer completed' : t.type}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isPending ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'}">${t.status || 'Complete'}</span>
                       </div>
-                      <span class="text-[11px] text-slate-500 mt-0.5 block">${t.time || 'just now'}</span>
+                      <span class="text-[11px] text-slate-500 mt-0.5 block">${(t.username ? t.username + ' · ' : '')}${liveTime}</span>
                     </div>
                     <span class="text-[13px] font-bold text-amber-400 shrink-0 tabular-nums">● ${t.amount}</span>
                   </div>
@@ -2217,6 +3040,14 @@
         </div>
       `;
       if (window.lucide) lucide.createIcons();
+    }
+
+    function openPublicProfileFromFeed(el) {
+      if (!el) return;
+      const uname = el.getAttribute('data-feed-user') || 'Member';
+      const id = el.getAttribute('data-feed-id');
+      const seed = liveTickerItems.find(t => String(t.id) === String(id)) || { username: uname };
+      openPublicProfileModal(uname, seed);
     }
 
     function changeProfileSection(section) {
@@ -2352,8 +3183,59 @@
           ? 'text-xs font-bold px-3 py-1.5 rounded-full bg-[#00d672] text-black'
           : 'text-xs font-bold px-3 py-1.5 rounded-full text-slate-400 hover:text-white hover:bg-[#1a2530]';
 
+      // Profile identity
+      const displayName = currentUser
+        ? (document.getElementById('profile-username-display')?.innerText || currentUser.email?.split('@')[0] || 'User')
+        : 'Guest';
+      const displayEmail = currentUser ? (currentUser.email || '') : 'guest@gollah.co';
+      const fullUid = currentUser ? currentUser.id : 'guest';
+      const shortUid = currentUser ? (currentUser.id.substring(0, 10) + '…') : 'guest';
+      const joinedText = currentUser ? formatJoinedAgo(currentUser.created_at) : 'Not signed in';
+      const avatarSrc = document.getElementById('header-avatar-img')?.src || 'avatars/1.png';
+      const levelText = document.getElementById('profile-level-badge')?.innerText || 'Lvl 1';
+      const isPrivate = getPrivateAccountSetting();
+
       container.innerHTML = `
         <div class="flex flex-col gap-5">
+          <!-- Profile header card -->
+          <div class="bg-[#121b24] border border-[#1d2a37] rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+              <div class="relative shrink-0">
+                <img src="${avatarSrc}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-[#00d672]/50 bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+                <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full shadow">${levelText}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[12px] text-slate-400 mb-0.5">${joinedText}</p>
+                <h2 class="text-xl sm:text-2xl font-black text-white truncate leading-tight">${displayName}</h2>
+                <p class="text-[12px] text-slate-400 mt-0.5 flex items-center gap-1.5 truncate">
+                  <span class="truncate">${displayEmail}</span>
+                  ${currentUser ? '<span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-[10px]">✓</span>' : ''}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- UID -->
+              <div class="flex items-center gap-2 bg-[#0b1116] border border-[#1e2a38] rounded-xl px-3 py-2 min-w-0">
+                <i data-lucide="id-card" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
+                <span class="text-[11px] text-slate-500 font-bold">UID</span>
+                <span class="text-[11px] font-mono text-slate-300 truncate max-w-[120px] sm:max-w-[200px]" title="${fullUid}">${shortUid}</span>
+                <button type="button" onclick="copyFullUserId()" class="text-slate-500 hover:text-[#00d672] transition shrink-0" title="Copy UID">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <!-- Private toggle -->
+              <div class="flex items-center gap-2.5 bg-[#0b1116] border border-[#1e2a38] rounded-xl px-3 py-2 ml-auto">
+                <i data-lucide="eye-off" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span class="text-[12px] font-bold text-white">Private</span>
+                <button type="button" id="private-toggle-btn" onclick="togglePrivateAccount()" class="relative w-10 h-5 rounded-full transition ${isPrivate ? 'bg-[#00d672]' : 'bg-[#2a3848]'}" title="Private account">
+                  <span class="absolute top-0.5 ${isPrivate ? 'left-[22px]' : 'left-0.5'} w-4 h-4 rounded-full bg-white shadow transition-all"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <h2 class="text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#00d672]"></i> Stats
           </h2>
