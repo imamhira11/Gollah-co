@@ -749,6 +749,41 @@
     </div>
   </div>
 
+  <!-- PROVIDER OFFERWALL IFRAME MODAL -->
+  <div id="provider-wall-modal" class="hidden fixed inset-0 z-[55] modal-backdrop flex items-center justify-center p-3 sm:p-5">
+    <div class="modal-card bg-[#0e1620] border border-[#1c2836] w-full max-w-5xl h-[min(92vh,820px)] rounded-2xl sm:rounded-3xl flex flex-col overflow-hidden shadow-2xl">
+      <div class="relative flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b border-[#1c2836] bg-[#111920] shrink-0">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#00d672] via-cyan-400 to-violet-400 opacity-80"></div>
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="provider-wall-icon" class="w-10 h-10 rounded-xl bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center text-[#00d672] font-black text-sm shrink-0">W</div>
+          <div class="min-w-0">
+            <h3 id="provider-wall-title" class="font-bold text-white text-[15px] truncate leading-tight">Offer Wall</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">Complete offers · coins credit via postback</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="reloadProviderWall()" class="hidden sm:flex w-9 h-9 rounded-xl bg-[#1a2430] hover:bg-[#243040] text-slate-400 hover:text-white items-center justify-center transition" title="Reload">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="closeProviderWallModal()" class="w-9 h-9 rounded-xl bg-[#1a2430] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 flex items-center justify-center transition" title="Close">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <div class="relative flex-1 min-h-0 bg-[#0b1116]">
+        <div id="provider-wall-loading" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[#0b1116]">
+          <div class="w-10 h-10 rounded-full border-2 border-[#1e2a38] border-t-[#00d672] animate-spin"></div>
+          <p class="text-[12px] text-slate-500 font-medium">Loading offer wall…</p>
+        </div>
+        <iframe id="provider-wall-iframe" title="Offer Wall" class="w-full h-full border-0 bg-[#0b1116]" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" allow="clipboard-write"></iframe>
+      </div>
+      <div class="px-4 py-2.5 border-t border-[#1c2836] bg-[#111920] flex items-center justify-between gap-2 shrink-0">
+        <span class="text-[10px] text-slate-600 truncate">User ID attached for tracking</span>
+        <button type="button" onclick="closeProviderWallModal()" class="text-[12px] font-bold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- OFFER DETAILS MODAL -->
   <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
@@ -3435,7 +3470,103 @@
       navigate(saved);
     }
 
-    function filterByProvider(providerName) {
+    // ── Provider offerwall iframe URLs (replace with your live wall links) ──
+    // {userId} is replaced with the logged-in user's id
+    const PROVIDER_WALL_URLS = {
+      'Clickwall': 'https://clickwall.com/wall?uid={userId}',
+      'Upwall': 'https://upwall.io/offers?user_id={userId}',
+      'Revtoo': 'https://revtoo.com/wall?playerid={userId}',
+      'Lootably': 'https://wall.lootably.com/?playerId={userId}',
+      'Monlix': 'https://offerwall.monlix.com/?appid=YOUR_APP&userid={userId}',
+      'Adgate': 'https://wall.adgaterewards.com/offerwall/{userId}',
+      'OfferToro': 'https://www.offertoro.com/ifr/show/{userId}/YOUR_PUB_ID/YOUR_APP_ID',
+      'Torox': 'https://torox.io/offerwall?uid={userId}',
+      'BitLabs': 'https://web.bitlabs.ai/?uid={userId}',
+      'CPX': 'https://offers.cpx-research.com/index.php?app_id=YOUR_APP&ext_user_id={userId}',
+      'MobiVortex': 'https://mobivortex.com/wall?uid={userId}',
+      'Offery': 'https://offery.com/wall?uid={userId}',
+      'Bitlab': 'https://bitlab.com/wall?uid={userId}',
+      'Tplayed': 'https://tplayed.com/wall?uid={userId}',
+      'Pixylabs': 'https://pixylabs.com/wall?uid={userId}',
+      'Pubscale': 'https://pubscale.com/wall?uid={userId}'
+    };
+
+    const PROVIDER_WALL_LOGOS = {
+      'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
+      'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
+      'MobiVortex': 'MV', 'Offery': 'OF', 'Bitlab': 'Bt', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS'
+    };
+
+    let activeProviderWallUrl = '';
+
+    function buildProviderWallUrl(providerName) {
+      const template = PROVIDER_WALL_URLS[providerName];
+      if (!template) return null;
+      const uid = (currentUser && currentUser.id) ? encodeURIComponent(currentUser.id) : 'guest';
+      return template.replace(/\{userId\}/g, uid);
+    }
+
+    function openProviderWallModal(providerName) {
+      if (window.__providersDragMoved) return;
+      if (isAccountBanned && isAccountBanned()) {
+        showBannedScreen(document.getElementById('banned-reason-pill')?.textContent || 'Policy Violation');
+        return;
+      }
+      if (!currentUser) {
+        if (typeof requireLogin === 'function') requireLogin('Please login to open this offer wall.');
+        else if (typeof openAuthModal === 'function') openAuthModal(false);
+        return;
+      }
+
+      const url = buildProviderWallUrl(providerName);
+      if (!url) {
+        // Fallback: filter offers by provider name if no wall URL configured
+        filterByProviderNameOnly(providerName);
+        return;
+      }
+
+      activeProviderWallUrl = url;
+      const modal = document.getElementById('provider-wall-modal');
+      const iframe = document.getElementById('provider-wall-iframe');
+      const loading = document.getElementById('provider-wall-loading');
+      const title = document.getElementById('provider-wall-title');
+      const icon = document.getElementById('provider-wall-icon');
+
+      if (title) title.textContent = providerName + ' Offer Wall';
+      if (icon) icon.textContent = PROVIDER_WALL_LOGOS[providerName] || providerName.slice(0, 2).toUpperCase();
+      if (loading) loading.classList.remove('hidden');
+      if (iframe) {
+        iframe.onload = () => {
+          if (loading) loading.classList.add('hidden');
+        };
+        iframe.src = url;
+      }
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeProviderWallModal() {
+      const modal = document.getElementById('provider-wall-modal');
+      const iframe = document.getElementById('provider-wall-iframe');
+      const loading = document.getElementById('provider-wall-loading');
+      if (iframe) {
+        iframe.onload = null;
+        iframe.src = 'about:blank';
+      }
+      if (loading) loading.classList.remove('hidden');
+      if (modal) modal.classList.add('hidden');
+      activeProviderWallUrl = '';
+    }
+
+    function reloadProviderWall() {
+      const iframe = document.getElementById('provider-wall-iframe');
+      const loading = document.getElementById('provider-wall-loading');
+      if (!iframe || !activeProviderWallUrl) return;
+      if (loading) loading.classList.remove('hidden');
+      iframe.src = activeProviderWallUrl;
+    }
+
+    function filterByProviderNameOnly(providerName) {
       searchQuery = providerName.toLowerCase();
       const searchInput = document.getElementById('offer-search-input');
       if (searchInput) searchInput.value = providerName;
@@ -3450,6 +3581,11 @@
       });
       if (currentTab !== 'home') navigate('home');
       else renderHome();
+    }
+
+    // Keep old name as alias → opens wall modal
+    function filterByProvider(providerName) {
+      openProviderWallModal(providerName);
     }
 
     function scrollProvidersCarousel(direction) {
