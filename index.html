@@ -690,7 +690,7 @@
     <div class="modal-card bg-[#141d26] border border-[#22303e] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-[#202c38] pb-3">
         <div class="flex items-center gap-3">
-          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-lg">
+          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg" style="background:rgba(145,149,161,0.2);color:#9195a1;">
             Ł
           </div>
           <div>
@@ -1425,7 +1425,7 @@
         const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
         t.time = liveTime;
         const isBinance = /binance/i.test(String(t.type || '')) || t.icon === '🟡';
-        const iconBg = isBinance ? 'bg-[#F0B90B]' : 'bg-[#a8b0bc]';
+        const iconBg = isBinance ? 'bg-[#F0B90B]' : 'bg-[#9195a1]';
         const iconFg = isBinance ? 'text-[#0b0e11] font-black' : 'text-white';
         const iconChar = isBinance ? 'B' : (t.icon || 'Ł');
         return `
@@ -2412,7 +2412,15 @@
       cashoutMinCoins = minLimit;
 
       document.getElementById('cashout-modal-title').innerText = `Withdraw ${crypto}`;
-      document.getElementById('cashout-icon-box').innerText = icon;
+      const iconBox = document.getElementById('cashout-icon-box');
+      iconBox.innerText = icon;
+      if (crypto.includes('Binance')) {
+        iconBox.style.background = 'rgba(245,158,11,0.2)';
+        iconBox.style.color = '#fbbf24';
+      } else {
+        iconBox.style.background = 'rgba(145,149,161,0.2)';
+        iconBox.style.color = '#9195a1';
+      }
       document.getElementById('cashout-current-balance').innerText = userCoins.toLocaleString();
       
       const amtInput = document.getElementById('cashout-amount-input');
@@ -3964,7 +3972,7 @@
           return `
             <div class="grid grid-cols-12 items-center bg-[#121b24] border border-[#1d2a37] p-3.5 rounded-xl text-xs gap-2">
               <span class="col-span-4 font-bold text-white flex items-center gap-2">
-                <span class="w-8 h-8 rounded-lg ${isBinance ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-sm font-bold">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style="${isBinance ? 'background:rgba(245,158,11,0.2);color:#fbbf24' : 'background:rgba(145,149,161,0.2);color:#9195a1'}">
                   ${isBinance ? '🟡' : 'Ł'}
                 </span>
                 ${w.method}
@@ -4117,7 +4125,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div onclick="openCustomCashoutModal('Litecoin (LTC)', 300, 'Ł')" class="bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672] p-5 rounded-2xl flex items-center justify-between cursor-pointer transition transform hover:-translate-y-1 shadow-xl group">
             <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-black flex items-center justify-center font-black text-2xl transition">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-2xl transition group-hover:brightness-110" style="background:rgba(145,149,161,0.18);color:#9195a1;">
                 Ł
               </div>
               <div>
