@@ -1424,10 +1424,13 @@
         // Live relative time (updates via startTickerTimeClock)
         const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
         t.time = liveTime;
-        // Exact match: light-gray icon · LTC + seconds ago · amount in dark black pill
+        const isBinance = /binance/i.test(String(t.type || '')) || t.icon === '🟡';
+        const iconBg = isBinance ? 'bg-[#F0B90B]' : 'bg-[#a8b0bc]';
+        const iconFg = isBinance ? 'text-[#0b0e11] font-black' : 'text-white';
+        const iconChar = isBinance ? 'B' : (t.icon || 'Ł');
         return `
           <div class="ticker-chip flex items-center gap-2 bg-[#1a1f28] border border-[#252b36] pl-1.5 pr-1.5 py-1 rounded-2xl shrink-0 hover:border-[#323846] transition" data-idx="${idx}">
-            <span class="w-8 h-8 rounded-xl bg-[#5b6575] text-[#f1f5f9] font-bold flex items-center justify-center text-[14px] shrink-0">${t.icon || 'Ł'}</span>
+            <span class="w-8 h-8 rounded-xl ${iconBg} ${iconFg} font-bold flex items-center justify-center text-[13px] shrink-0">${iconChar}</span>
             <div class="text-[11px] leading-[1.15] min-w-0 pr-1">
               <span class="text-[#e2e6ed] font-semibold block">${t.type}</span>
               <span class="ticker-live-time text-[#6b7280] text-[10px] font-medium">${liveTime}</span>
@@ -2211,7 +2214,7 @@
       clearTimeout(miniToastTimer);
       miniToastTimer = setTimeout(() => {
         el.classList.add('hidden');
-      }, 3500);
+      }, 10000);
     }
 
     // AUDIO 1: Pending Submit Pop Sound
