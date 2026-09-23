@@ -2033,6 +2033,23 @@
           await db.from('profiles').update({ is_private: next }).eq('id', currentUser.id);
         } catch (e) {}
       }
+
+      // Pop sound + in-app notification
+      try { playPendingTaakSound(); } catch (e) {}
+      if (next) {
+        showAppAlert('Your profile is now private. Others cannot see your offers or withdrawals.', {
+          title: 'Profile is private',
+          type: 'warning',
+          okText: 'OK'
+        });
+      } else {
+        showAppAlert('Your profile is now public. Others can see your activity from the live feed.', {
+          title: 'Profile unlocked',
+          type: 'success',
+          okText: 'OK'
+        });
+      }
+
       if (currentTab === 'profile') renderProfile();
     }
 
