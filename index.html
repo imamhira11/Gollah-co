@@ -762,6 +762,9 @@
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="openProviderWallExternal()" class="hidden sm:flex w-9 h-9 rounded-xl bg-[#1a2430] hover:bg-[#243040] text-slate-400 hover:text-white items-center justify-center transition" title="Open in new tab">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </button>
           <button type="button" onclick="reloadProviderWall()" class="hidden sm:flex w-9 h-9 rounded-xl bg-[#1a2430] hover:bg-[#243040] text-slate-400 hover:text-white items-center justify-center transition" title="Reload">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           </button>
@@ -775,7 +778,7 @@
           <div class="w-10 h-10 rounded-full border-2 border-[#1e2a38] border-t-[#00d672] animate-spin"></div>
           <p class="text-[12px] text-slate-500 font-medium">Loading offer wall…</p>
         </div>
-        <iframe id="provider-wall-iframe" title="Offer Wall" class="w-full h-full border-0 bg-[#0b1116]" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" allow="clipboard-write"></iframe>
+        <iframe id="provider-wall-iframe" title="Offer Wall" class="w-full h-full border-0 bg-[#0b1116]" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation allow-modals" allow="clipboard-write"></iframe>
       </div>
       <div class="px-4 py-2.5 border-t border-[#1c2836] bg-[#111920] flex items-center justify-between gap-2 shrink-0">
         <span class="text-[10px] text-slate-600 truncate">User ID attached for tracking</span>
@@ -3473,9 +3476,9 @@
     // ── Provider offerwall iframe URLs (replace with your live wall links) ──
     // {userId} is replaced with the logged-in user's id
     const PROVIDER_WALL_URLS = {
-      'Clickwall': 'https://clickwall.net/offerwall?api_key=10766&user_id={userId}',
-      'Upwall': 'https://upwall.io/offerwall?user_id={userId}',
-      'Revtoo': 'https://revtoo.com/offerwall?user_id={userId}',
+      'Clickwall': 'https://clickwall.net/app/iframe/10766/{userId}',
+      'Upwall': 'https://offerwall.upwall.io/?app_id=YOUR_UPWALL_APP_ID&userid={userId}',
+      'Revtoo': 'https://revtoo.com/offerwall/pg7w8gtff9w8zx7bok7wups4mr1nju/{userId}',
       'Lootably': 'https://wall.lootably.com/?playerId={userId}',
       'Monlix': 'https://offerwall.monlix.com/?appid=YOUR_APP&userid={userId}',
       'Adgate': 'https://wall.adgaterewards.com/offerwall/{userId}',
@@ -3506,6 +3509,10 @@
       return template.replace(/\{userId\}/g, uid);
     }
 
+    function openProviderWallExternal() {
+      if (activeProviderWallUrl) window.open(activeProviderWallUrl, '_blank', 'noopener,noreferrer');
+    }
+
     function openProviderWallModal(providerName) {
       if (window.__providersDragMoved) return;
       if (isAccountBanned && isAccountBanned()) {
@@ -3520,12 +3527,33 @@
 
       const url = buildProviderWallUrl(providerName);
       if (!url) {
-        // Fallback: filter offers by provider name if no wall URL configured
         filterByProviderNameOnly(providerName);
         return;
       }
 
+      // Placeholder API key not configured yet
+      if (/YOUR_[A-Z0-9_]+/.test(url)) {
+        if (typeof showToast === 'function') {
+          showToast(providerName + ': add your API key in PROVIDER_WALL_URLS first', 'error');
+        } else {
+          alert(providerName + ' wall is not configured yet.\n\nReplace YOUR_*_API_KEY / YOUR_*_APP_ID in PROVIDER_WALL_URLS with the key from your ' + providerName + ' publisher dashboard.');
+        }
+        return;
+      }
+
       activeProviderWallUrl = url;
+
+      // file:// or some walls block iframe — open in new tab instead
+      const isFileOrigin = (location.protocol === 'file:');
+      const preferExternal = isFileOrigin || providerName === 'Revtoo';
+      if (preferExternal) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        if (typeof showToast === 'function') {
+          showToast(providerName + ' opened in a new tab', 'success');
+        }
+        // Still show modal with link fallback if popup blocked
+      }
+
       const modal = document.getElementById('provider-wall-modal');
       const iframe = document.getElementById('provider-wall-iframe');
       const loading = document.getElementById('provider-wall-loading');
@@ -3535,11 +3563,33 @@
       if (title) title.textContent = providerName + ' Offer Wall';
       if (icon) icon.textContent = PROVIDER_WALL_LOGOS[providerName] || providerName.slice(0, 2).toUpperCase();
       if (loading) loading.classList.remove('hidden');
+
       if (iframe) {
-        iframe.onload = () => {
-          if (loading) loading.classList.add('hidden');
-        };
-        iframe.src = url;
+        if (preferExternal) {
+          // Don't load broken iframe on file:// — show helper panel
+          iframe.src = 'about:blank';
+          if (loading) {
+            loading.classList.remove('hidden');
+            loading.innerHTML = `
+              <div class="flex flex-col items-center justify-center gap-4 p-6 text-center max-w-sm">
+                <div class="w-12 h-12 rounded-2xl bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center">
+                  <i data-lucide="external-link" class="w-5 h-5 text-[#00d672]"></i>
+                </div>
+                <p class="text-[14px] font-bold text-white">${providerName} works best in a new tab</p>
+                <p class="text-[12px] text-slate-500 leading-relaxed">Local file or this network blocks iframe embed. Use the button below.</p>
+                <button type="button" onclick="openProviderWallExternal()" class="auth-submit-btn text-black font-bold px-5 py-2.5 rounded-xl text-[13px]">
+                  Open ${providerName} Wall
+                </button>
+              </div>`;
+            if (window.lucide) lucide.createIcons();
+          }
+        } else {
+          iframe.onload = () => {
+            if (loading) loading.classList.add('hidden');
+          };
+          iframe.src = 'about:blank';
+          setTimeout(() => { iframe.src = url; }, 30);
+        }
       }
       if (modal) modal.classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -3553,7 +3603,12 @@
         iframe.onload = null;
         iframe.src = 'about:blank';
       }
-      if (loading) loading.classList.remove('hidden');
+      if (loading) {
+        loading.classList.remove('hidden');
+        loading.innerHTML = `
+          <div class="w-10 h-10 rounded-full border-2 border-[#1e2a38] border-t-[#00d672] animate-spin"></div>
+          <p class="text-[12px] text-slate-500 font-medium">Loading offer wall…</p>`;
+      }
       if (modal) modal.classList.add('hidden');
       activeProviderWallUrl = '';
     }
