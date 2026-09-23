@@ -2492,6 +2492,92 @@
       window.open(trackingUrl, '_blank');
     }
 
+    // ── Network postbacks (client / return-URL style) ──
+    // Ovnix dashboard Postback URL example (no separate PHP):
+    //   https://gollah.com/?pb=ovnix&sub1={sub1}&reward={rewardValue}&offer_name={offer_name}&transaction_id={transaction_id}
+    // Other networks can use the same ?pb= provider flag.
+    const POSTBACK_TXN_KEY = 'gollah_pb_txns_v1';
+    function loadPostbackTxns() {
+      try { return new Set(JSON.parse(localStorage.getItem(POSTBACK_TXN_KEY) || '[]')); } catch (e) { return new Set(); }
+    }
+    function savePostbackTxn(txn) {
+      if (!txn) return;
+      try {
+        const s = loadPostbackTxns();
+        s.add(String(txn));
+        const arr = [...s].slice(-200);
+        localStorage.setItem(POSTBACK_TXN_KEY, JSON.stringify(arr));
+      } catch (e) {}
+    }
+    function hasPostbackTxn(txn) {
+      if (!txn) return false;
+      return loadPostbackTxns().has(String(txn));
+    }
+
+    async function handleOvnixPostbackParams(params) {
+      const sub1 = params.get('sub1') || params.get('user_id') || params.get('uid') || '';
+      const reward = Number(params.get('reward') || params.get('rewardValue') || params.get('payout') || params.get('amount') || params.get('coins') || 0);
+      const txn = params.get('transaction_id') || params.get('txn_id') || params.get('trans_id') || params.get('event_id') || '';
+      const offerName = params.get('offer_name') || params.get('offer') || params.get('campaign') || 'Ovnix Offer';
+      const status = String(params.get('status') || params.get('event') || 'completed').toLowerCase();
+
+      if (!reward || reward <= 0) return false;
+      if (['rejected', 'chargeback', 'reversed', 'cancel', 'cancelled'].includes(status)) return false;
+      if (txn && hasPostbackTxn('ovnix:' + txn)) return false;
+
+      // Only credit if logged-in user matches sub1 (when sub1 is present)
+      if (sub1 && currentUser && String(currentUser.id) !== String(sub1)) {
+        console.warn('[postback] Ovnix sub1 mismatch', sub1, currentUser && currentUser.id);
+        return false;
+      }
+      if (!currentUser) {
+        // Store pending for after login
+        try {
+          localStorage.setItem('gollah_pending_pb', JSON.stringify({
+            provider: 'Ovnix', offerName, coins: Math.floor(reward), txn, at: Date.now()
+          }));
+        } catch (e) {}
+        return false;
+      }
+
+      if (txn) savePostbackTxn('ovnix:' + txn);
+      await window.creditOfferPostback(offerName, Math.floor(reward), 'Ovnix');
+      return true;
+    }
+
+    async function processIncomingPostbacks() {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const pb = (params.get('pb') || params.get('provider') || '').toLowerCase();
+        // Also detect Ovnix-style params without pb flag
+        const looksOvnix = params.has('rewardValue') || params.has('reward') || (params.has('sub1') && params.has('reward'));
+        if (pb === 'ovnix' || (looksOvnix && (pb === '' || pb === 'ovnix'))) {
+          const ok = await handleOvnixPostbackParams(params);
+          if (ok) {
+            // Clean query from address bar
+            try {
+              const clean = window.location.pathname + (window.location.hash || '');
+              window.history.replaceState({}, document.title, clean || '/');
+            } catch (e) {}
+          }
+        }
+        // Apply pending postback after login
+        try {
+          const raw = localStorage.getItem('gollah_pending_pb');
+          if (raw && currentUser) {
+            const p = JSON.parse(raw);
+            if (p && p.coins > 0 && (!p.txn || !hasPostbackTxn((p.provider || 'net') + ':' + p.txn))) {
+              if (p.txn) savePostbackTxn((p.provider || 'net') + ':' + p.txn);
+              await window.creditOfferPostback(p.offerName || 'Offer', Math.floor(p.coins), p.provider || 'Ovnix');
+            }
+            localStorage.removeItem('gollah_pending_pb');
+          }
+        } catch (e) {}
+      } catch (e) {
+        console.warn('postback parse failed', e);
+      }
+    }
+
     window.creditOfferPostback = async function(offerName, coins, providerName) {
       if (!currentUser) return;
       userCoins += coins;
@@ -3517,13 +3603,14 @@
       'Bitlab': 'https://bitlab.com/wall?uid={userId}',
       'Tplayed': 'https://tplayed.com/wall?uid={userId}',
       'Pixylabs': 'https://pixylabs.com/wall?uid={userId}',
-      'Pubscale': 'https://pubscale.com/wall?uid={userId}'
+      'Pubscale': 'https://pubscale.com/wall?uid={userId}',
+      'Ovnix': 'https://offerwall.ovnix.io/?uid={userId}&sub1={userId}&user_id={userId}&pub_key=C444BBFE5C066901DBD6'
     };
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
       'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
-      'MobiVortex': 'MV', 'Offery': 'OF', 'Bitlab': 'Bt', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS'
+      'MobiVortex': 'MV', 'Offery': 'OF', 'Bitlab': 'Bt', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV'
     };
 
     let activeProviderWallUrl = '';
@@ -3587,7 +3674,18 @@
       const icon = document.getElementById('provider-wall-icon');
 
       if (title) title.textContent = providerName + ' Offer Wall';
-      if (icon) icon.textContent = PROVIDER_WALL_LOGOS[providerName] || providerName.slice(0, 2).toUpperCase();
+      if (icon) {
+        icon.textContent = PROVIDER_WALL_LOGOS[providerName] || providerName.slice(0, 2).toUpperCase();
+        if (providerName === 'Ovnix') {
+          icon.style.background = 'rgba(255,107,0,0.18)';
+          icon.style.borderColor = 'rgba(255,107,0,0.35)';
+          icon.style.color = '#FF6B00';
+        } else {
+          icon.style.background = '';
+          icon.style.borderColor = '';
+          icon.style.color = '';
+        }
+      }
       if (loading) loading.classList.remove('hidden');
 
       if (iframe) {
@@ -4441,6 +4539,7 @@
 
       // Providers section (Lootably, Monlix, Adgate, OfferToro, etc.)
       const providers = [
+        { name: 'Ovnix', label: 'Ovnix', bg: 'bg-[#FF6B00]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'OV' },
         { name: 'Lootably', label: 'Lootably', bg: 'bg-[#2a1f4d]', text: 'text-white', badge: '+50%', badgeBg: 'bg-violet-500', logo: 'L' },
         { name: 'Monlix', label: 'Monlix', bg: 'bg-[#00c853]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: 'X' },
         { name: 'Adgate', label: 'Adgate', bg: 'bg-[#29b6f6]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: '◆' },
@@ -5293,6 +5392,9 @@
     renderGlobalLiveTicker();
     initAuth();
     initLiveChat();
+    setTimeout(function () {
+      if (typeof processIncomingPostbacks === 'function') processIncomingPostbacks();
+    }, 900);
     updateHeaderCoinsDisplay();
     setInterval(() => {
       updateChatLockUI();
