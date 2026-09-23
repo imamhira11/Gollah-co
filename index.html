@@ -3627,6 +3627,18 @@
       } catch (e) {}
     }
 
+    function getChatAvatarUrl(m) {
+      const myName = getDisplayUsername();
+      if (currentUser && (m.username || '') === myName) {
+        const img = document.getElementById('header-avatar-img');
+        if (img && img.src) return img.src;
+        if (m.avatar_url) return m.avatar_url;
+      }
+      if (m.avatar_url) return m.avatar_url;
+      const seed = encodeURIComponent(m.username || m.user_id || 'User');
+      return 'https://api.dicebear.com/7.x/bottts/svg?seed=' + seed;
+    }
+
     function renderChatStream() {
       const stream = document.getElementById('chat-stream');
       if (!stream) return;
@@ -3639,13 +3651,17 @@
         const text = escapeChatHtml(m.message);
         const time = formatChatClock(m.createdAt);
         const isMe = currentUser && (m.username || '') === getDisplayUsername();
+        const avatar = getChatAvatarUrl(m);
         return `
-          <div class="chat-msg">
-            <div class="flex items-center justify-between text-[11px] mb-0.5 gap-2">
-              <span class="font-bold ${isMe ? 'text-amber-400' : 'text-[#00d672]'} truncate">${name}${isMe ? ' (you)' : ''}</span>
-              <span class="text-[10px] text-slate-600 shrink-0">${time}</span>
+          <div class="chat-msg flex items-start gap-2.5">
+            <img src="${avatar}" alt="" class="w-7 h-7 rounded-full object-cover shrink-0 bg-[#16202a] border border-[#1e2a38] mt-0.5" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=User'" />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between text-[11px] mb-0.5 gap-2">
+                <span class="font-bold ${isMe ? 'text-amber-400' : 'text-[#00d672]'} truncate">${name}${isMe ? ' (you)' : ''}</span>
+                <span class="text-[10px] text-slate-600 shrink-0">${time}</span>
+              </div>
+              <p class="text-slate-300 text-xs break-words whitespace-pre-wrap">${text}</p>
             </div>
-            <p class="text-slate-300 text-xs break-words whitespace-pre-wrap">${text}</p>
           </div>
         `;
       }).join('');
@@ -3691,11 +3707,13 @@
       }
       lastChatSendAt = now;
 
+      const avatarImg = document.getElementById('header-avatar-img');
       const msg = {
         id: 'local_' + now + '_' + Math.random().toString(36).slice(2, 7),
         username: getDisplayUsername(),
         message: text,
         user_id: currentUser.id,
+        avatar_url: avatarImg ? avatarImg.src : '',
         createdAt: new Date().toISOString()
       };
 
@@ -3707,7 +3725,8 @@
           await db.from('live_chat').insert({
             username: msg.username,
             message: msg.message,
-            user_id: currentUser.id
+            user_id: currentUser.id,
+            avatar_url: msg.avatar_url || null
           });
         } catch (e) {}
       }
@@ -3725,6 +3744,7 @@
               username: row.username || 'User',
               message: row.message || '',
               user_id: row.user_id,
+              avatar_url: row.avatar_url || '',
               createdAt: row.created_at || new Date().toISOString()
             });
           })
@@ -3735,7 +3755,7 @@
         try {
           const { data, error } = await db
             .from('live_chat')
-            .select('id, username, message, user_id, created_at')
+            .select('id, username, message, user_id, avatar_url, created_at')
             .order('created_at', { ascending: true })
             .limit(50);
           if (error || !data) return;
@@ -3745,6 +3765,7 @@
               username: row.username || 'User',
               message: row.message || '',
               user_id: row.user_id,
+              avatar_url: row.avatar_url || '',
               createdAt: row.created_at
             });
           });
