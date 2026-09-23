@@ -308,11 +308,49 @@
 
       <!-- Logged-in: coins, wallet, profile, notif, games -->
       <div id="header-user-actions" class="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
-      <!-- Coins pill -->
-      <button type="button" onclick="navigate('shop')" class="flex items-center gap-2 bg-[#16202a] border border-[#1e2a38] hover:border-amber-500/40 px-3 sm:px-3.5 py-2 rounded-full text-sm font-bold text-amber-400 transition">
-        <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-sm flex items-center justify-center text-[10px] text-amber-950 font-black">●</span>
-        <span id="header-coins">0</span>
-        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 hidden sm:inline"></i>
+      <!-- Coins pill — click toggles Coins ↔ USD (dollah-style) -->
+      <button type="button" id="header-coins-btn" onclick="toggleCoinsUsdMode()" class="flex items-center gap-2 bg-[#16202a] border border-[#1e2a38] hover:border-amber-500/40 px-3 sm:px-3.5 py-2 rounded-full text-sm font-bold text-amber-400 transition" title="Tap to switch Coins / USD · 1000 coins = $1">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="gCoinBody" cx="38%" cy="32%" r="65%">
+              <stop offset="0%" stop-color="#FFE9A0"/>
+              <stop offset="45%" stop-color="#F5C542"/>
+              <stop offset="100%" stop-color="#C48912"/>
+            </radialGradient>
+            <radialGradient id="gCoinShine" cx="30%" cy="28%" r="50%">
+              <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#FFF8DC" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="32" cy="32" r="30" fill="url(#gCoinBody)"/>
+          <circle cx="32" cy="32" r="30" fill="none" stroke="#A6700A" stroke-width="1.5" opacity="0.35"/>
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#E8B830" stroke-width="2.2"/>
+          <circle cx="32" cy="32" r="20.5" fill="none" stroke="#F7D56A" stroke-width="1.2" opacity="0.85"/>
+          <g stroke="#E0A820" stroke-width="1.4" stroke-linecap="round" opacity="0.75">
+            <line x1="32" y1="14" x2="32" y2="22"/>
+            <line x1="32" y1="42" x2="32" y2="50"/>
+            <line x1="14" y1="32" x2="22" y2="32"/>
+            <line x1="42" y1="32" x2="50" y2="32"/>
+            <line x1="19.3" y1="19.3" x2="24.9" y2="24.9"/>
+            <line x1="39.1" y1="39.1" x2="44.7" y2="44.7"/>
+            <line x1="19.3" y1="44.7" x2="24.9" y2="39.1"/>
+            <line x1="39.1" y1="24.9" x2="44.7" y2="19.3"/>
+            <line x1="23.2" y1="15.5" x2="26.5" y2="22.3"/>
+            <line x1="37.5" y1="41.7" x2="40.8" y2="48.5"/>
+            <line x1="15.5" y1="23.2" x2="22.3" y2="26.5"/>
+            <line x1="41.7" y1="37.5" x2="48.5" y2="40.8"/>
+            <line x1="15.5" y1="40.8" x2="22.3" y2="37.5"/>
+            <line x1="41.7" y1="26.5" x2="48.5" y2="23.2"/>
+            <line x1="23.2" y1="48.5" x2="26.5" y2="41.7"/>
+            <line x1="37.5" y1="22.3" x2="40.8" y2="15.5"/>
+          </g>
+          <circle cx="32" cy="32" r="7.5" fill="#F0C040"/>
+          <circle cx="32" cy="32" r="7.5" fill="none" stroke="#D4A020" stroke-width="1"/>
+          <circle cx="32" cy="32" r="4.2" fill="#E8B830"/>
+          <circle cx="32" cy="32" r="30" fill="url(#gCoinShine)"/>
+        </svg>
+        <span id="header-coins" class="tabular-nums">0</span>
+        <span id="header-coins-unit" class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">coins</span>
       </button>
 
       <!-- Wallet (purple like dollah) -->
@@ -1386,20 +1424,15 @@
         // Live relative time (updates via startTickerTimeClock)
         const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
         t.time = liveTime;
-        const isPending = (t.status || '') === 'Pending';
-        const statusColor = isPending
-          ? 'text-amber-400'
-          : (t.status === 'Sent' || t.status === 'Complete')
-            ? 'text-emerald-400'
-            : 'text-slate-500';
+        // Exact match: light-gray icon · LTC + seconds ago · amount in dark black pill
         return `
-          <div class="ticker-chip flex items-center gap-2.5 bg-[#131d27] border border-[#1f2c38] px-3 py-1.5 rounded-xl shrink-0 hover:border-[#00d672]/50 transition" data-idx="${idx}">
-            <span class="w-6 h-6 rounded-lg bg-[#1c2936] text-slate-300 font-bold flex items-center justify-center text-xs">${t.icon || 'Ł'}</span>
-            <div class="text-[11px] leading-tight min-w-0">
-              <span class="text-slate-300 font-medium block truncate">${t.type}</span>
-              <span class="ticker-live-time ${statusColor} text-[9px] font-semibold">${liveTime}</span>
+          <div class="ticker-chip flex items-center gap-2 bg-[#1a1f28] border border-[#252b36] pl-1.5 pr-1.5 py-1 rounded-2xl shrink-0 hover:border-[#323846] transition" data-idx="${idx}">
+            <span class="w-8 h-8 rounded-xl bg-[#3a4150] text-[#c5cad3] font-bold flex items-center justify-center text-[14px] shrink-0">${t.icon || 'Ł'}</span>
+            <div class="text-[11px] leading-[1.15] min-w-0 pr-1">
+              <span class="text-[#e2e6ed] font-semibold block">${t.type}</span>
+              <span class="ticker-live-time text-[#6b7280] text-[10px] font-medium">${liveTime}</span>
             </div>
-            <span class="text-white font-bold text-xs ml-1 shrink-0">● ${t.amount}</span>
+            <span class="bg-[#0b0e13] text-white font-bold text-[12px] px-3 py-1.5 rounded-full shrink-0 tabular-nums leading-none">${t.amount}</span>
           </div>
         `;
       }).join('');
@@ -1710,8 +1743,42 @@
     let userCompletedOffers = [];
     let currentUser = null;
     let userCoins = 0;
+    let showCoinsAsUsd = false; // header balance: coins vs $
+    const COINS_PER_USD = 1000; // 1,000 coins = $1.00
     let isSignupMode = false;
     let isPasswordVisible = false;
+
+    function coinsToUsd(coins) {
+      return (Number(coins) || 0) / COINS_PER_USD;
+    }
+
+    function updateHeaderCoinsDisplay() {
+      const el = document.getElementById('header-coins');
+      const unit = document.getElementById('header-coins-unit');
+      const btn = document.getElementById('header-coins-btn');
+      if (!el) return;
+      if (showCoinsAsUsd) {
+        el.textContent = '$' + coinsToUsd(userCoins).toFixed(2);
+        if (unit) unit.textContent = 'USD';
+        if (btn) {
+          btn.classList.add('text-emerald-400');
+          btn.classList.remove('text-amber-400');
+        }
+      } else {
+        el.textContent = userCoins.toLocaleString();
+        if (unit) unit.textContent = 'coins';
+        if (btn) {
+          btn.classList.add('text-amber-400');
+          btn.classList.remove('text-emerald-400');
+        }
+      }
+    }
+
+    function toggleCoinsUsdMode() {
+      showCoinsAsUsd = !showCoinsAsUsd;
+      try { localStorage.setItem('gollah_show_usd', showCoinsAsUsd ? '1' : '0'); } catch (err) {}
+      updateHeaderCoinsDisplay();
+    }
     let currentTab = 'home';
     let profileFilter = 'all';
     let profileSection = 'earnings'; // earnings | withdrawals | inprogress | onhold
@@ -2174,14 +2241,22 @@
       } catch (e) {}
     }
 
-    // AUDIO 2: Completed Custom Audio ("cashout.mp3")
+    // AUDIO 2: Cashout / complete sound (enter_cashout_sound.mp3)
     function playCompletedCustomAudio() {
       try {
-        const audio = new Audio('cashout.mp3');
+        const audio = new Audio('enter_cashout_sound.mp3');
+        audio.volume = 0.9;
         audio.play().catch(() => {
           playPendingTaakSound();
         });
-      } catch (e) {}
+      } catch (e) {
+        try { playPendingTaakSound(); } catch (err) {}
+      }
+    }
+
+    // Same file for cashout button press
+    function playCashoutClickSound() {
+      playCompletedCustomAudio();
     }
 
     let floatingToastTimer = null;
@@ -2262,7 +2337,7 @@
     window.creditOfferPostback = async function(offerName, coins, providerName) {
       if (!currentUser) return;
       userCoins += coins;
-      document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+      updateHeaderCoinsDisplay();
       const newLvl = updateLevelAndXpUI(userCoins);
 
       // Match provider from known offers if not passed
@@ -2397,10 +2472,10 @@
       submitBtn.disabled = true;
 
       try {
-        playPendingTaakSound();
+        playCashoutClickSound();
 
         userCoins -= amount;
-        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+        updateHeaderCoinsDisplay();
 
         const usdValueNum = parseFloat((amount / 1000).toFixed(2));
 
@@ -2666,7 +2741,7 @@
         document.getElementById('profile-username-display').innerText = displayName;
         document.getElementById('profile-email-display').innerText = user.email;
         document.getElementById('profile-user-id-snippet').innerText = `UID: ${user.id.substring(0, 8)}...`;
-        document.getElementById('header-coins').innerText = userCoins.toLocaleString();
+        updateHeaderCoinsDisplay();
         document.getElementById('profile-country-badge').innerText = `🚩 ${userCountry}`;
         
         updateLevelAndXpUI(userCoins);
@@ -2694,7 +2769,7 @@
         document.getElementById('profile-username-display').innerText = "Guest User";
         document.getElementById('profile-email-display').innerText = "guest@gollah.top";
         document.getElementById('profile-user-id-snippet').innerText = "UID: guest";
-        document.getElementById('header-coins').innerText = "0";
+        userCoins = 0; updateHeaderCoinsDisplay();
         document.getElementById('profile-country-badge').innerText = `🌐 GLOBAL`;
         document.getElementById('header-avatar-img').src = 'avatars/1.png';
         document.getElementById('dropdown-avatar-img').src = 'avatars/1.png';
@@ -3658,10 +3733,10 @@
           ? `<span class="absolute top-0 right-0 ${p.badgeBg} text-white text-[11px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-2xl shadow-md">${p.badge}</span>`
           : '';
         providersHTML += `
-          <div onclick="filterByProvider('${p.name}')" class="relative shrink-0 w-[180px] h-[200px] ${p.bg} rounded-3xl flex flex-col items-center justify-center cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl overflow-hidden border border-white/10 shadow-lg" style="scroll-snap-align: start;">
+          <div onclick="filterByProvider('${p.name}')" class="relative shrink-0 w-[148px] h-[190px] ${p.bg} rounded-2xl flex flex-col items-center justify-center cursor-pointer transition transform hover:-translate-y-1 hover:shadow-2xl overflow-hidden border border-white/10 shadow-lg" style="scroll-snap-align: start;">
             ${badgeHTML}
-            <span class="text-4xl font-black ${p.text} mb-3 tracking-tight drop-shadow">${p.logo}</span>
-            <span class="text-sm font-bold ${p.text} text-center px-3 leading-tight">${p.label}</span>
+            <span class="text-3xl font-black ${p.text} mb-2 tracking-tight drop-shadow">${p.logo}</span>
+            <span class="text-xs font-bold ${p.text} text-center px-2 leading-tight">${p.label}</span>
           </div>
         `;
       });
@@ -3681,7 +3756,7 @@
               </button>
             </div>
           </div>
-          <div id="providers-carousel" class="flex items-center gap-4 overflow-x-auto custom-scroll pb-2 scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+          <div id="providers-carousel" class="flex items-center gap-2 overflow-x-auto custom-scroll pb-2 scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
             ${providersHTML}
           </div>
         </div>
@@ -4420,11 +4495,13 @@
       } catch (e) {}
     }
 
+    try { showCoinsAsUsd = localStorage.getItem('gollah_show_usd') === '1'; } catch (e) {}
     updateGuestLayout(false);
     restoreLastTab();
     renderGlobalLiveTicker();
     initAuth();
     initLiveChat();
+    updateHeaderCoinsDisplay();
     setInterval(() => {
       updateChatLockUI();
       // Refresh avatars after profile/session loads
