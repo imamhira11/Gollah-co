@@ -559,6 +559,22 @@
     </aside>
   </div>
 
+  <!-- ACCOUNT BANNED OVERLAY -->
+  <div id="banned-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(6,10,14,0.92);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-md rounded-2xl px-6 py-10 text-center shadow-2xl" style="background:linear-gradient(160deg,#e11d48 0%,#be123c 55%,#9f1239 100%);">
+      <h2 class="text-white text-xl sm:text-2xl font-black mb-5 tracking-tight">Account banned due to:</h2>
+      <div id="banned-reason-pill" class="inline-block bg-white text-[#be123c] font-extrabold text-sm sm:text-base px-5 py-2 rounded-full shadow mb-6">Multiple Accounts</div>
+      <p class="text-white/90 text-[13px] sm:text-sm leading-relaxed max-w-sm mx-auto">
+        For account support &amp; appeals contact
+        <a href="mailto:appeal@gollah.top" class="font-bold underline text-white">appeal@gollah.top</a>
+        <br/>(Please allow 2–3 business days for a reply).
+      </p>
+      <button type="button" onclick="handleLogout()" class="mt-8 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
+        Sign out
+      </button>
+    </div>
+  </div>
+
   <!-- MINI TOAST (bottom-left — privacy & short notices) -->
   <div id="mini-toast" class="hidden fixed bottom-6 left-6 z-[70] bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl px-4 py-3 shadow-2xl max-w-[280px]">
     <div class="flex items-center gap-3">
@@ -2184,6 +2200,10 @@
     }
 
     function openOfferModal(offerId) {
+      if (isAccountBanned()) {
+        showBannedScreen(document.getElementById('banned-reason-pill')?.textContent || 'Policy Violation');
+        return;
+      }
       if (!currentUser) {
         requireLogin("Please login first to view and start offers!");
         return;
@@ -2278,6 +2298,10 @@
     let cashoutMinCoins = 300;
 
     function openCustomCashoutModal(crypto, minLimit = 300, icon = 'Ł') {
+      if (isAccountBanned()) {
+        showBannedScreen(document.getElementById('banned-reason-pill')?.textContent || 'Policy Violation');
+        return;
+      }
       if (!currentUser) {
         requireLogin("Please login to request cashouts!");
         return;
@@ -2588,15 +2612,38 @@
         let avatarUrl = 'avatars/1.png';
         let userCountry = user.user_metadata?.country || 'GLOBAL';
 
+        let isBanned = false;
+        let banReason = 'Policy Violation';
         try {
-          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
+          const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country, is_banned, ban_reason').eq('id', user.id).single();
           if (profile) {
             coins = profile.coins || 0;
             displayName = profile.username || displayName;
             userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
             if (profile.avatar_url) avatarUrl = profile.avatar_url;
+            if (profile.is_banned === true || profile.is_banned === 'true' || profile.is_banned === 1) {
+              isBanned = true;
+              banReason = profile.ban_reason || 'Policy Violation';
+            }
           }
-        } catch (e) {}
+        } catch (e) {
+          // Fallback without ban columns
+          try {
+            const { data: profile } = await db.from('profiles').select('coins, username, level, avatar_url, country').eq('id', user.id).single();
+            if (profile) {
+              coins = profile.coins || 0;
+              displayName = profile.username || displayName;
+              userCountry = (profile.country && profile.country !== 'Unknown') ? profile.country : userCountry;
+              if (profile.avatar_url) avatarUrl = profile.avatar_url;
+            }
+          } catch (e2) {}
+        }
+
+        if (isBanned) {
+          showBannedScreen(banReason);
+        } else {
+          hideBannedScreen();
+        }
 
         userCoins = coins;
         document.getElementById('header-avatar-img').src = avatarUrl;
@@ -2624,6 +2671,7 @@
           </button>
         `;
       } else {
+        hideBannedScreen();
         userCoins = 0;
         userNotifications = [];
         userWithdrawals = [];
@@ -2808,6 +2856,33 @@
         submitBtn.innerText = originalText;
         submitBtn.disabled = false;
       }
+    }
+
+    let accountIsBanned = false;
+
+    function showBannedScreen(reason) {
+      accountIsBanned = true;
+      const el = document.getElementById('banned-overlay');
+      const pill = document.getElementById('banned-reason-pill');
+      if (pill) pill.textContent = reason || 'Policy Violation';
+      if (el) el.classList.remove('hidden');
+      // Block chat / offers while banned
+      try {
+        const input = document.getElementById('chat-input');
+        const btn = document.getElementById('chat-send-btn');
+        if (input) input.disabled = true;
+        if (btn) btn.disabled = true;
+      } catch (e) {}
+    }
+
+    function hideBannedScreen() {
+      accountIsBanned = false;
+      const el = document.getElementById('banned-overlay');
+      if (el) el.classList.add('hidden');
+    }
+
+    function isAccountBanned() {
+      return accountIsBanned === true;
     }
 
     async function handleLogout() {
@@ -3804,6 +3879,10 @@
       const text = (input.value || '').trim();
       if (!text) return;
 
+      if (isAccountBanned()) {
+        showBannedScreen(document.getElementById('banned-reason-pill')?.textContent || 'Policy Violation');
+        return;
+      }
       if (!currentUser) {
         requireLogin('Please login to use live chat.');
         return;
