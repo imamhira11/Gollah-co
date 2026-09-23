@@ -564,6 +564,19 @@
     </aside>
   </div>
 
+  <!-- MINI TOAST (bottom-left — privacy & short notices) -->
+  <div id="mini-toast" class="hidden fixed bottom-6 left-6 z-[70] bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl px-4 py-3 shadow-2xl max-w-[280px]">
+    <div class="flex items-center gap-3">
+      <div id="mini-toast-icon-wrap" class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+        <i id="mini-toast-icon" data-lucide="eye-off" class="w-4 h-4 text-amber-400"></i>
+      </div>
+      <div class="min-w-0">
+        <p id="mini-toast-title" class="text-[13px] font-bold text-white leading-tight">Notice</p>
+        <p id="mini-toast-msg" class="text-[11px] text-slate-400 mt-0.5 leading-snug"></p>
+      </div>
+    </div>
+  </div>
+
   <!-- FLOATING TOAST (Longer Duration) -->
   <div id="dollah-floating-card" class="hidden fixed bottom-6 left-6 z-50 bg-[#141e28]/95 border border-[#243547] backdrop-blur-md rounded-2xl p-4 shadow-2xl min-w-[280px] max-w-sm cursor-pointer transition hover:border-[#00d672]" onclick="navigate('profile')">
     <div class="flex items-center justify-between mb-1.5">
@@ -2034,23 +2047,50 @@
         } catch (e) {}
       }
 
-      // Pop sound + in-app notification
+      // Pop sound + small bottom toast (not big center modal)
       try { playPendingTaakSound(); } catch (e) {}
       if (next) {
-        showAppAlert('Your profile is now private. Others cannot see your offers or withdrawals.', {
-          title: 'Profile is private',
-          type: 'warning',
-          okText: 'OK'
-        });
+        showMiniToast('Profile is private', 'Others cannot see your activity', 'private');
       } else {
-        showAppAlert('Your profile is now public. Others can see your activity from the live feed.', {
-          title: 'Profile unlocked',
-          type: 'success',
-          okText: 'OK'
-        });
+        showMiniToast('Profile unlocked', 'Your activity is public again', 'public');
       }
 
       if (currentTab === 'profile') renderProfile();
+    }
+
+    let miniToastTimer = null;
+    function showMiniToast(title, message, mode = 'info') {
+      const el = document.getElementById('mini-toast');
+      if (!el) return;
+      const titleEl = document.getElementById('mini-toast-title');
+      const msgEl = document.getElementById('mini-toast-msg');
+      const iconWrap = document.getElementById('mini-toast-icon-wrap');
+      const iconEl = document.getElementById('mini-toast-icon');
+
+      if (titleEl) titleEl.textContent = title || 'Notice';
+      if (msgEl) msgEl.textContent = message || '';
+
+      if (mode === 'private') {
+        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0';
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye-off'); iconEl.className = 'w-4 h-4 text-amber-400'; }
+      } else if (mode === 'public') {
+        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0';
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'eye'); iconEl.className = 'w-4 h-4 text-emerald-400'; }
+      } else {
+        if (iconWrap) iconWrap.className = 'w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0';
+        if (iconEl) { iconEl.setAttribute('data-lucide', 'info'); iconEl.className = 'w-4 h-4 text-blue-400'; }
+      }
+
+      el.classList.remove('hidden');
+      el.classList.remove('toast-animate-in');
+      void el.offsetWidth;
+      el.classList.add('toast-animate-in');
+      if (window.lucide) lucide.createIcons();
+
+      clearTimeout(miniToastTimer);
+      miniToastTimer = setTimeout(() => {
+        el.classList.add('hidden');
+      }, 3500);
     }
 
     // AUDIO 1: Pending Submit Pop Sound
