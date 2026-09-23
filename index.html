@@ -547,19 +547,14 @@
         <i data-lucide="chevron-right" class="w-3 h-3"></i>
       </div>
 
-      <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs">
-        <div>
-          <div class="flex items-center justify-between text-[11px] mb-0.5">
-            <span class="font-bold text-[#00d672]">The KHALID</span>
-            <span class="text-[10px] text-slate-600">05:53 am</span>
-          </div>
-          <p class="text-slate-300 text-xs">hello 😊 LTC received fast</p>
-        </div>
-      </div>
+      <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs"></div>
 
+      <div class="px-3 pt-1 pb-0">
+        <p id="chat-lock-hint" class="hidden text-[10px] text-amber-400/90 mb-1.5 leading-snug">🔒 Earn at least <b>50 coins</b> from offers to unlock chat.</p>
+      </div>
       <div class="p-3 border-t border-[#18232e] flex items-center gap-2">
-        <input id="chat-input" type="text" placeholder="Write a message..." class="flex-1 bg-[#131d27] border border-[#202c38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d672]" onkeydown="if(event.key==='Enter') sendLiveChat()" />
-        <button onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition">Send</button>
+        <input id="chat-input" type="text" maxlength="200" placeholder="Write a message..." class="flex-1 bg-[#131d27] border border-[#202c38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00d672] disabled:opacity-50" onkeydown="if(event.key==='Enter') sendLiveChat()" />
+        <button id="chat-send-btn" onclick="sendLiveChat()" class="bg-[#00d672] hover:bg-[#00be64] text-black font-bold px-3 py-2 rounded-xl text-xs transition disabled:opacity-50 disabled:cursor-not-allowed">Send</button>
       </div>
     </aside>
   </div>
@@ -3562,9 +3557,213 @@
       document.getElementById('profile-dropdown').classList.toggle('hidden');
     }
 
+    // ── Live Chat (min 50 coins earned) ──
+    const CHAT_STORAGE_KEY = 'gollah_live_chat_v1';
+    const CHAT_MIN_COINS = 50;
+    const CHAT_MAX_LEN = 200;
+    let chatMessages = [];
+    let lastChatSendAt = 0;
+
+    function escapeChatHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatChatClock(iso) {
+      try {
+        const d = iso ? new Date(iso) : new Date();
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function getTotalCoinsEarned() {
+      const fromOffers = userCompletedOffers.reduce((s, o) => s + (Number(o.coins) || 0), 0);
+      return Math.max(fromOffers, Number(userCoins) || 0);
+    }
+
+    function canUserChat() {
+      return !!currentUser && getTotalCoinsEarned() >= CHAT_MIN_COINS;
+    }
+
+    function updateChatLockUI() {
+      const input = document.getElementById('chat-input');
+      const btn = document.getElementById('chat-send-btn');
+      const hint = document.getElementById('chat-lock-hint');
+      const ok = canUserChat();
+      if (input) {
+        input.disabled = !ok;
+        input.placeholder = ok ? 'Write a message...' : 'Earn 50 coins to chat';
+      }
+      if (btn) btn.disabled = !ok;
+      if (hint) hint.classList.toggle('hidden', ok);
+    }
+
+    function loadChatFromStorage() {
+      try {
+        const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length) {
+            chatMessages = parsed.slice(-80);
+            return;
+          }
+        }
+      } catch (e) {}
+      chatMessages = [
+        { id: 'c1', username: 'The KHALID', message: 'hello 😊 LTC received fast', createdAt: new Date(Date.now() - 600000).toISOString() },
+        { id: 'c2', username: 'SaraBD', message: 'Surveys paying well today', createdAt: new Date(Date.now() - 300000).toISOString() }
+      ];
+      saveChatToStorage();
+    }
+
+    function saveChatToStorage() {
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatMessages.slice(-80)));
+      } catch (e) {}
+    }
+
+    function renderChatStream() {
+      const stream = document.getElementById('chat-stream');
+      if (!stream) return;
+      if (!chatMessages.length) {
+        stream.innerHTML = `<div class="py-8 text-center text-[11px] text-slate-600">No messages yet. Be the first!</div>`;
+        return;
+      }
+      stream.innerHTML = chatMessages.map(m => {
+        const name = escapeChatHtml(m.username || 'User');
+        const text = escapeChatHtml(m.message);
+        const time = formatChatClock(m.createdAt);
+        const isMe = currentUser && (m.username || '') === getDisplayUsername();
+        return `
+          <div class="chat-msg">
+            <div class="flex items-center justify-between text-[11px] mb-0.5 gap-2">
+              <span class="font-bold ${isMe ? 'text-amber-400' : 'text-[#00d672]'} truncate">${name}${isMe ? ' (you)' : ''}</span>
+              <span class="text-[10px] text-slate-600 shrink-0">${time}</span>
+            </div>
+            <p class="text-slate-300 text-xs break-words whitespace-pre-wrap">${text}</p>
+          </div>
+        `;
+      }).join('');
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function appendChatMessage(msg) {
+      if (!msg || !msg.message) return;
+      if (msg.id && chatMessages.some(m => m.id === msg.id)) return;
+      chatMessages.push(msg);
+      if (chatMessages.length > 80) chatMessages = chatMessages.slice(-80);
+      saveChatToStorage();
+      renderChatStream();
+    }
+
+    async function sendLiveChat() {
+      const input = document.getElementById('chat-input');
+      if (!input) return;
+      const text = (input.value || '').trim();
+      if (!text) return;
+
+      if (!currentUser) {
+        requireLogin('Please login to use live chat.');
+        return;
+      }
+      if (!canUserChat()) {
+        showAppAlert('You need to earn at least 50 coins from offers before you can use live chat.', {
+          title: 'Chat locked',
+          type: 'warning',
+          okText: 'OK'
+        });
+        updateChatLockUI();
+        return;
+      }
+      if (text.length > CHAT_MAX_LEN) {
+        showMiniToast('Too long', 'Max ' + CHAT_MAX_LEN + ' characters', 'info');
+        return;
+      }
+      const now = Date.now();
+      if (now - lastChatSendAt < 1200) {
+        showMiniToast('Slow down', 'Wait a second between messages', 'info');
+        return;
+      }
+      lastChatSendAt = now;
+
+      const msg = {
+        id: 'local_' + now + '_' + Math.random().toString(36).slice(2, 7),
+        username: getDisplayUsername(),
+        message: text,
+        user_id: currentUser.id,
+        createdAt: new Date().toISOString()
+      };
+
+      input.value = '';
+      appendChatMessage(msg);
+
+      if (db) {
+        try {
+          await db.from('live_chat').insert({
+            username: msg.username,
+            message: msg.message,
+            user_id: currentUser.id
+          });
+        } catch (e) {}
+      }
+    }
+
+    function subscribeLiveChat() {
+      if (!db) return;
+      try {
+        db.channel('live_chat_room')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat' }, (payload) => {
+            const row = payload.new;
+            if (!row) return;
+            appendChatMessage({
+              id: row.id || ('r_' + Date.now()),
+              username: row.username || 'User',
+              message: row.message || '',
+              user_id: row.user_id,
+              createdAt: row.created_at || new Date().toISOString()
+            });
+          })
+          .subscribe();
+      } catch (e) {}
+
+      (async () => {
+        try {
+          const { data, error } = await db
+            .from('live_chat')
+            .select('id, username, message, user_id, created_at')
+            .order('created_at', { ascending: true })
+            .limit(50);
+          if (error || !data) return;
+          data.forEach(row => {
+            appendChatMessage({
+              id: row.id,
+              username: row.username || 'User',
+              message: row.message || '',
+              user_id: row.user_id,
+              createdAt: row.created_at
+            });
+          });
+        } catch (e) {}
+      })();
+    }
+
+    function initLiveChat() {
+      loadChatFromStorage();
+      renderChatStream();
+      updateChatLockUI();
+      subscribeLiveChat();
+    }
+
     restoreLastTab();
     renderGlobalLiveTicker();
     initAuth();
+    initLiveChat();
+    setInterval(updateChatLockUI, 4000);
     if (window.lucide) lucide.createIcons();
   </script>
 </body>
