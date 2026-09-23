@@ -246,6 +246,19 @@
     #global-live-ticker-track.is-dragging * {
       pointer-events: none;
     }
+    #providers-carousel::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    #providers-carousel.is-dragging {
+      cursor: grabbing !important;
+      scroll-behavior: auto;
+    }
+    #providers-carousel.is-dragging * {
+      pointer-events: none;
+    }
     .ticker-chip {
       position: relative;
       cursor: pointer;
@@ -3447,6 +3460,84 @@
       track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
     }
 
+    // Drag-to-scroll providers row (same feel as live ticker)
+    function initProvidersCarouselDrag() {
+      const el = document.getElementById('providers-carousel');
+      if (!el || el.dataset.dragBound) return;
+      el.dataset.dragBound = '1';
+      el.style.cursor = 'grab';
+      el.style.userSelect = 'none';
+      el.style.webkitUserSelect = 'none';
+      // Hide scrollbar but keep drag/touch scroll
+      el.style.scrollbarWidth = 'none';
+      el.style.msOverflowStyle = 'none';
+
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let moved = false;
+      window.__providersDragMoved = false;
+
+      el.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        // Don't start drag from the chevron buttons outside this el
+        isDown = true;
+        moved = false;
+        window.__providersDragMoved = false;
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+        el.style.cursor = 'grabbing';
+      });
+
+      const endDrag = () => {
+        if (!isDown) return;
+        isDown = false;
+        el.classList.remove('is-dragging');
+        el.style.cursor = 'grab';
+        setTimeout(() => { window.__providersDragMoved = false; }, 0);
+      };
+
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('blur', endDrag);
+      el.addEventListener('mouseleave', () => { if (isDown) endDrag(); });
+
+      el.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 1.4;
+        if (Math.abs(walk) > 5) {
+          moved = true;
+          window.__providersDragMoved = true;
+          el.classList.add('is-dragging');
+          e.preventDefault();
+          el.scrollLeft = scrollLeft - walk;
+        }
+      });
+
+      // Block provider card click after a real drag
+      el.addEventListener('click', (e) => {
+        if (moved || window.__providersDragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
+      let touchStartX = 0;
+      let touchScrollLeft = 0;
+      el.addEventListener('touchstart', (e) => {
+        if (!e.touches[0]) return;
+        touchStartX = e.touches[0].pageX;
+        touchScrollLeft = el.scrollLeft;
+        window.__providersDragMoved = false;
+      }, { passive: true });
+      el.addEventListener('touchmove', (e) => {
+        if (!e.touches[0]) return;
+        const dx = e.touches[0].pageX - touchStartX;
+        if (Math.abs(dx) > 8) window.__providersDragMoved = true;
+        el.scrollLeft = touchScrollLeft - dx;
+      }, { passive: true });
+    }
+
     // ── Guest landing (PaidCash-style: left branding + right auth) ──
     let landingSignupMode = true;
 
@@ -4050,7 +4141,7 @@
               </button>
             </div>
           </div>
-          <div id="providers-carousel" class="flex items-center gap-2 overflow-x-auto custom-scroll pb-2 scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+          <div id="providers-carousel" class="flex items-center gap-2 overflow-x-auto pb-2 select-none" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; scrollbar-width: none; -ms-overflow-style: none;">
             ${providersHTML}
           </div>
         </div>
@@ -4157,6 +4248,7 @@
         </div>
       `;
       if (window.lucide) lucide.createIcons();
+      initProvidersCarouselDrag();
     }
 
     function openPublicProfileFromFeed(el) {
