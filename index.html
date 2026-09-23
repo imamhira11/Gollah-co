@@ -305,20 +305,21 @@
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
 
-  <!-- TOP HEADER — logo only left of sidebar line; search starts after (red line) -->
-  <header class="h-16 sm:h-[68px] bg-[#0e151c] border-b border-[#18232e] flex items-center z-30 shrink-0 sticky top-0">
+  <!-- TOP HEADER — mobile: logo only; PC: logo + Gollah text -->
+  <header class="h-14 sm:h-[68px] bg-[#0e151c] border-b border-[#18232e] flex items-center z-30 shrink-0 sticky top-0 overflow-hidden">
     <!-- Logo zone aligns with left sidebar (w-56 on lg) when logged in -->
-    <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-4 lg:w-56 lg:border-r lg:border-[#18232e]">
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-base shadow-md shadow-emerald-500/25">
+    <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-2.5 sm:px-4 lg:w-56 lg:border-r lg:border-[#18232e]">
+      <div class="flex items-center gap-2 sm:gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm sm:text-base shadow-md shadow-emerald-500/25 shrink-0">
           G
         </div>
-        <span class="text-xl font-black text-white tracking-tight">Gollah</span>
+        <!-- Mobile: hide "Gollah" text — PC/tablet only -->
+        <span class="hidden sm:inline text-xl font-black text-white tracking-tight">Gollah</span>
       </div>
     </div>
 
     <!-- Content starts AFTER sidebar line: search + actions -->
-    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-3 px-4 sm:px-5">
+    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-5 overflow-hidden">
       <div id="header-search-wrap" class="relative flex-1 max-w-lg hidden sm:block">
         <i data-lucide="search" class="w-[18px] h-[18px] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search" class="w-full bg-[#16202a] border border-[#1e2a38] rounded-full py-2.5 pl-11 pr-5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00d672]/60 transition" />
@@ -335,9 +336,9 @@
       </div>
 
       <!-- Logged-in: coins, wallet, profile, notif, games -->
-      <div id="header-user-actions" class="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
+      <div id="header-user-actions" class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 ml-auto max-w-full">
       <!-- Coins pill — click toggles Coins ↔ USD (dollah-style) -->
-      <button type="button" id="header-coins-btn" onclick="toggleCoinsUsdMode()" class="flex items-center gap-2 bg-[#16202a] border border-[#1e2a38] hover:border-amber-500/40 px-3 sm:px-3.5 py-2 rounded-full text-sm font-bold text-amber-400 transition" title="Tap to switch Coins / USD · 1000 coins = $1">
+      <button type="button" id="header-coins-btn" onclick="toggleCoinsUsdMode()" class="flex items-center gap-1.5 sm:gap-2 bg-[#16202a] border border-[#1e2a38] hover:border-amber-500/40 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-amber-400 transition shrink-0" title="Tap to switch Coins / USD · 1000 coins = $1">
         <svg class="w-5 h-5 shrink-0" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <radialGradient id="gCoinBody" cx="38%" cy="32%" r="65%">
@@ -378,18 +379,18 @@
           <circle cx="32" cy="32" r="30" fill="url(#gCoinShine)"/>
         </svg>
         <span id="header-coins" class="tabular-nums">0</span>
-        <span id="header-coins-unit" class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">coins</span>
+        <span id="header-coins-unit" class="hidden sm:inline text-[10px] font-bold text-slate-500 uppercase tracking-wide">coins</span>
       </button>
 
       <!-- Wallet (purple like dollah) -->
-      <button type="button" onclick="navigate('shop')" class="w-10 h-10 rounded-xl bg-[#6c5ce7] hover:bg-[#5b4bd1] flex items-center justify-center text-white transition shadow-md shadow-indigo-900/40" title="Wallet">
-        <i data-lucide="wallet" class="w-[18px] h-[18px]"></i>
+      <button type="button" onclick="navigate('shop')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#6c5ce7] hover:bg-[#5b4bd1] flex items-center justify-center text-white transition shadow-md shadow-indigo-900/40 shrink-0" title="Wallet">
+        <i data-lucide="wallet" class="w-4 h-4 sm:w-[18px] sm:h-[18px]"></i>
       </button>
 
       <!-- Profile -->
-      <div class="relative">
-        <button type="button" onclick="toggleProfileDropdown()" class="flex items-center gap-1.5 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1.5 pr-2 rounded-full transition relative">
-          <img id="header-avatar-img" src="avatars/1.png" class="w-8 h-8 rounded-full object-cover bg-[#202c38] ring-2 ring-[#00d672]/30" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+      <div class="relative shrink-0">
+        <button type="button" onclick="toggleProfileDropdown()" class="flex items-center gap-1 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1 sm:p-1.5 sm:pr-2 rounded-full transition relative">
+          <img id="header-avatar-img" src="avatars/1.png" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover bg-[#202c38] ring-2 ring-[#00d672]/30" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden sm:block"></i>
           <!-- Mobile only: notif badge on avatar -->
           <span id="header-notif-badge" class="sm:hidden hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e151c] flex items-center justify-center shadow">0</span>
@@ -1883,7 +1884,17 @@
       { id: 'he5', name: 'Whale.io', coins: 28875, tag: 'DEPOSIT', platform: 'both', bg: 'linear-gradient(145deg,#1e1b4b 0%,#0f172a 50%,#312e81 100%)', accent: '#a78bfa', emoji: '🐋', instruction: 'Register and make first deposit on Whale.io.', link: '#', provider: 'OfferToro' },
       { id: 'he6', name: 'Gangsta Casino', coins: 28529, tag: 'CASINO', platform: 'android', bg: 'linear-gradient(145deg,#1e3a5f 0%,#0f172a 50%,#1e40af 100%)', accent: '#60a5fa', emoji: '🎰', instruction: 'Install and spin required times.', link: '#', provider: 'AdGate' },
       { id: 'he7', name: 'Microjobwork', coins: 17489, tag: 'REGISTER', platform: 'both', bg: 'linear-gradient(145deg,#0f766e 0%,#042f2e 50%,#0d9488 100%)', accent: '#2dd4bf', emoji: '💼', instruction: 'Complete free registration and verify email.', link: '#', provider: 'Torox' },
-      { id: 'he8', name: 'Rocket Hit', coins: 10610, tag: 'GAME', platform: 'ios', bg: 'linear-gradient(145deg,#4c1d95 0%,#1e1b4b 50%,#6d28d9 100%)', accent: '#c084fc', emoji: '🚀', instruction: 'Hit targets with rockets and complete levels.', link: '#', provider: 'Lootably' }
+      { id: 'he8', name: 'Rocket Hit', coins: 10610, tag: 'GAME', platform: 'ios', bg: 'linear-gradient(145deg,#4c1d95 0%,#1e1b4b 50%,#6d28d9 100%)', accent: '#c084fc', emoji: '🚀', instruction: 'Hit targets with rockets and complete levels.', link: '#', provider: 'Lootably' },
+      { id: 'he9', name: 'Neon Racer', coins: 24500, tag: 'GAME', platform: 'android', bg: 'linear-gradient(145deg,#9f1239 0%,#4c0519 50%,#be123c 100%)', accent: '#fb7185', emoji: '🏎️', instruction: 'Race neon tracks and finish top 3.', link: '#', provider: 'Monlix' },
+      { id: 'he10', name: 'Crystal Quest', coins: 18990, tag: 'GAME', platform: 'both', bg: 'linear-gradient(145deg,#0e7490 0%,#083344 50%,#155e75 100%)', accent: '#22d3ee', emoji: '💎', instruction: 'Collect crystals and clear dungeon floors.', link: '#', provider: 'Torox' },
+      { id: 'he11', name: 'Shadow Ninja', coins: 33200, tag: 'GAME', platform: 'android', bg: 'linear-gradient(145deg,#18181b 0%,#09090b 50%,#27272a 100%)', accent: '#a1a1aa', emoji: '🥷', instruction: 'Stealth missions — reach rank 15.', link: '#', provider: 'AdGate' },
+      { id: 'he12', name: 'Candy Merge', coins: 15280, tag: 'GAME', platform: 'ios', bg: 'linear-gradient(145deg,#9d174d 0%,#500724 50%,#be185d 100%)', accent: '#f472b6', emoji: '🍬', instruction: 'Merge candies and hit level 40.', link: '#', provider: 'Lootably' },
+      { id: 'he13', name: 'Dragon Arena', coins: 42150, tag: 'GAME', platform: 'android', bg: 'linear-gradient(145deg,#7c2d12 0%,#431407 50%,#9a3412 100%)', accent: '#fb923c', emoji: '🐉', instruction: 'Train dragons and win 5 arena battles.', link: '#', provider: 'OfferToro' },
+      { id: 'he14', name: 'Sky Fortress', coins: 27840, tag: 'GAME', platform: 'both', bg: 'linear-gradient(145deg,#1d4ed8 0%,#1e3a8a 50%,#2563eb 100%)', accent: '#93c5fd', emoji: '🏰', instruction: 'Build fortress and defend against raids.', link: '#', provider: 'BitLabs' },
+      { id: 'he15', name: 'Zombie Rush', coins: 19850, tag: 'GAME', platform: 'android', bg: 'linear-gradient(145deg,#365314 0%,#1a2e05 50%,#4d7c0f 100%)', accent: '#a3e635', emoji: '🧟', instruction: 'Survive waves and reach day 20.', link: '#', provider: 'CPX' },
+      { id: 'he16', name: 'Pixel Farm', coins: 12400, tag: 'OTHER', platform: 'ios', bg: 'linear-gradient(145deg,#166534 0%,#052e16 50%,#15803d 100%)', accent: '#4ade80', emoji: '🌾', instruction: 'Grow crops and unlock barn level 10.', link: '#', provider: 'Torox' },
+      { id: 'he17', name: 'Space Miner', coins: 35670, tag: 'GAME', platform: 'android', bg: 'linear-gradient(145deg,#312e81 0%,#1e1b4b 50%,#4338ca 100%)', accent: '#818cf8', emoji: '⛏️', instruction: 'Mine asteroids and upgrade ship tier 5.', link: '#', provider: 'Monlix' },
+      { id: 'he18', name: 'Magic Cards', coins: 22100, tag: 'GAME', platform: 'both', bg: 'linear-gradient(145deg,#6b21a8 0%,#3b0764 50%,#7e22ce 100%)', accent: '#e9d5ff', emoji: '🃏', instruction: 'Collect cards and win ranked match.', link: '#', provider: 'AdGate' }
     ];
 
     let activeOfferData = null;
