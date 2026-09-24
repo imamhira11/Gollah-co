@@ -2200,10 +2200,64 @@
       updateNotificationsBadge();
     }
 
+    function parseNotifAmount(msg) {
+      if (!msg) return null;
+      // Match "● 2,322 coins" or "777 coins"
+      const m = String(msg).match(/●?\s*([\d,]+)\s*coins/i);
+      if (!m) return null;
+      const n = parseInt(m[1].replace(/,/g, ''), 10);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function resolveNotifStatus(n) {
+      let currentStatus = (n.status || '').toLowerCase();
+      const msg = String(n.message || '');
+      const title = String(n.title || '');
+
+      // Message already says COMPLETED → complete
+      if (/status:\s*completed/i.test(msg) || /successfully sent/i.test(msg) || /paid!/i.test(title)) {
+        currentStatus = 'completed';
+      }
+
+      // Sync with real withdrawal records (fixes stuck PENDING after cashout completes)
+      const amt = parseNotifAmount(msg);
+      if (amt != null && Array.isArray(userWithdrawals) && userWithdrawals.length) {
+        const matches = userWithdrawals.filter(w => Number(w.amount) === amt);
+        if (matches.length) {
+          const anyCompleted = matches.some(w => (w.status || '').toUpperCase() === 'COMPLETED');
+          const allPending = matches.every(w => (w.status || '').toUpperCase() === 'PENDING');
+          if (anyCompleted && (currentStatus === 'pending' || /status:\s*pending/i.test(msg) || /cashout/i.test(title))) {
+            currentStatus = 'completed';
+          } else if (allPending && currentStatus !== 'completed' && (/cashout/i.test(title) || /status:\s*pending/i.test(msg))) {
+            currentStatus = 'pending';
+          }
+        }
+      }
+
+      return currentStatus;
+    }
+
     function openNotificationsModal() {
       document.getElementById('profile-dropdown').classList.add('hidden');
       const list = document.getElementById('notifications-list');
       list.innerHTML = '';
+
+      // Auto-fix stuck pending notifs against live withdrawal status before render
+      let notifDirty = false;
+      userNotifications.forEach(n => {
+        const resolved = resolveNotifStatus(n);
+        if (resolved === 'completed' && (n.status || '').toLowerCase() === 'pending') {
+          n.status = 'completed';
+          if (n.message && /Status:\s*PENDING/i.test(n.message)) {
+            n.message = n.message.replace(/Status:\s*PENDING\.?/i, 'Status: COMPLETED.');
+          }
+          if (n.title && /Cashout/i.test(n.title) && !/Paid/i.test(n.title)) {
+            n.title = n.title.replace(/\s*Cashout/i, ' Paid!');
+          }
+          notifDirty = true;
+        }
+      });
+      if (notifDirty) saveNotificationsToStorage();
 
       if (userNotifications.length === 0) {
         list.innerHTML = `
@@ -2218,44 +2272,40 @@
       } else {
         userNotifications.forEach(n => {
           const item = document.createElement('div');
-          
-          let currentStatus = (n.status || '').toLowerCase();
-          if (n.title && n.title.includes('Cashout')) {
-            const matchedW = userWithdrawals.find(w => n.message && n.message.includes(w.amount));
-            if (matchedW && (matchedW.status || '').toUpperCase() === 'COMPLETED') {
-              currentStatus = 'completed';
-            }
-          }
-
+          const currentStatus = resolveNotifStatus(n);
           const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
           const isPending = currentStatus === 'pending';
-          let displayMessage = n.message;
-          if (isComplete && displayMessage && displayMessage.includes('Status: PENDING')) {
-            displayMessage = displayMessage.replace('Status: PENDING', 'Status: COMPLETED');
+          let displayMessage = n.message || '';
+          if (isComplete && /Status:\s*PENDING/i.test(displayMessage)) {
+            displayMessage = displayMessage.replace(/Status:\s*PENDING\.?/i, 'Status: COMPLETED.');
+          }
+          let displayTitle = n.title || '';
+          if (isComplete && /Cashout/i.test(displayTitle) && !/Paid/i.test(displayTitle)) {
+            displayTitle = displayTitle.replace(/\s*Cashout/i, ' Paid!');
           }
 
           item.className = `notif-item p-3.5 rounded-xl border flex items-start justify-between gap-3 ${
             isComplete
               ? 'bg-emerald-500/5 border-emerald-500/25'
               : isPending
-                ? 'bg-amber-500/5 border-amber-500/20'
+                ? 'bg-[#6c5ce7]/8 border-[#6c5ce7]/30'
                 : 'bg-[#0e1620] border-[#1a2530]'
           }`;
           item.innerHTML = `
             <div class="flex-1 flex flex-col gap-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-semibold text-white text-[13px]">${n.title}</span>
+                <span class="font-semibold text-white text-[13px]">${displayTitle}</span>
                 <span class="text-[11px] text-slate-600">${n.time || ''}</span>
               </div>
-              <p class="text-[12px] text-slate-400 leading-relaxed">${displayMessage || ''}</p>
+              <p class="text-[12px] text-slate-400 leading-relaxed">${displayMessage}</p>
             </div>
             <div class="shrink-0 pt-0.5">
               ${isComplete ? `
-                <div class="w-7 h-7 rounded-full bg-[#00d672] flex items-center justify-center text-black font-black text-xs shadow-md shadow-emerald-500/25" title="Complete">✓</div>
-              ` : isPending ? `
-                <div class="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center" title="Pending">
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <div class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-900/40" title="Complete">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
+              ` : isPending ? `
+                <div class="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#6c5ce7] text-white text-[10px] font-extrabold uppercase tracking-wide leading-none shadow-sm shadow-indigo-900/40" title="Pending">Pending</div>
               ` : `
                 <div class="w-7 h-7 rounded-full bg-[#1a2530] text-slate-400 flex items-center justify-center" title="Info">
                   <i data-lucide="info" class="w-3.5 h-3.5"></i>
@@ -3069,23 +3119,47 @@
 
           // Compare with local cache to detect newly completed status for custom completed audio & live ticker broadcast
           fetchedList.forEach(fw => {
-            const oldW = userWithdrawals.find(ow => ow.id === fw.id);
-            if (oldW && oldW.status === 'PENDING' && fw.status === 'COMPLETED') {
+            const oldW = userWithdrawals.find(ow => String(ow.id) === String(fw.id));
+            const wasPending = !oldW || (oldW.status || '').toUpperCase() === 'PENDING';
+            if (wasPending && fw.status === 'COMPLETED') {
               playCompletedCustomAudio();
               const shortMethod = (fw.method || '').includes('Binance') ? 'Binance' : 'LTC';
               const tickerIcon = shortMethod === 'Binance' ? 'B' : 'Ł';
+              const amtNum = Number(fw.amount) || 0;
+              const amtStr = amtNum.toLocaleString();
+
+              // Upgrade any matching PENDING notification instead of leaving a stuck pending row
+              let upgraded = false;
+              userNotifications.forEach(n => {
+                const st = (n.status || '').toLowerCase();
+                if (st !== 'pending') return;
+                const nAmt = parseNotifAmount(n.message);
+                if (nAmt != null && nAmt === amtNum) {
+                  n.status = 'completed';
+                  n.title = `${fw.method || 'Crypto'} Paid!`;
+                  n.message = `● ${amtStr} coins payout successfully sent! Status: COMPLETED.`;
+                  n.time = 'just now';
+                  upgraded = true;
+                }
+              });
+              if (!upgraded) {
+                addNotification({
+                  title: `${fw.method || 'Crypto'} Paid!`,
+                  message: `● ${amtStr} coins payout successfully sent! Status: COMPLETED.`,
+                  status: 'completed'
+                });
+              } else {
+                saveNotificationsToStorage();
+                updateNotificationsBadge();
+              }
+
               // Success float: short title + Sent + solid green check (no COMPLETE text)
               triggerDollahFloatingToast({
                 time: 'just now',
                 title: shortMethod,
                 status: 'Sent',
-                coins: (fw.amount || 0).toLocaleString(),
+                coins: amtStr,
                 icon: tickerIcon
-              });
-              addNotification({
-                title: `${fw.method || 'Crypto'} Paid!`,
-                message: `● ${(fw.amount || 0).toLocaleString()} coins payout successfully sent! Status: COMPLETED.`,
-                status: 'completed'
               });
               // Broadcast completed payout to SHARED live bar for all users
               broadcastLiveActivity(shortMethod, fw.amount, tickerIcon, 'Sent', {
