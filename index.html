@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gollah | #1 Web3 Rewards Platform</title>
+  <title>Get Reward for Completing Task</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300d672'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-size='36' font-weight='900' fill='%23000000'%3EG%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300d672'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-size='36' font-weight='900' fill='%23000000'%3EG%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -38,7 +38,7 @@
       font-weight: 800 !important;
     }
     .cat-active {
-      background-color: #1a2734 !important;
+      background-color: #16202a !important;
       color: #00d672 !important;
       font-weight: 700 !important;
       border-left: 3px solid #00d672;
@@ -115,11 +115,55 @@
     }
     .auth-submit-btn:active { transform: translateY(0); }
     .notif-item {
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
     .notif-item:hover {
-      transform: translateX(2px);
+      transform: translateY(-1px);
       border-color: rgba(0, 214, 114, 0.35) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Right-side notifications drawer — NO full-screen blur/backdrop */
+    #notifications-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 100%;
+      max-width: 380px;
+      z-index: 50;
+      background: #111920;
+      border-left: 1px solid #1c2836;
+      border-radius: 16px 0 0 16px;
+      box-shadow: -16px 0 48px rgba(0, 0, 0, 0.55);
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      /* no backdrop-filter, no screen darken */
+    }
+    #notifications-modal.notif-drawer-open {
+      display: flex !important;
+      transform: translateX(0);
+    }
+    #notifications-modal::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d672, #34d399, #22d3ee, #a78bfa, #f472b6, #fbbf24, #00d672);
+      background-size: 200% 100%;
+      animation: topStripFlow 3s linear infinite;
+      pointer-events: none;
+      z-index: 6;
+    }
+    .notif-drawer-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      min-height: 0;
     }
 
     /* Polished live-feed controls */
@@ -367,8 +411,8 @@
     /* Small vibrant yellow coin icon */
     .coin-icon-sm {
       display: inline-block;
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       flex-shrink: 0;
       vertical-align: middle;
       filter: drop-shadow(0 0 3px rgba(245, 197, 66, 0.55));
@@ -440,7 +484,7 @@
   <!-- TOP HEADER — mobile: logo only; PC: logo + Gollah text -->
   <header class="h-14 sm:h-[68px] bg-[#0e1620] border-b border-[#18232e] flex items-center z-40 shrink-0 sticky top-0">
     <!-- Logo zone aligns with left sidebar (w-56 on lg) when logged in -->
-    <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-2.5 sm:px-4 lg:w-56 lg:border-r lg:border-[#18232e]">
+    <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-2.5 sm:px-4 lg:w-56 bg-[#0c131d]">
       <div class="flex items-center gap-2 sm:gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#00d672] flex items-center justify-center text-black font-black text-sm sm:text-base shadow-md shadow-emerald-500/25 shrink-0">
           G
@@ -573,7 +617,7 @@
 
   <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
   <div class="flex-1 flex w-full overflow-hidden">
-    <aside id="left-sidebar" class="w-56 shrink-0 bg-[#0d141b] border-r border-[#18232e] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
+    <aside id="left-sidebar" class="w-56 shrink-0 bg-[#0c131d] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
       <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-1">
           <button onclick="navigate('home')" id="nav-home" class="nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition">
@@ -797,29 +841,32 @@
   <div id="float-toast-stack" aria-live="polite" aria-relevant="additions"></div>
 
   <!-- NOTIFICATIONS MODAL -->
-  <div id="notifications-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-    <div class="modal-card bg-[#111920] border border-[#1c2836] w-full max-w-[420px] rounded-[20px] max-h-[85vh] flex flex-col">
-      <div class="relative flex items-center justify-between px-5 py-4 border-b border-[#1c2836]">
-        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-400/40 to-transparent"></div>
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500/25 to-rose-600/10 border border-rose-500/20 flex items-center justify-center shadow-inner">
-            <i data-lucide="bell" class="w-5 h-5 text-rose-400"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-[15px] text-white leading-tight tracking-tight">Notifications</h3>
-            <p class="text-[11px] text-slate-500 mt-0.5">Cashouts · offers · system</p>
-          </div>
-        </div>
-        <button onclick="closeNotificationsModal()" class="w-9 h-9 rounded-xl bg-[#253243]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition">
+  <!-- Notifications: right drawer only — no full-screen blur -->
+  <div id="notifications-modal" class="hidden">
+    <div class="notif-drawer-panel">
+      <div class="relative flex items-center justify-between px-5 py-4 border-b border-[#1c2836] shrink-0">
+        <h3 class="font-bold text-[16px] text-white leading-tight tracking-tight">Notifications</h3>
+        <button type="button" onclick="closeNotificationsModal()" class="w-9 h-9 rounded-xl bg-[#253243]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div id="notifications-list" class="overflow-y-auto custom-scroll flex flex-col gap-2 p-4 max-h-[55vh] min-h-[160px]"></div>
+      <div class="px-4 pt-3 pb-2 shrink-0">
+        <div class="flex items-center gap-1 p-1 rounded-full bg-[#0e1620] border border-[#1e2a38]">
+          <button type="button" id="notif-tab-site" onclick="setNotifTab('site')" class="flex-1 text-center text-[13px] font-bold py-2 rounded-full text-slate-400 hover:text-white transition">
+            Site
+          </button>
+          <button type="button" id="notif-tab-personal" onclick="setNotifTab('personal')" class="flex-1 text-center text-[13px] font-extrabold py-2 rounded-full bg-[#00d672] text-black shadow-md shadow-emerald-900/30 transition">
+            Personal
+          </button>
+        </div>
+      </div>
 
-      <div class="px-5 py-3.5 border-t border-[#1c2836] flex items-center justify-between gap-3 bg-[#0e1620]/80">
-        <button onclick="clearAllNotifications()" class="text-[12px] font-semibold text-slate-500 hover:text-slate-200 transition px-2 py-1.5 rounded-lg hover:bg-white/5">Clear all</button>
-        <button onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2 rounded-xl">Done</button>
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex-1 flex flex-col p-4 min-h-0"></div>
+
+      <div class="px-5 py-3.5 border-t border-[#1c2836] flex items-center justify-between gap-3 bg-[#0e1620]/90 shrink-0">
+        <button type="button" onclick="clearAllNotifications()" class="text-[12px] font-semibold text-slate-500 hover:text-slate-200 transition px-2 py-1.5 rounded-lg hover:bg-white/5">Clear all</button>
+        <button type="button" onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2 rounded-xl">Done</button>
       </div>
     </div>
   </div>
@@ -2099,7 +2146,7 @@
           userNotifications = JSON.parse(notifStored);
         } else {
           userNotifications = [
-            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw directly to your crypto wallet.', time: 'just now', status: 'system', isRead: false }
+            { id: 'n1', title: 'Welcome to Gollah!', message: 'Complete offers and withdraw to crypto. Min cashout 300 coins.', time: 'just now', status: 'system', category: 'site', isRead: false }
           ];
           saveNotificationsToStorage();
         }
@@ -2189,20 +2236,42 @@
       }
     }
 
+    let notifActiveTab = 'personal'; // 'site' | 'personal'
+
     function addNotification(notif) {
+      const status = String(notif.status || 'info').toLowerCase();
+      // Auto category: system/site → site tab; everything else → personal
+      let category = notif.category;
+      if (!category) {
+        category = (status === 'system' || status === 'site' || status === 'info' && notif.siteOnly)
+          ? 'site'
+          : (status === 'system' ? 'site' : 'personal');
+      }
+      if (status === 'system' || status === 'site') category = 'site';
+      if (['pending', 'completed', 'complete', 'click', 'hold', 'reward'].includes(status)) {
+        category = 'personal';
+      }
+
+      const createdAt = notif.createdAt || new Date().toISOString();
       userNotifications.unshift({
-        id: 'n_' + Date.now(),
+        id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         ...notif,
-        time: 'just now',
+        category: category,
+        coins: notif.coins != null ? notif.coins : null,
+        icon: notif.icon || null,
+        iconBg: notif.iconBg || null,
+        createdAt: createdAt,
+        time: notif.time || 'just now',
         isRead: false
       });
+      // Keep last 80
+      if (userNotifications.length > 80) userNotifications = userNotifications.slice(0, 80);
       saveNotificationsToStorage();
       updateNotificationsBadge();
     }
 
     function parseNotifAmount(msg) {
       if (!msg) return null;
-      // Match "● 2,322 coins" or "777 coins"
       const m = String(msg).match(/●?\s*([\d,]+)\s*coins/i);
       if (!m) return null;
       const n = parseInt(m[1].replace(/,/g, ''), 10);
@@ -2214,21 +2283,19 @@
       const msg = String(n.message || '');
       const title = String(n.title || '');
 
-      // Message already says COMPLETED → complete
       if (/status:\s*completed/i.test(msg) || /successfully sent/i.test(msg) || /paid!/i.test(title)) {
         currentStatus = 'completed';
       }
 
-      // Sync with real withdrawal records (fixes stuck PENDING after cashout completes)
-      const amt = parseNotifAmount(msg);
+      const amt = n.coins != null ? Number(n.coins) : parseNotifAmount(msg);
       if (amt != null && Array.isArray(userWithdrawals) && userWithdrawals.length) {
         const matches = userWithdrawals.filter(w => Number(w.amount) === amt);
         if (matches.length) {
-          const anyCompleted = matches.some(w => (w.status || '').toUpperCase() === 'COMPLETED');
-          const allPending = matches.every(w => (w.status || '').toUpperCase() === 'PENDING');
+          const anyCompleted = matches.some(w => String(w.status || '').toUpperCase() === 'COMPLETED');
+          const allPending = matches.every(w => String(w.status || '').toUpperCase() === 'PENDING');
           if (anyCompleted && (currentStatus === 'pending' || /status:\s*pending/i.test(msg) || /cashout/i.test(title))) {
             currentStatus = 'completed';
-          } else if (allPending && currentStatus !== 'completed' && (/cashout/i.test(title) || /status:\s*pending/i.test(msg))) {
+          } else if (allPending && currentStatus !== 'completed' && (/cashout/i.test(title) || /status:\s*pending/i.test(msg) || currentStatus === 'pending')) {
             currentStatus = 'pending';
           }
         }
@@ -2237,12 +2304,124 @@
       return currentStatus;
     }
 
-    function openNotificationsModal() {
-      document.getElementById('profile-dropdown').classList.add('hidden');
+    function getNotifCategory(n) {
+      if (n.category === 'site' || n.category === 'personal') return n.category;
+      const st = (n.status || '').toLowerCase();
+      if (st === 'system' || st === 'site') return 'site';
+      return 'personal';
+    }
+
+    function setNotifTab(tab) {
+      notifActiveTab = tab === 'site' ? 'site' : 'personal';
+      const siteBtn = document.getElementById('notif-tab-site');
+      const persBtn = document.getElementById('notif-tab-personal');
+      if (siteBtn && persBtn) {
+        if (notifActiveTab === 'personal') {
+          persBtn.className = 'flex-1 text-center text-[13px] font-extrabold py-2 rounded-full bg-[#00d672] text-black shadow-md shadow-emerald-900/30 transition';
+          siteBtn.className = 'flex-1 text-center text-[13px] font-bold py-2 rounded-full text-slate-400 hover:text-white transition';
+        } else {
+          siteBtn.className = 'flex-1 text-center text-[13px] font-extrabold py-2 rounded-full bg-[#00d672] text-black shadow-md shadow-emerald-900/30 transition';
+          persBtn.className = 'flex-1 text-center text-[13px] font-bold py-2 rounded-full text-slate-400 hover:text-white transition';
+        }
+      }
+      renderNotificationsList();
+    }
+
+    function notifStatusBadge(status) {
+      if (status === 'pending') {
+        // Compact purple PENDING
+        return `<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-[#6c5ce7] text-white text-[9px] font-extrabold uppercase tracking-wide leading-none shadow-sm shadow-indigo-900/40 shrink-0">PENDING</span>`;
+      }
+      if (status === 'hold') {
+        return `<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-orange-500 text-white text-[9px] font-extrabold uppercase tracking-wide leading-none shadow-sm shrink-0">HOLD</span>`;
+      }
+      if (status === 'completed' || status === 'complete' || status === 'reward') {
+        // Compact green check — not oversized
+        return `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white shrink-0" title="Complete">
+          <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </span>`;
+      }
+      if (status === 'click') {
+        return `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#1a2530] border border-[#2a3a4c] text-slate-300 shrink-0" title="Clicked">
+          <i data-lucide="mouse-pointer-click" class="w-2.5 h-2.5"></i>
+        </span>`;
+      }
+      return `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#1a2530] text-slate-400 shrink-0" title="Info">
+        <i data-lucide="info" class="w-2.5 h-2.5"></i>
+      </span>`;
+    }
+
+    function notifLeftIcon(n, status) {
+      const title = String(n.title || '');
+      const isLtc = /litecoin|\bltc\b/i.test(title) || n.icon === 'Ł';
+      const isBinance = /binance/i.test(title) || n.icon === 'B';
+      const isWithdraw = status === 'pending' || status === 'completed' || /cashout|paid|withdraw/i.test(title);
+      // Fixed 48px tile — never squish
+      const box = 'w-12 h-12 rounded-lg shrink-0';
+
+      if (isWithdraw && isLtc) {
+        return `<div class="${box} bg-[#9195a1] flex items-center justify-center text-white font-black text-base">Ł</div>`;
+      }
+      if (isWithdraw && isBinance) {
+        return `<div class="${box} bg-[#F0B90B] flex items-center justify-center text-[#0b0e11] font-black text-base">B</div>`;
+      }
+
+      const imgSrc = n.image || n.logo || null;
+      if (imgSrc && typeof imgSrc === 'string' && (imgSrc.startsWith('http') || imgSrc.startsWith('data:image') || imgSrc.startsWith('/'))) {
+        return `<div class="${box} overflow-hidden bg-[#1a2530] border border-[#2a3a4c]">
+          <img src="${imgSrc.replace(/"/g, '&quot;')}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+        </div>`;
+      }
+
+      if (n.emoji) {
+        const bg = n.emojiBg || n.bg || 'linear-gradient(145deg,#1a2734,#0e1620)';
+        return `<div class="${box} overflow-hidden flex items-center justify-center text-[22px] leading-none border border-white/5" style="background:${String(bg).replace(/"/g, '')}">${n.emoji}</div>`;
+      }
+
+      if (status === 'click' || status === 'complete' || status === 'completed' || status === 'reward' || status === 'hold') {
+        try {
+          const byName = (typeof ALL_OFFERS !== 'undefined' ? ALL_OFFERS : []).find(o => o.name === title);
+          const he = (typeof HIGH_EARNING_OFFERS !== 'undefined' ? HIGH_EARNING_OFFERS : []).find(o => o.name === title);
+          const src = (byName && (byName.logo || byName.image)) || (he && he.image) || null;
+          if (src) {
+            return `<div class="${box} overflow-hidden bg-[#1a2530] border border-[#2a3a4c]">
+              <img src="${String(src).replace(/"/g, '&quot;')}" alt="" class="w-full h-full object-cover" />
+            </div>`;
+          }
+          if (he && he.emoji) {
+            const bg = he.bg || 'linear-gradient(145deg,#1a2734,#0e1620)';
+            return `<div class="${box} overflow-hidden flex items-center justify-center text-[22px] leading-none border border-white/5" style="background:${bg}">${he.emoji}</div>`;
+          }
+        } catch (e) {}
+      }
+
+      if (status === 'click') {
+        return `<div class="${box} bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center text-[#00d672]">
+          <i data-lucide="mouse-pointer-click" class="w-5 h-5"></i>
+        </div>`;
+      }
+      if (status === 'complete' || status === 'completed' || status === 'reward') {
+        if (n.icon && String(n.icon).length <= 3) {
+          return `<div class="${box} bg-[#00d672] flex items-center justify-center text-black font-black text-sm">${String(n.icon).slice(0, 2)}</div>`;
+        }
+        return `<div class="${box} bg-[#00d672] flex items-center justify-center text-black">
+          <i data-lucide="check" class="w-5 h-5"></i>
+        </div>`;
+      }
+      if (status === 'hold') {
+        return `<div class="${box} bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+          <i data-lucide="pause" class="w-5 h-5"></i>
+        </div>`;
+      }
+      return `<div class="${box} bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center text-[#00d672] font-black text-sm">G</div>`;
+    }
+
+    function renderNotificationsList() {
       const list = document.getElementById('notifications-list');
+      if (!list) return;
       list.innerHTML = '';
 
-      // Auto-fix stuck pending notifs against live withdrawal status before render
+      // Auto-fix stuck pending against live withdrawals
       let notifDirty = false;
       userNotifications.forEach(n => {
         const resolved = resolveNotifStatus(n);
@@ -2254,86 +2433,125 @@
           if (n.title && /Cashout/i.test(n.title) && !/Paid/i.test(n.title)) {
             n.title = n.title.replace(/\s*Cashout/i, ' Paid!');
           }
+          if (n.message && /Pending approval/i.test(n.message)) {
+            n.message = 'Payout sent successfully';
+          }
           notifDirty = true;
         }
       });
       if (notifDirty) saveNotificationsToStorage();
 
-      if (userNotifications.length === 0) {
+      const filteredAll = userNotifications.filter(n => getNotifCategory(n) === notifActiveTab);
+      const filtered = filteredAll.slice(0, 18);
+
+      if (!filtered.length) {
+        const emptyMsg = notifActiveTab === 'site'
+          ? 'Site updates and announcements will appear here.'
+          : 'Offer rewards, cashouts and click history will appear here.';
         list.innerHTML = `
           <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
             <div class="w-14 h-14 rounded-2xl bg-[#1a2530] border border-[#243040] flex items-center justify-center mb-4">
               <i data-lucide="bell-off" class="w-6 h-6 text-slate-500"></i>
             </div>
             <p class="text-[14px] font-semibold text-slate-300 mb-1">No notifications yet</p>
-            <p class="text-[12px] text-slate-600 max-w-[240px]">Offer completions, cashouts and system alerts will show up here.</p>
+            <p class="text-[12px] text-slate-600 max-w-[240px]">${emptyMsg}</p>
           </div>
         `;
-      } else {
-        userNotifications.forEach(n => {
-          const item = document.createElement('div');
-          const currentStatus = resolveNotifStatus(n);
-          const isComplete = currentStatus === 'complete' || currentStatus === 'completed';
-          const isPending = currentStatus === 'pending';
-          let displayMessage = n.message || '';
-          if (isComplete && /Status:\s*PENDING/i.test(displayMessage)) {
-            displayMessage = displayMessage.replace(/Status:\s*PENDING\.?/i, 'Status: COMPLETED.');
-          }
-          let displayTitle = n.title || '';
-          if (isComplete && /Cashout/i.test(displayTitle) && !/Paid/i.test(displayTitle)) {
-            displayTitle = displayTitle.replace(/\s*Cashout/i, ' Paid!');
-          }
-
-          item.className = `notif-item p-3.5 rounded-xl border flex items-start justify-between gap-3 ${
-            isComplete
-              ? 'bg-emerald-500/5 border-emerald-500/25'
-              : isPending
-                ? 'bg-[#6c5ce7]/8 border-[#6c5ce7]/30'
-                : 'bg-[#0e1620] border-[#1a2530]'
-          }`;
-          item.innerHTML = `
-            <div class="flex-1 flex flex-col gap-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-semibold text-white text-[13px]">${displayTitle}</span>
-                <span class="text-[11px] text-slate-600">${n.time || ''}</span>
-              </div>
-              <p class="text-[12px] text-slate-400 leading-relaxed">${displayMessage}</p>
-            </div>
-            <div class="shrink-0 pt-0.5">
-              ${isComplete ? `
-                <div class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-900/40" title="Complete">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                </div>
-              ` : isPending ? `
-                <div class="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#6c5ce7] text-white text-[10px] font-extrabold uppercase tracking-wide leading-none shadow-sm shadow-indigo-900/40" title="Pending">Pending</div>
-              ` : `
-                <div class="w-7 h-7 rounded-full bg-[#1a2530] text-slate-400 flex items-center justify-center" title="Info">
-                  <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                </div>
-              `}
-            </div>
-          `;
-          list.appendChild(item);
-        });
+        if (window.lucide) lucide.createIcons();
+        return;
       }
 
-      userNotifications.forEach(n => n.isRead = true);
+      filtered.forEach(n => {
+        const status = resolveNotifStatus(n);
+        let displayTitle = n.title || '';
+        let displayMessage = n.message || '';
+        if ((status === 'completed' || status === 'complete') && /Cashout/i.test(displayTitle) && !/Paid/i.test(displayTitle)) {
+          displayTitle = displayTitle.replace(/\s*Cashout/i, ' Paid!');
+        }
+        if ((status === 'completed' || status === 'complete') && /Status:\s*PENDING/i.test(displayMessage)) {
+          displayMessage = displayMessage.replace(/Status:\s*PENDING\.?/i, 'Status: COMPLETED.');
+        }
+        if (status === 'pending' && /cashout|withdraw|ltc|binance|litecoin/i.test(displayTitle + displayMessage)) {
+          displayMessage = 'Pending approval';
+        }
+        if ((status === 'completed' || status === 'complete') && /paid|cashout|payout|withdraw/i.test(displayTitle + displayMessage)) {
+          if (!/complete/i.test(displayMessage)) displayMessage = 'Complete';
+        }
+        if (status === 'click') {
+          displayMessage = displayMessage || 'Offer opened · tracking active';
+        }
+
+        const coinsVal = n.coins != null ? Number(n.coins) : parseNotifAmount(n.message);
+        const coinsHtml = (coinsVal != null && Number.isFinite(coinsVal) && coinsVal > 0)
+          ? `<p class="coin-amt text-[12px] font-bold mt-1.5 flex items-center gap-1.5">${typeof coinIconSvg === 'function' ? coinIconSvg('coin-icon-sm') : '●'} <span>${Number(coinsVal).toLocaleString()}</span></p>`
+          : '';
+
+        // Dynamic real-time timestamp via existing formatTickerTime
+        const timeLabel = n.createdAt ? formatTickerTime(n.createdAt) : (n.time || 'just now');
+
+        const item = document.createElement('div');
+        item.className = 'notif-item w-full p-4 mb-3 rounded-[18px] border border-[#243040] bg-[#16202a] hover:bg-[#1a2530] transition-colors';
+        item.innerHTML = `
+          <div class="flex justify-between items-center w-full mb-3">
+            <span class="text-[11px] text-slate-400 font-semibold tracking-wide">${timeLabel}</span>
+            <div class="shrink-0">${notifStatusBadge(status)}</div>
+          </div>
+          <div class="flex items-start gap-4 w-full">
+            <div class="w-[48px] h-[48px] shrink-0 flex items-center justify-center rounded-xl overflow-hidden shadow-sm">
+              ${notifLeftIcon(n, status)}
+            </div>
+            <div class="flex flex-col flex-1 min-w-0 justify-center">
+              <p class="font-bold text-white text-[14px] leading-tight truncate w-full">${displayTitle.replace(/</g, '&lt;')}</p>
+              <p class="text-[12px] text-slate-400 mt-1 leading-snug truncate w-full">${String(displayMessage).replace(/</g, '&lt;')}</p>
+              ${coinsHtml}
+            </div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openNotificationsModal() {
+      document.getElementById('profile-dropdown')?.classList.add('hidden');
+      setNotifTab(notifActiveTab || 'personal');
+      userNotifications.forEach(n => { n.isRead = true; });
       saveNotificationsToStorage();
       updateNotificationsBadge();
-
-      document.getElementById('notifications-modal').classList.remove('hidden');
+      const modal = document.getElementById('notifications-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      void modal.offsetWidth;
+      modal.classList.add('notif-drawer-open');
       if (window.lucide) lucide.createIcons();
     }
 
     function closeNotificationsModal() {
-      document.getElementById('notifications-modal').classList.add('hidden');
+      const modal = document.getElementById('notifications-modal');
+      if (!modal) return;
+      modal.classList.remove('notif-drawer-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('notif-drawer-open')) {
+          modal.classList.add('hidden');
+        }
+      }, 320);
     }
 
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const m = document.getElementById('notifications-modal');
+        if (m && m.classList.contains('notif-drawer-open')) closeNotificationsModal();
+      }
+    });
+
     function clearAllNotifications() {
-      userNotifications = [];
+      // Clear only the active tab's notifications
+      userNotifications = userNotifications.filter(n => getNotifCategory(n) !== notifActiveTab);
       saveNotificationsToStorage();
       updateNotificationsBadge();
-      openNotificationsModal();
+      renderNotificationsList();
     }
 
     // ── In-app alert (replaces browser alert) ──
@@ -2778,15 +2996,50 @@
       activeOfferData = null;
     }
 
+    function resolveOfferVisual(offer) {
+      if (!offer) return { image: null, emoji: null, emojiBg: null };
+      let image = null;
+      const candidates = [offer.image, offer.logo, offer.img, offer.icon_url, offer.thumbnail];
+      for (const c of candidates) {
+        if (c && typeof c === 'string' && (c.startsWith('http') || c.startsWith('data:image') || c.startsWith('/'))) {
+          image = c;
+          break;
+        }
+      }
+      let emoji = offer.emoji || null;
+      let emojiBg = offer.bg || offer.emojiBg || null;
+      // Match high-earning catalog by id or name
+      try {
+        const he = HIGH_EARNING_OFFERS.find(h => h.id === offer.id || h.name === offer.name);
+        if (he) {
+          if (!image && he.image) image = he.image;
+          if (!emoji && he.emoji) emoji = he.emoji;
+          if (!emojiBg && he.bg) emojiBg = he.bg;
+        }
+        if (!image) {
+          const ao = ALL_OFFERS.find(a => a.id === offer.id || a.name === offer.name);
+          if (ao && (ao.logo || ao.image)) image = ao.logo || ao.image;
+        }
+      } catch (e) {}
+      return { image, emoji, emojiBg };
+    }
+
     function launchOfferTracking() {
       if (!activeOfferData || !currentUser) return;
       const offer = activeOfferData;
+      const visual = resolveOfferVisual(offer);
       closeOfferModal();
 
       addNotification({
-        title: `${offer.name} Clicked`,
-        message: `Task opened via ${offer.provider}. Tracking active. Reward credits upon verified completion.`,
-        status: 'click'
+        title: offer.name,
+        message: 'Offer opened · tracking active',
+        status: 'click',
+        category: 'personal',
+        coins: offer.coins || null,
+        icon: offer.icon || null,
+        image: visual.image || null,
+        emoji: visual.emoji || null,
+        emojiBg: visual.emojiBg || null
       });
 
       const trackingUrl = `${offer.link}?subid=${currentUser.id}&user=${currentUser.email.split('@')[0]}`;
@@ -2905,10 +3158,17 @@
         await db.from('profiles').update({ coins: userCoins, level: newLvl }).eq('id', currentUser.id);
       }
 
+      const completeVisual = resolveOfferVisual({ name: offerName, id: null, provider: provider });
       addNotification({
-        title: `${offerName} Complete!`,
-        message: `Verified by network. ● ${coins.toLocaleString()} coins credited to your wallet balance.`,
-        status: 'complete'
+        title: offerName,
+        message: 'Complete',
+        status: 'complete',
+        category: 'personal',
+        coins: coins,
+        icon: (provider || 'G').slice(0, 2).toUpperCase(),
+        image: completeVisual.image || null,
+        emoji: completeVisual.emoji || null,
+        emojiBg: completeVisual.emojiBg || null
       });
 
       broadcastLiveActivity('Offer', coins, '⚡', 'Complete', {
@@ -3047,9 +3307,12 @@
         saveWithdrawalsToStorage();
 
         addNotification({
-          title: `${selectedCashoutCrypto} Cashout`,
-          message: `● ${amount.toLocaleString()} coins submitted to: ${address.substring(0, 10)}... Status: PENDING.`,
-          status: 'pending'
+          title: selectedCashoutCrypto.includes('Binance') ? 'Binance Pay' : 'LTC',
+          message: 'Pending approval',
+          status: 'pending',
+          category: 'personal',
+          coins: amount,
+          icon: selectedCashoutCrypto.includes('Binance') ? 'B' : 'Ł'
         });
 
         if (db) {
@@ -3128,25 +3391,30 @@
               const amtNum = Number(fw.amount) || 0;
               const amtStr = amtNum.toLocaleString();
 
-              // Upgrade any matching PENDING notification instead of leaving a stuck pending row
+              // Upgrade matching PENDING notification → completed (admin released payout)
               let upgraded = false;
               userNotifications.forEach(n => {
                 const st = (n.status || '').toLowerCase();
                 if (st !== 'pending') return;
-                const nAmt = parseNotifAmount(n.message);
+                const nAmt = n.coins != null ? Number(n.coins) : parseNotifAmount(n.message);
                 if (nAmt != null && nAmt === amtNum) {
                   n.status = 'completed';
-                  n.title = `${fw.method || 'Crypto'} Paid!`;
-                  n.message = `● ${amtStr} coins payout successfully sent! Status: COMPLETED.`;
+                  n.category = 'personal';
+                  n.title = shortMethod;
+                  n.message = 'Complete';
+                  n.coins = amtNum;
                   n.time = 'just now';
                   upgraded = true;
                 }
               });
               if (!upgraded) {
                 addNotification({
-                  title: `${fw.method || 'Crypto'} Paid!`,
-                  message: `● ${amtStr} coins payout successfully sent! Status: COMPLETED.`,
-                  status: 'completed'
+                  title: shortMethod,
+                  message: 'Complete',
+                  status: 'completed',
+                  category: 'personal',
+                  coins: amtNum,
+                  icon: tickerIcon
                 });
               } else {
                 saveNotificationsToStorage();
@@ -3920,7 +4188,7 @@
     // {userId} is replaced with the logged-in user's id
     const PROVIDER_WALL_URLS = {
       'Clickwall': 'https://clickwall.net/app/iframe/10766/{userId}',
-      'Upwall': 'https://offerwall.upwall.io/?app_id=YOUR_UPWALL_APP_ID&userid={userId}',
+      'Upwall': 'https://offerwall.upwall.io/?app_id=a423-4871-f305-4958&userid={userId}',
       'Revtoo': 'https://revtoo.com/offerwall/pg7w8gtff9w8zx7bok7wups4mr1nju/{userId}',
       'Lootably': 'https://wall.lootably.com/?playerId={userId}',
       'Monlix': 'https://offerwall.monlix.com/?appid=YOUR_APP&userid={userId}',
@@ -3937,13 +4205,14 @@
       'Pixylabs': 'https://pixylabs.com/wall?uid={userId}',
       'Pubscale': 'https://pubscale.com/wall?uid={userId}',
       'Ovnix': 'https://offerwall.ovnix.io?pk=2618EC1B325900F4F19F&sub1={userId}',
-      'Taskwall': 'https://taskwall.io/?app_id=YOUR_APP_ID&userid={userId}'
+      'Taskwall': 'https://taskwall.io/?app_id=YOUR_APP_ID&userid={userId}',
+      'Adlexy': 'https://adlexy.com/offerwall/m0r3q7d2nrulqzsolq093mu021rjhq/{userId}'
     };
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
       'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
-      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW'
+      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX'
     };
 
     let activeProviderWallUrl = '';
@@ -4130,7 +4399,9 @@
         tag: o.tag,
         instruction: o.instruction || 'Complete the offer requirements to earn coins.',
         link: o.link || '#',
-        image: o.image,
+        image: o.image || null,
+        emoji: o.emoji || null,
+        bg: o.bg || null,
         platform: o.platform
       };
       activeOfferData = mapped;
@@ -4138,6 +4409,7 @@
         // openOfferModal looks up by id in ALL_OFFERS — inject temporarily
         const exists = ALL_OFFERS.find(x => x.id === id);
         if (!exists) ALL_OFFERS.push(mapped);
+        else Object.assign(exists, { emoji: mapped.emoji, bg: mapped.bg, image: mapped.image });
         openOfferModal(id);
       }
     }
@@ -4874,6 +5146,7 @@
       const providers = [
         // Active / approved walls first
         { name: 'Ovnix', label: 'Ovnix', bg: 'bg-[#FF6B00]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'OV' },
+        { name: 'Adlexy', label: 'Adlexy', bg: 'bg-gradient-to-br from-[#ff0055] to-[#aa00ff]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'AX' },
         { name: 'VortexWall', label: 'VortexWall', bg: 'bg-[#e91e63]', text: 'text-white', badge: null, badgeBg: '', logo: 'VW' },
         { name: 'GemiAd', label: 'GemiAd', bg: 'bg-[#6366f1]', text: 'text-white', badge: null, badgeBg: '', logo: 'GA' },
         { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
