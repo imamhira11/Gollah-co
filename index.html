@@ -306,7 +306,7 @@
 <body class="min-h-screen flex flex-col bg-[#0b1116] text-slate-300">
 
   <!-- TOP HEADER — mobile: logo only; PC: logo + Gollah text -->
-  <header class="h-14 sm:h-[68px] bg-[#0e151c] border-b border-[#18232e] flex items-center z-30 shrink-0 sticky top-0 overflow-hidden">
+  <header class="h-14 sm:h-[68px] bg-[#0e151c] border-b border-[#18232e] flex items-center z-40 shrink-0 sticky top-0">
     <!-- Logo zone aligns with left sidebar (w-56 on lg) when logged in -->
     <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-2.5 sm:px-4 lg:w-56 lg:border-r lg:border-[#18232e]">
       <div class="flex items-center gap-2 sm:gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigate('home');">
@@ -319,7 +319,7 @@
     </div>
 
     <!-- Content starts AFTER sidebar line: search + actions -->
-    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-5 overflow-hidden">
+    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-5">
       <div id="header-search-wrap" class="relative flex-1 max-w-lg hidden sm:block">
         <i data-lucide="search" class="w-[18px] h-[18px] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
         <input id="offer-search-input" oninput="handleOfferSearch(this.value)" type="text" placeholder="Search" class="w-full bg-[#16202a] border border-[#1e2a38] rounded-full py-2.5 pl-11 pr-5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00d672]/60 transition" />
@@ -389,14 +389,14 @@
 
       <!-- Profile -->
       <div class="relative shrink-0">
-        <button type="button" onclick="toggleProfileDropdown()" class="flex items-center gap-1 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1 sm:p-1.5 sm:pr-2 rounded-full transition relative">
+        <button type="button" onclick="toggleProfileDropdown(event)" class="flex items-center gap-1 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1 sm:p-1.5 sm:pr-2 rounded-full transition relative">
           <img id="header-avatar-img" src="avatars/1.png" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover bg-[#202c38] ring-2 ring-[#00d672]/30" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden sm:block"></i>
           <!-- Mobile only: notif badge on avatar -->
           <span id="header-notif-badge" class="sm:hidden hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e151c] flex items-center justify-center shadow">0</span>
         </button>
 
-        <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
+        <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-64 bg-[#141d26] border border-[#22303e] rounded-2xl shadow-2xl p-4 z-[100] flex flex-col gap-3">
           <div class="flex flex-col items-center text-center relative">
             <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full border-2 border-[#00d672] mb-1 object-cover bg-[#0b1116]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
             <div class="flex items-center gap-1.5 mt-0.5">
@@ -5044,9 +5044,25 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function toggleProfileDropdown() {
-      document.getElementById('profile-dropdown').classList.toggle('hidden');
+    function toggleProfileDropdown(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const dd = document.getElementById('profile-dropdown');
+      if (!dd) return;
+      dd.classList.toggle('hidden');
+      if (window.lucide) lucide.createIcons();
     }
+
+    // Close profile dropdown when clicking outside
+    document.addEventListener('click', function (ev) {
+      const dd = document.getElementById('profile-dropdown');
+      if (!dd || dd.classList.contains('hidden')) return;
+      const wrap = dd.closest('.relative');
+      if (wrap && wrap.contains(ev.target)) return;
+      dd.classList.add('hidden');
+    });
 
     // ── Live Chat (min 50 coins earned) ──
     const CHAT_STORAGE_KEY = 'gollah_live_chat_v1';
