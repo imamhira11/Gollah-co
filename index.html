@@ -3616,13 +3616,14 @@
       'Tplayed': 'https://tplayed.com/wall?uid={userId}',
       'Pixylabs': 'https://pixylabs.com/wall?uid={userId}',
       'Pubscale': 'https://pubscale.com/wall?uid={userId}',
-      'Ovnix': 'https://offerwall.ovnix.io?pk=2618EC1B325900F4F19F&sub1={userId}'
+      'Ovnix': 'https://offerwall.ovnix.io?pk=2618EC1B325900F4F19F&sub1={userId}',
+      'Taskwall': 'https://taskwall.io/?app_id=YOUR_APP_ID&userid={userId}'
     };
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
       'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
-      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV'
+      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW'
     };
 
     let activeProviderWallUrl = '';
@@ -4558,6 +4559,7 @@
         { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
         { name: 'Clickwall', label: 'Clickwall', bg: 'bg-[#ff5722]', text: 'text-white', badge: null, badgeBg: '', logo: 'CW' },
         { name: 'Revtoo', label: 'Revtoo', bg: 'bg-[#0d9488]', text: 'text-white', badge: null, badgeBg: '', logo: 'RT' },
+        { name: 'Taskwall', label: 'Taskwall', bg: 'bg-[#2563eb]', text: 'text-white', badge: null, badgeBg: '', logo: 'TW' },
         // Pending approval — keep at end
         { name: 'Lootably', label: 'Lootably', bg: 'bg-[#2a1f4d]', text: 'text-white', badge: '+50%', badgeBg: 'bg-violet-500', logo: 'L' },
         { name: 'Monlix', label: 'Monlix', bg: 'bg-[#00c853]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: 'X' },
