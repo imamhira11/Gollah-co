@@ -549,7 +549,7 @@
       <!-- Profile -->
       <div class="relative shrink-0">
         <button type="button" onclick="toggleProfileDropdown(event)" class="flex items-center gap-1 bg-[#16202a] border border-[#1e2a38] hover:border-[#00d672]/40 p-1 sm:p-1.5 sm:pr-2 rounded-full transition relative">
-          <img id="header-avatar-img" src="avatars/1.png" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#00d672]/30" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+          <img id="header-avatar-img" src="avatars/1.png" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#00d672]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
           <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden sm:block"></i>
           <!-- Mobile only: notif badge on avatar -->
           <span id="header-notif-badge" class="sm:hidden hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e1620] flex items-center justify-center shadow">0</span>
@@ -559,7 +559,7 @@
           <!-- Compact Dollah-style header — tight padding -->
           <div class="px-3 pt-4 pb-2.5 flex flex-col items-center text-center">
             <div class="relative mb-2">
-              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#1e2a38]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#00d672] ring-offset-2 ring-offset-[#1a2433]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
               <span id="profile-level-badge" class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-extrabold leading-none bg-rose-500 text-white px-1.5 py-[3px] rounded-[5px] shadow whitespace-nowrap">Lvl 1</span>
             </div>
             <span id="profile-username-display" class="font-semibold text-white text-[13px] tracking-tight truncate max-w-[220px]">Guest</span>
@@ -4206,13 +4206,14 @@
       'Pubscale': 'https://pubscale.com/wall?uid={userId}',
       'Ovnix': 'https://offerwall.ovnix.io?pk=2618EC1B325900F4F19F&sub1={userId}',
       'Taskwall': 'https://taskwall.io/?app_id=YOUR_APP_ID&userid={userId}',
-      'Adlexy': 'https://adlexy.com/offerwall/m0r3q7d2nrulqzsolq093mu021rjhq/{userId}'
+      'Adlexy': 'https://adlexy.com/offerwall/m0r3q7d2nrulqzsolq093mu021rjhq/{userId}',
+      'TheoremReach': 'https://theoremreach.com/respondent_entry/direct?api_key=7e156271b315dd18b7dc6fc3ad64&user_id={userId}'
     };
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
       'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
-      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX'
+      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX', 'TheoremReach': 'TR'
     };
 
     let activeProviderWallUrl = '';
@@ -5104,9 +5105,11 @@
       let offersHTML = '';
       filtered.forEach(o => {
         if (o.logo) {
-          // Full image card (High Earning style) — TheoremReach / CPX
+          // Full image card — TheoremReach opens provider wall iframe
+          const isTheoremReach = String(o.provider || '').toLowerCase() === 'theoremreach' || String(o.name || '').toLowerCase().includes('theoremreach');
+          const featuredClick = isTheoremReach ? "openProviderWallModal('TheoremReach')" : ("openOfferModal('" + o.id + "')");
           offersHTML += `
-          <button type="button" onclick="openOfferModal('${o.id}')" class="w-full text-left rounded-2xl overflow-hidden bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672]/70 transition transform hover:-translate-y-1 shadow-xl group cursor-pointer">
+          <button type="button" onclick="${featuredClick}" class="w-full text-left rounded-2xl overflow-hidden bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672]/70 transition transform hover:-translate-y-1 shadow-xl group cursor-pointer">
             <div class="relative aspect-square w-full overflow-hidden bg-[#0e1620]">
               <img src="${o.logo}" alt="${o.name}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.style.display='none'" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 pointer-events-none"></div>
