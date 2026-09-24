@@ -4551,22 +4551,24 @@
 
       // Providers section (Lootably, Monlix, Adgate, OfferToro, etc.)
       const providers = [
+        // Active / approved walls first
         { name: 'Ovnix', label: 'Ovnix', bg: 'bg-[#FF6B00]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'OV' },
+        { name: 'VortexWall', label: 'VortexWall', bg: 'bg-[#e91e63]', text: 'text-white', badge: null, badgeBg: '', logo: 'VW' },
+        { name: 'GemiAd', label: 'GemiAd', bg: 'bg-[#6366f1]', text: 'text-white', badge: null, badgeBg: '', logo: 'GA' },
+        { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
+        { name: 'Clickwall', label: 'Clickwall', bg: 'bg-[#ff5722]', text: 'text-white', badge: null, badgeBg: '', logo: 'CW' },
+        { name: 'Revtoo', label: 'Revtoo', bg: 'bg-[#0d9488]', text: 'text-white', badge: null, badgeBg: '', logo: 'RT' },
+        // Pending approval — keep at end
         { name: 'Lootably', label: 'Lootably', bg: 'bg-[#2a1f4d]', text: 'text-white', badge: '+50%', badgeBg: 'bg-violet-500', logo: 'L' },
         { name: 'Monlix', label: 'Monlix', bg: 'bg-[#00c853]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: 'X' },
         { name: 'Adgate', label: 'Adgate', bg: 'bg-[#29b6f6]', text: 'text-white', badge: 'Hot', badgeBg: 'bg-red-500', logo: '◆' },
         { name: 'OfferToro', label: 'OfferToro', bg: 'bg-[#7c4dff]', text: 'text-white', badge: null, badgeBg: '', logo: 'OT' },
         { name: 'Torox', label: 'Torox', bg: 'bg-[#ff6d00]', text: 'text-white', badge: null, badgeBg: '', logo: 'TX' },
         { name: 'BitLabs', label: 'BitLabs', bg: 'bg-[#1e88e5]', text: 'text-white', badge: null, badgeBg: '', logo: 'BL' },
-        { name: 'VortexWall', label: 'VortexWall', bg: 'bg-[#e91e63]', text: 'text-white', badge: null, badgeBg: '', logo: 'VW' },
         { name: 'Offery', label: 'Offery', bg: 'bg-[#9c27b0]', text: 'text-white', badge: null, badgeBg: '', logo: 'OF' },
-        { name: 'GemiAd', label: 'GemiAd', bg: 'bg-[#6366f1]', text: 'text-white', badge: null, badgeBg: '', logo: 'GA' },
         { name: 'Tplayed', label: 'Tplayed', bg: 'bg-[#00bcd4]', text: 'text-white', badge: null, badgeBg: '', logo: 'TP' },
-        { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
-        { name: 'Clickwall', label: 'Clickwall', bg: 'bg-[#ff5722]', text: 'text-white', badge: null, badgeBg: '', logo: 'CW' },
         { name: 'Pixylabs', label: 'Pixylabs', bg: 'bg-[#607d8b]', text: 'text-white', badge: null, badgeBg: '', logo: 'PX' },
-        { name: 'Pubscale', label: 'Pubscale', bg: 'bg-[#795548]', text: 'text-white', badge: null, badgeBg: '', logo: 'PS' },
-        { name: 'Revtoo', label: 'Revtoo', bg: 'bg-[#0d9488]', text: 'text-white', badge: null, badgeBg: '', logo: 'RT' }
+        { name: 'Pubscale', label: 'Pubscale', bg: 'bg-[#795548]', text: 'text-white', badge: null, badgeBg: '', logo: 'PS' }
       ];
 
       let providersHTML = '';
