@@ -4196,7 +4196,8 @@
       'OfferToro': 'https://www.offertoro.com/ifr/show/{userId}/YOUR_PUB_ID/YOUR_APP_ID',
       'Torox': 'https://torox.io/offerwall?uid={userId}',
       'BitLabs': 'https://web.bitlabs.ai/?uid={userId}',
-      'CPX': 'https://offers.cpx-research.com/index.php?app_id=YOUR_APP&ext_user_id={userId}',
+      'CPX': 'https://offers.cpx-research.com/index.php?app_id=36517&ext_user_id={userId}',
+      'CPX Research': 'https://offers.cpx-research.com/index.php?app_id=36517&ext_user_id={userId}',
       'MobiVortex': 'https://mobivortex.com/wall?uid={userId}',
       'VortexWall': 'https://vortexwall.com/ow/6ab46a9cb8a42db09a071fd5/{userId}',
       'Offery': 'https://offery.com/wall?uid={userId}',
@@ -4212,7 +4213,7 @@
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
-      'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX',
+      'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX', 'CPX Research': 'CPX',
       'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX', 'TheoremReach': 'TR'
     };
 
@@ -5106,8 +5107,13 @@
       filtered.forEach(o => {
         if (o.logo) {
           // Full image card — TheoremReach opens provider wall iframe
-          const isTheoremReach = String(o.provider || '').toLowerCase() === 'theoremreach' || String(o.name || '').toLowerCase().includes('theoremreach');
-          const featuredClick = isTheoremReach ? "openProviderWallModal('TheoremReach')" : ("openOfferModal('" + o.id + "')");
+          const provLow = String(o.provider || '').toLowerCase();
+          const nameLow = String(o.name || '').toLowerCase();
+          const isTheoremReach = provLow === 'theoremreach' || nameLow.includes('theoremreach');
+          const isCpx = provLow === 'cpx' || provLow === 'cpx research' || nameLow.includes('cpx');
+          let featuredClick = "openOfferModal('" + o.id + "')";
+          if (isTheoremReach) featuredClick = "openProviderWallModal('TheoremReach')";
+          else if (isCpx) featuredClick = "openProviderWallModal('CPX Research')";
           offersHTML += `
           <button type="button" onclick="${featuredClick}" class="w-full text-left rounded-2xl overflow-hidden bg-[#121b24] border border-[#1d2a37] hover:border-[#00d672]/70 transition transform hover:-translate-y-1 shadow-xl group cursor-pointer">
             <div class="relative aspect-square w-full overflow-hidden bg-[#0e1620]">
