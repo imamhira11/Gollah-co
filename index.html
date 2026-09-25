@@ -123,29 +123,37 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
-    /* Right-side notifications drawer — NO full-screen blur/backdrop */
+    /* Shared LARGE card — identical fixed position + size (zero offset between views) */
+    #profile-dropdown,
+    #notifications-modal {
+      position: fixed !important;
+      top: 4.25rem !important;   /* under header */
+      right: 0.75rem !important; /* same right edge */
+      left: auto !important;
+      margin: 0 !important;
+      width: min(380px, calc(100vw - 1.5rem)) !important;
+      height: min(80vh, calc(100vh - 5rem)) !important;
+      max-height: min(80vh, calc(100vh - 5rem)) !important;
+      background: #1a2433;
+      border: 1px solid #2a3a4c;
+      border-radius: 18px;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,255,255,0.03);
+      overflow: hidden;
+      z-index: 100;
+      flex-direction: column;
+    }
     #notifications-modal {
       display: none;
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100%;
-      width: 100%;
-      max-width: 380px;
-      z-index: 50;
-      background: #111920;
-      border-left: 1px solid #1c2836;
-      border-radius: 16px 0 0 16px;
-      box-shadow: -16px 0 48px rgba(0, 0, 0, 0.55);
-      flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow: hidden;
-      /* no backdrop-filter, no screen darken */
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+      transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
     }
-    #notifications-modal.notif-drawer-open {
+    #notifications-modal.notif-dropdown-open {
       display: flex !important;
-      transform: translateX(0);
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
     }
     #notifications-modal::before {
       content: '';
@@ -157,13 +165,22 @@
       animation: topStripFlow 3s linear infinite;
       pointer-events: none;
       z-index: 6;
+      border-radius: 18px 18px 0 0;
     }
     .notif-drawer-panel {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
+      max-height: inherit;
       min-height: 0;
+    }
+    /* legacy class kept for safety */
+    #notifications-modal.notif-drawer-open {
+      display: flex !important;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
     }
 
     /* Polished live-feed controls */
@@ -555,59 +572,59 @@
           <span id="header-notif-badge" class="sm:hidden hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e1620] flex items-center justify-center shadow">0</span>
         </button>
 
-        <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-[280px] bg-[#1a2433] border border-[#2a3a4c] rounded-[18px] shadow-[0_16px_48px_rgba(0,0,0,0.55)] z-[100] overflow-hidden">
-          <!-- Compact Dollah-style header — tight padding -->
-          <div class="px-3 pt-4 pb-2.5 flex flex-col items-center text-center">
-            <div class="relative mb-2">
-              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-14 h-14 rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#00d672] ring-offset-2 ring-offset-[#1a2433]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
-              <span id="profile-level-badge" class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-extrabold leading-none bg-rose-500 text-white px-1.5 py-[3px] rounded-[5px] shadow whitespace-nowrap">Lvl 1</span>
+        <div id="profile-dropdown" class="hidden flex flex-col">
+          <!-- Spacious profile header — scaled for large card -->
+          <div class="px-5 pt-7 pb-5 flex flex-col items-center text-center shrink-0">
+            <div class="relative mb-3">
+              <img id="dropdown-avatar-img" src="avatars/1.png" class="w-[72px] h-[72px] rounded-full object-cover bg-[#1e2a38] ring-2 ring-[#00d672] ring-offset-2 ring-offset-[#1a2433]" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Guest'" />
+              <span id="profile-level-badge" class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-extrabold leading-none bg-rose-500 text-white px-2 py-[3px] rounded-[6px] shadow whitespace-nowrap">Lvl 1</span>
             </div>
-            <span id="profile-username-display" class="font-semibold text-white text-[13px] tracking-tight truncate max-w-[220px]">Guest</span>
+            <span id="profile-username-display" class="font-bold text-white text-[16px] tracking-tight truncate max-w-[280px]">Guest</span>
             <span id="profile-email-display" class="hidden">guest@gollah.top</span>
             <span id="profile-country-badge" class="hidden">🌐 GLOBAL</span>
-            <!-- UID pill — Dollah inset look -->
-            <button type="button" onclick="copyUserId()" class="mt-1.5 inline-flex items-center gap-1.5 max-w-[180px] text-[10px] font-mono text-slate-400 hover:text-slate-200 transition bg-[#0d1319] px-2.5 py-[4px] rounded-full border border-[#1e2a38] shadow-inner">
+            <!-- UID pill -->
+            <button type="button" onclick="copyUserId()" class="mt-2.5 inline-flex items-center gap-1.5 max-w-[220px] text-[11px] font-mono text-slate-400 hover:text-slate-200 transition bg-[#0d1319] px-3 py-[5px] rounded-full border border-[#1e2a38] shadow-inner">
               <span id="profile-user-id-snippet" class="truncate">guest</span>
-              <i data-lucide="copy" class="w-2.5 h-2.5 shrink-0 opacity-50"></i>
+              <i data-lucide="copy" class="w-3 h-3 shrink-0 opacity-50"></i>
             </button>
-            <!-- Slim XP bar — minimal padding, green #00d672 -->
-            <div class="w-full mt-2.5 px-0.5">
-              <div class="flex justify-between text-[9px] font-semibold text-slate-500 mb-0.5">
+            <!-- XP bar -->
+            <div class="w-full mt-4 px-1">
+              <div class="flex justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
                 <span id="xp-text">Lvl 1</span>
                 <span id="xp-next-level">Lvl 2</span>
               </div>
-              <div class="w-full bg-[#0d1319] h-[4px] rounded-full overflow-hidden">
+              <div class="w-full bg-[#0d1319] h-[6px] rounded-full overflow-hidden">
                 <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500 rounded-full"></div>
               </div>
               <p id="xp-needed" class="hidden">10 XP to next level</p>
             </div>
           </div>
 
-          <!-- Menu — taller + highlight #253243 (dollah-style) -->
-          <div class="px-2 py-3 flex flex-col gap-0.5 border-t border-[#1e2a38]">
-            <button type="button" onclick="openNotificationsModal(); document.getElementById('profile-dropdown')?.classList.add('hidden')" class="flex items-center justify-between w-full py-3 px-2.5 hover:bg-[#253243] rounded-lg text-slate-300 text-left transition">
-              <span class="flex items-center gap-2.5 text-[13px] font-medium">
-                <i data-lucide="bell" class="w-4 h-4 text-slate-400"></i>
+          <!-- Menu fills remaining height of the large card -->
+          <div class="px-3 py-3 flex flex-col gap-1 border-t border-[#1e2a38] flex-1 min-h-0">
+            <button type="button" onclick="event.stopPropagation(); openNotificationsModal(); closeProfileDropdown()" class="flex items-center justify-between w-full py-3.5 px-3.5 hover:bg-[#253243] rounded-xl text-slate-300 text-left transition">
+              <span class="flex items-center gap-3 text-[14px] font-medium">
+                <i data-lucide="bell" class="w-5 h-5 text-slate-400"></i>
                 Notifications
               </span>
               <span id="dropdown-notif-pill" class="hidden min-w-[18px] h-[18px] bg-rose-500 text-white font-bold text-[9px] px-1 rounded-full flex items-center justify-center">0</span>
             </button>
-            <button type="button" onclick="navigate('profile')" class="flex items-center gap-2.5 w-full py-3 px-2.5 hover:bg-[#253243] rounded-lg text-slate-300 text-left transition text-[13px] font-medium">
-              <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+            <button type="button" onclick="navigate('profile')" class="flex items-center gap-3 w-full py-3.5 px-3.5 hover:bg-[#253243] rounded-xl text-slate-300 text-left transition text-[14px] font-medium">
+              <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
               Profile
             </button>
-            <button type="button" onclick="openLegalModal('contact'); document.getElementById('profile-dropdown')?.classList.add('hidden')" class="flex items-center gap-2.5 w-full py-3 px-2.5 hover:bg-[#253243] rounded-lg text-slate-300 text-left transition text-[13px] font-medium">
-              <i data-lucide="life-buoy" class="w-4 h-4 text-slate-400"></i>
+            <button type="button" onclick="openLegalModal('contact'); closeProfileDropdown()" class="flex items-center gap-3 w-full py-3.5 px-3.5 hover:bg-[#253243] rounded-xl text-slate-300 text-left transition text-[14px] font-medium">
+              <i data-lucide="life-buoy" class="w-5 h-5 text-slate-400"></i>
               Help & Support
             </button>
           </div>
 
-          <div id="auth-button-slot" class="px-2 pb-3 pt-1 border-t border-[#1e2a38]"></div>
+          <div id="auth-button-slot" class="px-3 pb-4 pt-2 border-t border-[#1e2a38] shrink-0 mt-auto"></div>
         </div>
       </div>
 
       <!-- Desktop only: Notification bell in top bar (like dollah) -->
-      <button type="button" onclick="openNotificationsModal()" class="hidden sm:flex relative w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] hover:border-rose-500/40 items-center justify-center text-slate-300 hover:text-white transition" title="Notifications">
+      <button type="button" id="desktop-notif-bell" onclick="event.stopPropagation(); openNotificationsModal()" class="hidden sm:flex relative w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] hover:border-rose-500/40 items-center justify-center text-slate-300 hover:text-white transition" title="Notifications">
         <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
         <span id="desktop-notif-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e1620] items-center justify-center shadow">0</span>
       </button>
@@ -842,31 +859,35 @@
 
   <!-- NOTIFICATIONS MODAL -->
   <!-- Notifications: right drawer only — no full-screen blur -->
-  <div id="notifications-modal" class="hidden">
+  <div id="notifications-modal" class="hidden" role="dialog" aria-label="Notifications">
     <div class="notif-drawer-panel">
-      <div class="relative flex items-center justify-between px-5 py-4 border-b border-[#1c2836] shrink-0">
-        <h3 class="font-bold text-[16px] text-white leading-tight tracking-tight">Notifications</h3>
-        <button type="button" onclick="closeNotificationsModal()" class="w-9 h-9 rounded-xl bg-[#253243]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition">
+      <div class="relative flex items-center justify-between px-3 py-3 border-b border-[#1c2836] shrink-0">
+        <button type="button" id="notifBackBtn" onclick="closeNotificationsOrGoBack(event)" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors" title="Back" aria-label="Back">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <button type="button" onclick="closeNotificationsModal()" class="w-8 h-8 rounded-xl bg-[#253243]/80 hover:bg-[#243040] text-slate-400 hover:text-white flex items-center justify-center transition" title="Close">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="px-4 pt-3 pb-2 shrink-0">
+      <div class="px-3 pt-2.5 pb-1.5 shrink-0">
         <div class="flex items-center gap-1 p-1 rounded-full bg-[#0e1620] border border-[#1e2a38]">
-          <button type="button" id="notif-tab-site" onclick="setNotifTab('site')" class="flex-1 text-center text-[13px] font-bold py-2 rounded-full text-slate-400 hover:text-white transition">
+          <button type="button" id="notif-tab-site" onclick="setNotifTab('site')" class="flex-1 text-center text-[12px] font-bold py-1.5 rounded-full text-slate-400 hover:text-white transition">
             Site
           </button>
-          <button type="button" id="notif-tab-personal" onclick="setNotifTab('personal')" class="flex-1 text-center text-[13px] font-extrabold py-2 rounded-full bg-[#00d672] text-black shadow-md shadow-emerald-900/30 transition">
+          <button type="button" id="notif-tab-personal" onclick="setNotifTab('personal')" class="flex-1 text-center text-[12px] font-extrabold py-1.5 rounded-full bg-[#00d672] text-black shadow-md shadow-emerald-900/30 transition">
             Personal
           </button>
         </div>
       </div>
 
-      <div id="notifications-list" class="overflow-y-auto custom-scroll flex-1 flex flex-col p-4 min-h-0"></div>
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex-1 flex flex-col p-3 min-h-0"></div>
 
-      <div class="px-5 py-3.5 border-t border-[#1c2836] flex items-center justify-between gap-3 bg-[#0e1620]/90 shrink-0">
+      <div class="px-4 py-3 border-t border-[#1c2836] flex items-center justify-between gap-3 bg-[#0e1620]/95 shrink-0">
         <button type="button" onclick="clearAllNotifications()" class="text-[12px] font-semibold text-slate-500 hover:text-slate-200 transition px-2 py-1.5 rounded-lg hover:bg-white/5">Clear all</button>
-        <button type="button" onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2 rounded-xl">Done</button>
+        <button type="button" onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-5 py-2 rounded-xl">Done</button>
       </div>
     </div>
   </div>
@@ -2513,37 +2534,84 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    function isNotifDropdownOpen() {
+      const m = document.getElementById('notifications-modal');
+      return !!(m && (m.classList.contains('notif-dropdown-open') || m.classList.contains('notif-drawer-open')));
+    }
+
     function openNotificationsModal() {
-      document.getElementById('profile-dropdown')?.classList.add('hidden');
+      const pd = document.getElementById('profile-dropdown');
+      if (pd) {
+        pd.classList.add('hidden');
+        pd.style.display = 'none';
+      }
+      const modal = document.getElementById('notifications-modal');
+      if (!modal) return;
+      // Toggle: bell again closes
+      if (isNotifDropdownOpen()) {
+        closeNotificationsModal();
+        return;
+      }
       setNotifTab(notifActiveTab || 'personal');
       userNotifications.forEach(n => { n.isRead = true; });
       saveNotificationsToStorage();
       updateNotificationsBadge();
-      const modal = document.getElementById('notifications-modal');
-      if (!modal) return;
       modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
       void modal.offsetWidth;
-      modal.classList.add('notif-drawer-open');
+      modal.classList.add('notif-dropdown-open');
+      modal.classList.remove('notif-drawer-open');
       if (window.lucide) lucide.createIcons();
+    }
+
+    function closeNotificationsOrGoBack(e) {
+      // Back arrow: swap to profile view in the EXACT same fixed box
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      }
+      // Hide notifications immediately (no leftover overlap)
+      const modal = document.getElementById('notifications-modal');
+      if (modal) {
+        modal.classList.remove('notif-dropdown-open');
+        modal.classList.remove('notif-drawer-open');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+      }
+      openProfileDropdown();
     }
 
     function closeNotificationsModal() {
       const modal = document.getElementById('notifications-modal');
       if (!modal) return;
+      modal.classList.remove('notif-dropdown-open');
       modal.classList.remove('notif-drawer-open');
+      modal.style.pointerEvents = 'none';
       setTimeout(() => {
-        if (!modal.classList.contains('notif-drawer-open')) {
+        if (!isNotifDropdownOpen()) {
           modal.classList.add('hidden');
+          modal.style.display = 'none';
         }
-      }, 320);
+      }, 200);
     }
 
-    
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        const m = document.getElementById('notifications-modal');
-        if (m && m.classList.contains('notif-drawer-open')) closeNotificationsModal();
-      }
+      if (e.key === 'Escape' && isNotifDropdownOpen()) closeNotificationsModal();
+    });
+
+    // Click outside closes notifications dropdown
+    document.addEventListener('click', function(ev) {
+      if (!isNotifDropdownOpen()) return;
+      const modal = document.getElementById('notifications-modal');
+      if (!modal) return;
+      if (modal.contains(ev.target)) return;
+      // Ignore bell / profile-menu notification buttons
+      const t = ev.target;
+      if (t.closest && (t.closest('[onclick*="openNotificationsModal"]') || t.closest('[title="Notifications"]'))) return;
+      closeNotificationsModal();
     });
 
     function clearAllNotifications() {
@@ -3751,7 +3819,7 @@
     }
 
     function openAuthModal(signup = false) {
-      document.getElementById('profile-dropdown').classList.add('hidden');
+      closeProfileDropdown();
       isSignupMode = signup;
       updateAuthModalUI();
       document.getElementById('auth-error-banner').classList.add('hidden');
@@ -3945,12 +4013,12 @@
       if (db) await db.auth.signOut();
       currentUser = null;
       syncUserSession(null);
-      document.getElementById('profile-dropdown').classList.add('hidden');
+      closeProfileDropdown();
       navigate('home');
     }
 
     function openLegalModal(type) {
-      document.getElementById('profile-dropdown').classList.add('hidden');
+      closeProfileDropdown();
       const titleEl = document.getElementById('legal-modal-title');
       const bodyEl = document.getElementById('legal-modal-body');
 
@@ -4162,7 +4230,7 @@
     function navigate(view) {
       currentTab = view;
       try { sessionStorage.setItem('gollah_current_tab', view); } catch (e) {}
-      document.getElementById('profile-dropdown').classList.add('hidden');
+      closeProfileDropdown();
       ['home', 'premium', 'shop', 'ranking', 'profile'].forEach(v => {
         const el = document.getElementById('nav-' + v);
         if (el) el.className = (v === view) ? "nav-active flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition" : "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-[#16202a] transition";
@@ -4208,13 +4276,14 @@
       'Ovnix': 'https://offerwall.ovnix.io?pk=2618EC1B325900F4F19F&sub1={userId}',
       'Taskwall': 'https://taskwall.io/?app_id=YOUR_APP_ID&userid={userId}',
       'Adlexy': 'https://adlexy.com/offerwall/m0r3q7d2nrulqzsolq093mu021rjhq/{userId}',
-      'TheoremReach': 'https://theoremreach.com/respondent_entry/direct?api_key=7e156271b315dd18b7dc6fc3ad64&user_id={userId}'
+      'TheoremReach': 'https://theoremreach.com/respondent_entry/direct?api_key=7e156271b315dd18b7dc6fc3ad64&user_id={userId}',
+      'RewardTym': 'https://rewardtym.online/offerwall?partnerid=lt_partner_7ee756752dc2f06e&userid={userId}'
     };
 
     const PROVIDER_WALL_LOGOS = {
       'Clickwall': 'CW', 'Upwall': 'UW', 'Revtoo': 'RT', 'Lootably': 'L', 'Monlix': 'X',
       'Adgate': '◆', 'OfferToro': 'OT', 'Torox': 'TX', 'BitLabs': 'BL', 'CPX': 'CPX', 'CPX Research': 'CPX',
-      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX', 'TheoremReach': 'TR'
+      'MobiVortex': 'MV', 'VortexWall': 'VW', 'Offery': 'OF', 'GemiAd': 'GA', 'Tplayed': 'TP', 'Pixylabs': 'PX', 'Pubscale': 'PS', 'Ovnix': 'OV', 'Taskwall': 'TW', 'Adlexy': 'AX', 'TheoremReach': 'TR', 'RewardTym': 'RT'
     };
 
     let activeProviderWallUrl = '';
@@ -4315,6 +4384,9 @@
           iframe.onload = () => {
             if (loading) loading.classList.add('hidden');
           };
+          iframe.setAttribute('allow', 'clipboard-write');
+          iframe.setAttribute('title', providerName + ' Offer Wall');
+          iframe.setAttribute('frameborder', '0');
           iframe.src = 'about:blank';
           setTimeout(() => { iframe.src = url; }, 30);
         }
@@ -5156,6 +5228,7 @@
         // Active / approved walls first
         { name: 'Ovnix', label: 'Ovnix', bg: 'bg-[#FF6B00]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'OV' },
         { name: 'Adlexy', label: 'Adlexy', bg: 'bg-gradient-to-br from-[#ff0055] to-[#aa00ff]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'AX' },
+        { name: 'RewardTym', label: 'RewardTym', bg: 'bg-gradient-to-br from-[#f59e0b] to-[#ea580c]', text: 'text-white', badge: 'New', badgeBg: 'bg-emerald-500', logo: 'RT' },
         { name: 'VortexWall', label: 'VortexWall', bg: 'bg-[#e91e63]', text: 'text-white', badge: null, badgeBg: '', logo: 'VW' },
         { name: 'GemiAd', label: 'GemiAd', bg: 'bg-[#6366f1]', text: 'text-white', badge: null, badgeBg: '', logo: 'GA' },
         { name: 'Upwall', label: 'Upwall', bg: 'bg-[#4caf50]', text: 'text-white', badge: null, badgeBg: '', logo: 'UW' },
@@ -5541,7 +5614,7 @@
                 <h2 class="text-xl sm:text-2xl font-black text-white truncate leading-tight">${displayName}</h2>
                 <p class="text-[12px] text-slate-400 mt-0.5 flex items-center gap-1.5 truncate">
                   <span class="truncate">${displayEmail}</span>
-                  ${currentUser ? '<span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-[10px]">✓</span>' : ''}
+                  ${currentUser ? '<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-slate-950 flex-shrink-0 ml-1.5 shadow-sm" title="Email verified"><svg class="w-2.5 h-2.5 stroke-[3] text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>' : ''}
                 </p>
               </div>
             </div>
@@ -5648,6 +5721,29 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    function closeProfileDropdown() {
+      const dd = document.getElementById('profile-dropdown');
+      if (!dd) return;
+      dd.classList.add('hidden');
+      dd.style.display = 'none';
+    }
+
+    function openProfileDropdown() {
+      // Ensure notifications are fully closed first
+      const modal = document.getElementById('notifications-modal');
+      if (modal) {
+        modal.classList.remove('notif-dropdown-open', 'notif-drawer-open');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+      }
+      const dd = document.getElementById('profile-dropdown');
+      if (!dd) return;
+      dd.classList.remove('hidden');
+      dd.style.display = 'flex';
+      if (window.lucide) lucide.createIcons();
+    }
+
     function toggleProfileDropdown(e) {
       if (e) {
         e.preventDefault();
@@ -5655,17 +5751,24 @@
       }
       const dd = document.getElementById('profile-dropdown');
       if (!dd) return;
-      dd.classList.toggle('hidden');
-      if (window.lucide) lucide.createIcons();
+      if (dd.classList.contains('hidden') || dd.style.display === 'none') {
+        openProfileDropdown();
+      } else {
+        closeProfileDropdown();
+      }
     }
 
     // Close profile dropdown when clicking outside
     document.addEventListener('click', function (ev) {
       const dd = document.getElementById('profile-dropdown');
-      if (!dd || dd.classList.contains('hidden')) return;
-      const wrap = dd.closest('.relative');
-      if (wrap && wrap.contains(ev.target)) return;
-      dd.classList.add('hidden');
+      if (!dd || dd.classList.contains('hidden') || dd.style.display === 'none') return;
+      // Avatar button / header profile trigger
+      if (ev.target.closest && ev.target.closest('[onclick*="toggleProfileDropdown"]')) return;
+      // Ignore the notifications Back button (it re-opens this menu)
+      if (ev.target.closest && (ev.target.closest('#notifBackBtn') || ev.target.closest('#notifications-modal'))) return;
+      // Clicks inside the profile card itself
+      if (dd.contains(ev.target)) return;
+      closeProfileDropdown();
     });
 
     // ── Live Chat (min 50 coins earned) ──
