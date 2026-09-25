@@ -1,0 +1,645 @@
+body {
+      background-color: #0c131d;
+      color: #94a3b8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
+    }
+    /* Image load placeholder (dollah-style) — shows until image loads */
+    img {
+      background-color: #1e2a38;
+    }
+    .offer-img-placeholder,
+    .img-placeholder {
+      background-color: #1e2a38 !important;
+    }
+
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0c131d; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1b2632; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #243445; }
+    .nav-active {
+      background-color: #00d672 !important;
+      color: #061910 !important;
+      font-weight: 800 !important;
+    }
+    .cat-active {
+      background-color: #16202a !important;
+      color: #00d672 !important;
+      font-weight: 700 !important;
+      border-left: 3px solid #00d672;
+    }
+    .cat-active .cat-badge {
+      background-color: #00d672 !important;
+      color: #061910 !important;
+    }
+    @keyframes toastSlideIn {
+      0% { opacity: 0; transform: translateY(25px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .toast-animate-in {
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-backdrop {
+      background: rgba(4, 8, 12, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    @keyframes modalIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-card {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      animation: modalIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 24px 64px rgba(0,0,0,0.55),
+        0 0 80px rgba(0, 214, 114, 0.06);
+    }
+    /* Only TOP thin strip — moving colors (not 4 sides) */
+    .modal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(
+        90deg,
+        #00d672,
+        #34d399,
+        #22d3ee,
+        #a78bfa,
+        #f472b6,
+        #fbbf24,
+        #00d672
+      );
+      background-size: 200% 100%;
+      animation: topStripFlow 3s linear infinite;
+      pointer-events: none;
+      z-index: 6;
+    }
+    @keyframes topStripFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .auth-input:focus {
+      border-color: #00d672 !important;
+      box-shadow: 0 0 0 3px rgba(0, 214, 114, 0.12);
+    }
+    .auth-submit-btn {
+      background: linear-gradient(135deg, #00e67a 0%, #00d672 45%, #00b85c 100%);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s;
+    }
+    .auth-submit-btn:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 8px 28px rgba(0, 214, 114, 0.35);
+      transform: translateY(-1px);
+    }
+    .auth-submit-btn:active { transform: translateY(0); }
+    .notif-item {
+      background-color: #1e2a38 !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .notif-item:hover {
+      background-color: #253446 !important;
+      transform: translateY(-1px);
+      border-color: rgba(0, 214, 114, 0.35) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Shared LARGE card — identical fixed position + size (zero offset between views) */
+    #profile-dropdown,
+    #notifications-modal {
+      position: fixed !important;
+      top: 4.25rem !important;   /* under header */
+      right: 0.75rem !important; /* same right edge */
+      left: auto !important;
+      margin: 0 !important;
+      width: min(380px, calc(100vw - 1.5rem)) !important;
+      height: min(80vh, calc(100vh - 5rem)) !important;
+      max-height: min(80vh, calc(100vh - 5rem)) !important;
+      background: #1a2433;
+      border: 1px solid #2a3a4c;
+      border-radius: 18px;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,255,255,0.03);
+      overflow: hidden;
+      z-index: 100;
+      flex-direction: column;
+    }
+    #notifications-modal {
+      background-color: #16202a !important;
+      display: none;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+      transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    #notifications-modal.notif-dropdown-open {
+      display: flex !important;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    #notifications-modal::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d672, #34d399, #22d3ee, #a78bfa, #f472b6, #fbbf24, #00d672);
+      background-size: 200% 100%;
+      animation: topStripFlow 3s linear infinite;
+      pointer-events: none;
+      z-index: 6;
+      border-radius: 18px 18px 0 0;
+    }
+    .notif-drawer-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      max-height: inherit;
+      min-height: 0;
+    }
+    /* legacy class kept for safety */
+    #notifications-modal.notif-drawer-open {
+      display: flex !important;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* Polished live-feed controls */
+    .feed-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: #0e1620;
+      border: 1px solid #1e2a38;
+      border-radius: 12px;
+      padding: 3px;
+      gap: 2px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .feed-toggle-btn {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 9px;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+    }
+    .feed-toggle-btn:hover { color: #fff; }
+    .feed-toggle-btn.active {
+      background: linear-gradient(135deg, #00d672 0%, #00b85c 100%);
+      color: #061910;
+      box-shadow: 0 2px 10px rgba(0, 214, 114, 0.35);
+    }
+    .feed-dropdown-wrap {
+      position: relative;
+      width: 76px;
+    }
+    .feed-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      height: 32px;
+      background: #0e1620;
+      border: 1px solid #1e2a38;
+      border-radius: 10px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .feed-dropdown-btn:hover {
+      border-color: #00d672;
+      box-shadow: 0 0 0 1px rgba(0, 214, 114, 0.15);
+    }
+    .feed-dropdown-btn .coin-icon-xs {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 2px rgba(245, 197, 66, 0.5));
+    }
+    .feed-dropdown-btn .feed-dd-chevron {
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      color: #64748b;
+    }
+    .feed-dropdown-menu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      z-index: 40;
+      width: 100%;
+      background: #141d26;
+      border: 1px solid #22303e;
+      border-radius: 10px;
+      padding: 2px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03);
+      display: none;
+    }
+    .feed-dropdown-menu.open { display: block; animation: toastSlideIn 0.2s ease; }
+    .feed-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      text-align: center;
+      padding: 4px 2px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.25;
+    }
+    .feed-dropdown-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+    .feed-dropdown-item.selected {
+      background: rgba(0, 214, 114, 0.12);
+      color: #00d672;
+    }
+    .feed-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0f171f;
+      border: 1px solid #1a2530;
+      border-radius: 14px;
+      padding: 11px 14px;
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    }
+    .feed-row:hover {
+      border-color: rgba(0, 214, 114, 0.4);
+      background: #121b24;
+      transform: translateY(-1px);
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.01em;
+    }
+    .section-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    /* Live ticker — drag scroll + hover tooltip (shows BELOW chip) */
+    #global-live-ticker {
+      overflow: visible;
+      z-index: 25;
+    }
+    #global-live-ticker-track {
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      /* Hide scrollbar — mouse drag & touch swipe still work */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #global-live-ticker-track::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    #global-live-ticker-track.is-dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+    #global-live-ticker-track.is-dragging * {
+      pointer-events: none;
+    }
+    #providers-carousel::-webkit-scrollbar,
+    #high-earning-carousel::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    #high-earning-carousel {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #high-earning-carousel.is-dragging {
+      cursor: grabbing !important;
+      scroll-behavior: auto;
+    }
+    #high-earning-carousel.is-dragging * {
+      pointer-events: none;
+    }
+
+    #providers-carousel.is-dragging {
+      cursor: grabbing !important;
+      scroll-behavior: auto;
+    }
+    #providers-carousel.is-dragging * {
+      pointer-events: none;
+    }
+    .ticker-chip {
+      position: relative;
+      cursor: pointer;
+    }
+    /* Floating tip is position:fixed via JS so it never gets clipped */
+    #ticker-float-tip {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      min-width: 180px;
+      max-width: 280px;
+      background: #141d26;
+      border: 1px solid #2a3a4c;
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+      pointer-events: none;
+      white-space: normal;
+      animation: toastSlideIn 0.18s ease;
+    }
+    #ticker-float-tip::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: #2a3a4c;
+    }
+
+    /* Float toast bottom timing bar — thin solid dark line only (no gray track) */
+    .toast-with-timer {
+      position: relative;
+      overflow: hidden;
+    }
+    .toast-progress-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: none !important;
+      background-color: transparent !important;
+      border: none;
+      border-radius: 0 0 16px 16px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .toast-progress-bar {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: #000000;
+      border-radius: 0 0 0 16px;
+      transform-origin: left center;
+      transform: scaleX(1);
+      box-shadow: none;
+    }
+    .toast-progress-bar.run {
+      animation: toastProgressShrink linear forwards;
+    }
+    @keyframes toastProgressShrink {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+
+    /* Daily Claim modal rows */
+    .daily-claim-row {
+      background: #1a2433;
+      border: 1px solid #243040;
+      border-radius: 14px;
+      padding: 12px 14px 10px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .daily-claim-row:hover {
+      border-color: rgba(0, 214, 114, 0.28);
+      background: #1c2836;
+    }
+    .daily-claim-progress-track {
+      height: 4px;
+      background: #0d1319;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .daily-claim-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #059669, #10b981, #34d399);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.45);
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+    .daily-claim-btn {
+      min-width: 72px;
+      height: 30px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform 0.12s ease, filter 0.15s, background 0.2s, opacity 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      padding: 0 12px;
+      white-space: nowrap;
+    }
+    .daily-claim-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      background: #243040 !important;
+      color: #64748b !important;
+      box-shadow: none !important;
+      filter: none !important;
+    }
+    .daily-claim-btn.enabled {
+      background: linear-gradient(135deg, #00e67a 0%, #00d672 50%, #00b85c 100%);
+      color: #061910;
+      box-shadow: 0 4px 16px rgba(0, 214, 114, 0.35);
+    }
+    .daily-claim-btn.enabled:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .daily-claim-btn.enabled:active {
+      transform: translateY(0) scale(0.97);
+    }
+    .daily-claim-btn.claimed {
+      background: rgba(16, 185, 129, 0.15) !important;
+      color: #34d399 !important;
+      opacity: 1 !important;
+      cursor: default;
+      box-shadow: none !important;
+    }
+
+    /* Coin amounts — white with ~10% gray (not yellow) */
+    .coin-amt,
+    #header-coins,
+    #floating-offer-coins,
+    #modal-offer-coins,
+    #cashout-current-balance,
+    #header-coins-btn {
+      color: #e6e6e6 !important;
+    }
+    #header-coins-btn.text-emerald-400 #header-coins-unit {
+      color: #34d399 !important;
+    }
+    #header-coins-btn:not(.text-emerald-400) #header-coins-unit {
+      color: #64748b !important;
+    }
+
+    /* Small vibrant yellow coin icon */
+    .coin-icon-sm {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      vertical-align: middle;
+      filter: drop-shadow(0 0 3px rgba(245, 197, 66, 0.55));
+    }
+    .coin-icon-md {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      vertical-align: middle;
+      filter: drop-shadow(0 0 4px rgba(245, 197, 66, 0.5));
+    }
+
+    /* Stacked float toasts — newest at bottom, older push up */
+    #float-toast-stack {
+      position: fixed;
+      left: 1.5rem;
+      bottom: 1.5rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 10px;
+      max-width: min(340px, calc(100vw - 2rem));
+      pointer-events: none;
+    }
+    #float-toast-stack .float-toast-card {
+      pointer-events: auto;
+      position: relative;
+      width: 340px;
+      max-width: 90vw;
+      min-width: 280px;
+      background: rgba(36, 52, 71, 0.95);
+      border: 1px solid #3a4d63;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+      cursor: pointer;
+      transition: border-color 0.2s;
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
+    #float-toast-stack .float-toast-card:hover {
+      border-color: rgba(0, 214, 114, 0.55);
+    }
+    /* Jump-up bounce then swipe left off-screen */
+    @keyframes jumpAndSwipeLeft {
+      0% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 1;
+      }
+      25% {
+        /* Upward jump / bounce pop */
+        transform: translateX(8px) translateY(-10px) scale(1.04);
+        opacity: 1;
+      }
+      100% {
+        /* Swift slide-out to the left */
+        transform: translateX(-140%) translateY(-10px) scale(0.92);
+        opacity: 0;
+      }
+    }
+    #float-toast-stack .float-toast-card.toast-jump-exit {
+      animation: jumpAndSwipeLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+      pointer-events: none !important;
+    }
+    @media (max-width: 640px) {
+      #float-toast-stack {
+        left: 0.75rem;
+        bottom: 0.75rem;
+        right: 0.75rem;
+        max-width: none;
+      }
+      #float-toast-stack .float-toast-card {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+      }
+    }
+
+/* ── Offer completed earnings toast (realtime postbacks) ── */
+.earn-success-toast {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.95) 0%, rgba(15, 23, 42, 0.96) 55%, rgba(17, 24, 39, 0.98) 100%) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(16, 185, 129, 0.2), 0 0 32px rgba(16, 185, 129, 0.12) !important;
+  opacity: 0;
+  transform: translateY(18px) scale(0.96);
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.earn-success-toast.earn-toast-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.earn-success-toast.earn-toast-out {
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.earn-toast-check {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+}
+.earn-toast-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.earn-toast-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
