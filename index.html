@@ -213,36 +213,55 @@
       color: #061910;
       box-shadow: 0 2px 10px rgba(0, 214, 114, 0.35);
     }
-    .feed-dropdown-wrap { position: relative; }
+    .feed-dropdown-wrap {
+      position: relative;
+      width: 76px;
+    }
     .feed-dropdown-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      height: 32px;
       background: #0e1620;
       border: 1px solid #1e2a38;
-      border-radius: 12px;
-      padding: 7px 12px 7px 14px;
-      font-size: 12px;
-      font-weight: 700;
+      border-radius: 10px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 600;
       color: #e2e8f0;
       cursor: pointer;
       transition: border-color 0.2s, box-shadow 0.2s;
-      min-width: 148px;
     }
     .feed-dropdown-btn:hover {
       border-color: #00d672;
       box-shadow: 0 0 0 1px rgba(0, 214, 114, 0.15);
     }
+    .feed-dropdown-btn .coin-icon-xs {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 2px rgba(245, 197, 66, 0.5));
+    }
+    .feed-dropdown-btn .feed-dd-chevron {
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      color: #64748b;
+    }
     .feed-dropdown-menu {
       position: absolute;
+      left: 0;
       right: 0;
-      top: calc(100% + 6px);
+      top: calc(100% + 4px);
       z-index: 40;
-      min-width: 180px;
+      width: 100%;
       background: #141d26;
       border: 1px solid #22303e;
-      border-radius: 14px;
-      padding: 6px;
+      border-radius: 10px;
+      padding: 2px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03);
       display: none;
     }
@@ -250,17 +269,18 @@
     .feed-dropdown-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       width: 100%;
-      text-align: left;
-      padding: 9px 12px;
-      border-radius: 10px;
-      font-size: 12px;
+      text-align: center;
+      padding: 4px 2px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 600;
       color: #cbd5e1;
       transition: background 0.15s, color 0.15s;
+      line-height: 1.25;
     }
-    .feed-dropdown-item:hover { background: #1a2530; color: #fff; }
+    .feed-dropdown-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
     .feed-dropdown-item.selected {
       background: rgba(0, 214, 114, 0.12);
       color: #00d672;
@@ -5487,21 +5507,20 @@
               </h3>
               <span class="section-sub pl-4">Public activity · updates in realtime</span>
             </div>
-            <div class="flex flex-wrap items-center gap-2.5">
-              <button type="button" id="live-feed-type-toggle" onclick="toggleLiveFeedType()" class="inline-flex items-center justify-center min-w-[118px] px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition shadow-sm ${liveFeedType === 'offers' ? 'bg-[#00d672] text-[#061910] shadow-emerald-900/30' : 'bg-[#16202a] text-slate-200 border border-[#2a3a4c] hover:border-[#00d672]/40'}">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="live-feed-type-toggle" onclick="toggleLiveFeedType()" class="inline-flex items-center justify-center h-8 min-w-[86px] px-2.5 rounded-lg text-[11px] font-semibold transition shadow-sm ${liveFeedType === 'offers' ? 'bg-[#00d672] text-[#061910] shadow-emerald-900/30' : 'bg-[#16202a] text-slate-200 border border-[#2a3a4c] hover:border-[#00d672]/40'}">
                 ${liveFeedType === 'offers' ? 'Offers' : 'Withdrawals'}
               </button>
               <div class="feed-dropdown-wrap" onclick="event.stopPropagation()">
                 <button type="button" class="feed-dropdown-btn" onclick="toggleLiveFeedDropdown(event)">
-                  ${typeof coinIconSvg === 'function' ? coinIconSvg('coin-icon-sm') : '<span class="text-amber-400">●</span>'}
+                  ${typeof coinIconSvg === 'function' ? coinIconSvg('coin-icon-xs') : '<span class="text-amber-400 text-[10px]">●</span>'}
                   <span>${liveFeedMinCoins === 0 ? 'All' : liveFeedMinCoins.toLocaleString()}</span>
-                  <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 ml-auto"></i>
+                  <i data-lucide="chevron-down" class="feed-dd-chevron"></i>
                 </button>
                 <div id="live-feed-dropdown-menu" class="feed-dropdown-menu">
                   ${[50, 100, 500, 1000, 5000].map(v => `
                     <button type="button" class="feed-dropdown-item ${liveFeedMinCoins === v ? 'selected' : ''}" onclick="pickLiveFeedMin(${v}, event)">
-                      <span>${v.toLocaleString()}</span>
-                      ${liveFeedMinCoins === v ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                      ${v.toLocaleString()}
                     </button>
                   `).join('')}
                 </div>
