@@ -115,9 +115,12 @@
     }
     .auth-submit-btn:active { transform: translateY(0); }
     .notif-item {
+      background-color: #1e2a38 !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
       transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
     .notif-item:hover {
+      background-color: #253446 !important;
       transform: translateY(-1px);
       border-color: rgba(0, 214, 114, 0.35) !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -143,6 +146,7 @@
       flex-direction: column;
     }
     #notifications-modal {
+      background-color: #16202a !important;
       display: none;
       opacity: 0;
       transform: translateY(-8px) scale(0.98);
@@ -470,16 +474,33 @@
       padding: 14px 16px 16px;
       box-shadow: 0 16px 48px rgba(0,0,0,0.45);
       cursor: pointer;
-      transition: border-color 0.2s, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+      transition: border-color 0.2s;
       animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
     }
     #float-toast-stack .float-toast-card:hover {
       border-color: rgba(0, 214, 114, 0.55);
     }
-    #float-toast-stack .float-toast-card.is-leaving {
-      opacity: 0;
-      transform: translateY(12px) scale(0.96);
-      pointer-events: none;
+    /* Jump-up bounce then swipe left off-screen */
+    @keyframes jumpAndSwipeLeft {
+      0% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 1;
+      }
+      25% {
+        /* Upward jump / bounce pop */
+        transform: translateX(8px) translateY(-10px) scale(1.04);
+        opacity: 1;
+      }
+      100% {
+        /* Swift slide-out to the left */
+        transform: translateX(-140%) translateY(-10px) scale(0.92);
+        opacity: 0;
+      }
+    }
+    #float-toast-stack .float-toast-card.toast-jump-exit {
+      animation: jumpAndSwipeLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+      pointer-events: none !important;
     }
     @media (max-width: 640px) {
       #float-toast-stack {
@@ -2123,11 +2144,20 @@
     let profileFilter = 'all';
     let profileSection = 'earnings'; // earnings | withdrawals | inprogress | onhold
     let liveFeedType = 'offers'; // offers | withdrawals
-    let liveFeedMinCoins = 0; // 0 | 50 | 100 | 500 | 1000
+    try {
+      const savedFeed = localStorage.getItem('gollah_live_feed_type');
+      if (savedFeed === 'withdrawals' || savedFeed === 'offers') liveFeedType = savedFeed;
+    } catch (e) {}
+    let liveFeedMinCoins = 0; // 0 = All | 50 | 100 | 500 | 1000 | 5000
 
     function setLiveFeedType(type) {
-      liveFeedType = type;
+      liveFeedType = (type === 'withdrawals') ? 'withdrawals' : 'offers';
+      try { localStorage.setItem('gollah_live_feed_type', liveFeedType); } catch (e) {}
       if (currentTab === 'home' || currentTab === 'premium') renderHome();
+    }
+
+    function toggleLiveFeedType() {
+      setLiveFeedType(liveFeedType === 'offers' ? 'withdrawals' : 'offers');
     }
 
     function setLiveFeedMinCoins(min) {
@@ -2145,6 +2175,8 @@
     function pickLiveFeedMin(min, e) {
       if (e) e.stopPropagation();
       setLiveFeedMinCoins(min);
+      const menu = document.getElementById('live-feed-dropdown-menu');
+      if (menu) menu.classList.remove('open');
     }
 
     // Close custom dropdown when clicking outside
@@ -2437,6 +2469,66 @@
       return `<div class="${box} bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center text-[#00d672] font-black text-sm">G</div>`;
     }
 
+    /** Live Feed row icon — same branded badges / offer images as Notifications */
+    function liveFeedLeftIcon(t) {
+      const box = 'w-10 h-10 rounded-xl shrink-0 overflow-hidden flex items-center justify-center';
+      const typeStr = String(t.type || '');
+      const titleStr = String(t.offerName || t.type || '');
+      const iconChar = t.icon || '';
+      const isLtc = /litecoin|\bltc\b/i.test(typeStr + ' ' + titleStr) || iconChar === 'Ł';
+      const isBinance = /binance/i.test(typeStr + ' ' + titleStr) || iconChar === 'B' || iconChar === '🟡';
+      const isWithdraw = isLtc || isBinance || /withdraw|cashout/i.test(typeStr);
+
+      if (isWithdraw && isBinance) {
+        return `<div class="${box} bg-[#F0B90B] text-[#0b0e11] font-black text-sm">B</div>`;
+      }
+      if (isWithdraw && isLtc) {
+        return `<div class="${box} bg-[#9195a1] text-white font-black text-sm">Ł</div>`;
+      }
+      if (isWithdraw) {
+        return `<div class="${box} bg-[#9195a1] text-white font-black text-sm">${(iconChar || 'Ł').toString().slice(0, 2)}</div>`;
+      }
+
+      // Offer / completion — prefer stored image, then catalog match
+      const imgDirect = t.image || t.logo || null;
+      if (imgDirect && typeof imgDirect === 'string' && (imgDirect.startsWith('http') || imgDirect.startsWith('data:image') || imgDirect.startsWith('/'))) {
+        return `<div class="${box} bg-[#1a2530] border border-[#2a3a4c]"><img src="${String(imgDirect).replace(/"/g, '&quot;')}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" /></div>`;
+      }
+
+      try {
+        const name = (t.offerName || t.type || '').trim();
+        if (name && typeof resolveOfferVisual === 'function') {
+          const visual = resolveOfferVisual({ name: name, id: t.offerId || null, provider: t.provider || '' });
+          if (visual.image) {
+            return `<div class="${box} bg-[#1a2530] border border-[#2a3a4c]"><img src="${String(visual.image).replace(/"/g, '&quot;')}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" /></div>`;
+          }
+          if (visual.emoji) {
+            const bg = visual.emojiBg || 'linear-gradient(145deg,#1a2734,#0e1620)';
+            return `<div class="${box} text-[18px] leading-none border border-white/5" style="background:${String(bg).replace(/"/g, '')}">${visual.emoji}</div>`;
+          }
+        }
+        const byName = (typeof ALL_OFFERS !== 'undefined' ? ALL_OFFERS : []).find(o => o.name === name || (name && o.name && o.name.toLowerCase() === name.toLowerCase()));
+        const he = (typeof HIGH_EARNING_OFFERS !== 'undefined' ? HIGH_EARNING_OFFERS : []).find(o => o.name === name || (name && o.name && o.name.toLowerCase() === name.toLowerCase()));
+        const src = (byName && (byName.logo || byName.image)) || (he && he.image) || null;
+        if (src) {
+          return `<div class="${box} bg-[#1a2530] border border-[#2a3a4c]"><img src="${String(src).replace(/"/g, '&quot;')}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" /></div>`;
+        }
+        if (he && he.emoji) {
+          const bg = he.bg || 'linear-gradient(145deg,#1a2734,#0e1620)';
+          return `<div class="${box} text-[18px] leading-none border border-white/5" style="background:${bg}">${he.emoji}</div>`;
+        }
+      } catch (e) {}
+
+      if (t.emoji) {
+        const bg = t.emojiBg || t.bg || 'linear-gradient(145deg,#1a2734,#0e1620)';
+        return `<div class="${box} text-[18px] leading-none border border-white/5" style="background:${String(bg).replace(/"/g, '')}">${t.emoji}</div>`;
+      }
+
+      // Fallback letter badge
+      const letter = (t.offerName || t.type || iconChar || 'O').toString().trim().charAt(0).toUpperCase() || 'O';
+      return `<div class="${box} bg-[#00d672]/15 border border-[#00d672]/25 text-[#00d672] font-black text-sm">${letter}</div>`;
+    }
+
     function renderNotificationsList() {
       const list = document.getElementById('notifications-list');
       if (!list) return;
@@ -2511,7 +2603,7 @@
         const timeLabel = n.createdAt ? formatTickerTime(n.createdAt) : (n.time || 'just now');
 
         const item = document.createElement('div');
-        item.className = 'notif-item w-full p-4 mb-3 rounded-[18px] border border-[#243040] bg-[#16202a] hover:bg-[#1a2530] transition-colors';
+        item.className = 'notif-item w-full p-4 mb-3 rounded-[18px] border border-white/[0.05] bg-[#1e2a38] hover:bg-[#253446] transition-colors';
         item.innerHTML = `
           <div class="flex justify-between items-center w-full mb-3">
             <span class="text-[11px] text-slate-400 font-semibold tracking-wide">${timeLabel}</span>
@@ -2948,13 +3040,37 @@
       const item = activeFloatToasts[idx];
       clearTimeout(item.timer);
       activeFloatToasts.splice(idx, 1);
-      if (!item.el) return;
+      const el = item.el;
+      if (!el) return;
+
       if (immediate) {
-        item.el.remove();
+        try { el.remove(); } catch (e) {}
         return;
       }
-      item.el.classList.add('is-leaving');
-      setTimeout(() => { try { item.el.remove(); } catch (e) {} }, 280);
+
+      // Already animating out — ignore second click
+      if (el.dataset.leaving === '1') return;
+      el.dataset.leaving = '1';
+
+      // Clear any inline transform/opacity so keyframes control the exit
+      el.style.transition = 'none';
+      el.style.transform = '';
+      el.style.opacity = '';
+      // Kill entrance keyframes, then play jump + swipe-left
+      el.style.animation = 'none';
+      void el.offsetWidth; // reflow so the new animation can restart
+      el.classList.add('toast-jump-exit');
+      el.style.pointerEvents = 'none';
+
+      let removed = false;
+      const cleanup = function () {
+        if (removed) return;
+        removed = true;
+        try { el.remove(); } catch (e) {}
+      };
+      el.addEventListener('animationend', cleanup, { once: true });
+      // Fallback if animationend is missed
+      setTimeout(cleanup, 450);
     }
 
     function triggerDollahFloatingToast(data) {
@@ -3007,7 +3123,11 @@
       card.className = 'float-toast-card toast-with-timer';
       card.dataset.toastId = id;
       card.setAttribute('role', 'status');
-      card.onclick = function () { navigate('profile'); };
+      card.onclick = function (ev) {
+        if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+        dismissFloatToast(id, false);
+      };
+      card.title = 'Click to dismiss';
       card.innerHTML = `
         <div class="flex items-start justify-between gap-3 mb-2.5">
           <span class="text-[11px] text-slate-400 font-medium pt-0.5">${timeText}</span>
@@ -5368,20 +5488,19 @@
               <span class="section-sub pl-4">Public activity · updates in realtime</span>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
-              <div class="feed-toggle">
-                <button type="button" onclick="setLiveFeedType('offers')" class="feed-toggle-btn ${liveFeedType === 'offers' ? 'active' : ''}">Offers</button>
-                <button type="button" onclick="setLiveFeedType('withdrawals')" class="feed-toggle-btn ${liveFeedType === 'withdrawals' ? 'active' : ''}">Withdrawals</button>
-              </div>
+              <button type="button" id="live-feed-type-toggle" onclick="toggleLiveFeedType()" class="inline-flex items-center justify-center min-w-[118px] px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition shadow-sm ${liveFeedType === 'offers' ? 'bg-[#00d672] text-[#061910] shadow-emerald-900/30' : 'bg-[#16202a] text-slate-200 border border-[#2a3a4c] hover:border-[#00d672]/40'}">
+                ${liveFeedType === 'offers' ? 'Offers' : 'Withdrawals'}
+              </button>
               <div class="feed-dropdown-wrap" onclick="event.stopPropagation()">
                 <button type="button" class="feed-dropdown-btn" onclick="toggleLiveFeedDropdown(event)">
-                  <i data-lucide="filter" class="w-3.5 h-3.5 text-[#00d672]"></i>
-                  <span>${liveFeedMinCoins === 0 ? 'All amounts' : 'Min ' + liveFeedMinCoins.toLocaleString()}</span>
+                  ${typeof coinIconSvg === 'function' ? coinIconSvg('coin-icon-sm') : '<span class="text-amber-400">●</span>'}
+                  <span>${liveFeedMinCoins === 0 ? 'All' : liveFeedMinCoins.toLocaleString()}</span>
                   <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 ml-auto"></i>
                 </button>
                 <div id="live-feed-dropdown-menu" class="feed-dropdown-menu">
-                  ${[0, 50, 100, 500, 1000].map(v => `
+                  ${[50, 100, 500, 1000, 5000].map(v => `
                     <button type="button" class="feed-dropdown-item ${liveFeedMinCoins === v ? 'selected' : ''}" onclick="pickLiveFeedMin(${v}, event)">
-                      <span>${v === 0 ? 'All amounts' : 'Min ' + v.toLocaleString() + ' coins'}</span>
+                      <span>${v.toLocaleString()}</span>
                       ${liveFeedMinCoins === v ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
                     </button>
                   `).join('')}
@@ -5424,12 +5543,15 @@
                 const isPending = (t.status || '') === 'Pending';
                 const liveTime = t.createdAt ? formatTickerTime(t.createdAt) : (t.time || 'just now');
                 const unameAttr = (t.username || 'Member').replace(/"/g, '&quot;');
+                const rowTitle = isOffer
+                  ? (t.offerName || t.type || 'Offer completed')
+                  : (t.type || 'Withdrawal');
                 return `
                   <div class="feed-row cursor-pointer" data-feed-user="${unameAttr}" data-feed-id="${t.id || fi}" onclick="openPublicProfileFromFeed(this)">
-                    <span class="w-10 h-10 rounded-xl bg-[#16202a] border border-[#1e2a38] flex items-center justify-center text-sm font-bold shrink-0">${t.icon || (isOffer ? '⚡' : 'Ł')}</span>
+                    ${liveFeedLeftIcon(t)}
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-[13px] font-semibold text-white truncate">${isOffer ? 'Offer completed' : t.type}</span>
+                        <span class="text-[13px] font-semibold text-white truncate">${rowTitle}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isPending ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'}">${t.status || 'Complete'}</span>
                       </div>
                       <span class="text-[11px] text-slate-500 mt-0.5 block">${(t.username ? t.username + ' · ' : '')}${liveTime}</span>
