@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/postback-:provider", "destination": "/api/postback?provider=:provider" }
+  ]
+}
