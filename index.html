@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Reward for Completing Task</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300d672'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-size='36' font-weight='900' fill='%23ffffff'%3EG%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300d672'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-size='36' font-weight='900' fill='%23ffffff'%3EG%3C/text%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ES5GC5CDFM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ES5GC5CDFM');
+  </script>
+
+<style id="gollah-negative-amount-css">
+  .gollah-negative-amount,
+  .gollah-negative-amount span,
+  .coin-amt.gollah-negative-amount,
+  .notif-item .gollah-negative-amount,
+  .uas-reward.gollah-negative-amount {
+    color: #ED1E4C !important;
+  }
+</style>
+
+<style id="gollah-toast-sad-css">
+  /* Chargeback toast: soft downward crimson rain (card size/layout unchanged) */
+  .float-toast-confetti.float-toast-sad {
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .float-toast-sad .ftc-drop {
+    position: absolute;
+    top: -8px;
+    width: 3px;
+    height: 10px;
+    border-radius: 2px;
+    background: rgba(237, 30, 76, 0.55);
+    opacity: 0;
+    animation: gollah-sad-fall 1.6s ease-in forwards;
+  }
+  .float-toast-sad .ftc-d1 { left: 12%; animation-delay: 0.05s; height: 8px; }
+  .float-toast-sad .ftc-d2 { left: 28%; animation-delay: 0.25s; height: 12px; background: rgba(237,30,76,0.4); }
+  .float-toast-sad .ftc-d3 { left: 44%; animation-delay: 0.12s; height: 9px; }
+  .float-toast-sad .ftc-d4 { left: 58%; animation-delay: 0.35s; height: 11px; background: rgba(148,163,184,0.35); }
+  .float-toast-sad .ftc-d5 { left: 72%; animation-delay: 0.18s; height: 8px; }
+  .float-toast-sad .ftc-d6 { left: 86%; animation-delay: 0.42s; height: 10px; background: rgba(237,30,76,0.35); }
+  @keyframes gollah-sad-fall {
+    0%   { transform: translateY(0); opacity: 0; }
+    12%  { opacity: 0.7; }
+    100% { transform: translateY(72px); opacity: 0; }
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0D1117] text-slate-200">
+  <script>
+  (function(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i)||'';if(k.indexOf('auth-token')===-1&&k.indexOf('supabase.auth')===-1)continue;var v=localStorage.getItem(k);if(v&&v.length>20){document.body.classList.add('layout-logged-in');break;}}}catch(e){}})();
+  </script>
+
+  <!-- GLOBAL LIVE TICKER — guest: top of page; logged-in: moved below header by JS -->
+  <div id="global-live-ticker" class="sticky top-0 z-[45] bg-[#0D1117]/95 backdrop-blur-sm px-3 sm:px-4 py-2.5 shrink-0 flex items-center gap-2.5 w-full">
+    <div class="live-indicator-box" title="Live activity">
+      <span class="live-indicator-dot"></span>
+    </div>
+    <div id="global-live-ticker-track" class="flex items-center gap-2 flex-1 min-w-0">
+      <span class="text-[10px] text-slate-600 font-medium shrink-0">Loading…</span>
+    </div>
+  </div>
+
+  <!-- TOP HEADER — mobile: logo only; PC: logo + Gollah text -->
+  <header class="h-14 sm:h-[68px] bg-[#151A23] border-b border-[#2A3344] flex items-center z-40 shrink-0 sticky top-0 relative">
+    <div id="header-inner" class="header-inner flex items-center w-full h-full min-w-0">
+    <!-- Logo zone aligns with left sidebar (w-56 on lg) when logged in -->
+    <div id="header-logo-zone" class="shrink-0 h-full flex items-center px-2.5 sm:px-4 lg:w-56 bg-[#151A23]">
+      <div class="flex items-center gap-2 sm:gap-2.5 cursor-pointer" onclick="filterCategory('featured'); navigateHome();">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#00d672] flex items-center justify-center text-white font-black text-sm sm:text-base shadow-md shadow-emerald-500/25 shrink-0">
+          G
+        </div>
+        <!-- Mobile: hide "Gollah" text — PC/tablet only -->
+        <span class="hidden sm:inline text-xl font-black text-white tracking-tight">Gollah</span>
+      </div>
+    </div>
+
+    <!-- Guest centered nav (pre-login only) — centered in header-inner -->
+    <nav id="header-guest-nav" class="hidden absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 items-center gap-1 z-10">
+      <button type="button" onclick="openAuthModal(true)" class="guest-nav-item">Earn</button>
+      <button type="button" onclick="openAuthModal(true)" class="guest-nav-item">Offers</button>
+      <button type="button" onclick="openAuthModal(true)" class="guest-nav-item">Surveys</button>
+      <button type="button" onclick="openAuthModal(true)" class="guest-nav-item">Withdraw</button>
+      <button type="button" onclick="openAuthModal(true)" class="guest-nav-item">Bonus</button>
+    </nav>
+
+    <!-- Content starts AFTER sidebar line: search + actions -->
+    <div class="flex-1 min-w-0 h-full flex items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-5 relative">
+      <div id="header-search-wrap" class="relative hidden sm:block">
+        <i data-lucide="search" class="w-[18px] h-[18px] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input id="offer-search-input" name="gollah_catalog_query" type="search" inputmode="search" placeholder="Search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" data-bwignore="true" role="searchbox" aria-label="Search offers" readonly onpointerdown="this.removeAttribute('readonly')" onfocus="this.removeAttribute('readonly')" oninput="handleOfferSearch(this.value)" class="w-full bg-[#0D1117] border border-[#2A3344] rounded-full py-2.5 pl-11 pr-5 text-sm text-[#F8FAFC] placeholder:text-slate-500 focus:outline-none focus:border-[#00d672]/60 transition" />
+      </div>
+
+      <!-- Guest: Sign In + Sign Up (PaidCash-style top bar) -->
+      <div id="header-guest-actions" class="hidden items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
+        <button type="button" onclick="openAuthModal(false)" class="px-4 sm:px-5 py-2 rounded-xl text-sm font-bold text-white border border-[#343E50] bg-transparent hover:bg-[#1E2532] hover:border-[#00d672]/40 transition">
+          Sign In
+        </button>
+        <button type="button" onclick="openAuthModal(true)" class="px-4 sm:px-5 py-2 rounded-xl text-sm font-extrabold text-white bg-[#00d672] hover:bg-[#00be64] shadow-md shadow-emerald-900/30 transition">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- Logged-in: unified Coin+Wallet block + profile + dynamic notif badge -->
+      <div id="header-user-actions" class="flex items-center gap-3 shrink-0 ml-auto max-w-full">
+      <!-- UNIFIED Coin Balance + Wallet container (pixel-perfect) -->
+      <div class="header-balance-wallet-wrap">
+        <!-- Left: Coin & Balance Area (keeps all existing JS IDs) -->
+        <button type="button" id="header-coins-btn" onclick="toggleCoinsUsdMode()" class="header-coin-area" title="Tap to switch Coins / USD · 1000 coins = $1">
+          <svg class="header-coin-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="gCoinBody" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stop-color="#FFF3C4"/>
+                <stop offset="35%" stop-color="#FFD54F"/>
+                <stop offset="70%" stop-color="#F5C542"/>
+                <stop offset="100%" stop-color="#C48912"/>
+              </radialGradient>
+              <radialGradient id="gCoinShine" cx="30%" cy="28%" r="50%">
+                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="#FFF8DC" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="30" fill="url(#gCoinBody)"/>
+            <circle cx="32" cy="32" r="30" fill="none" stroke="#A6700A" stroke-width="1.5" opacity="0.35"/>
+            <circle cx="32" cy="32" r="24" fill="none" stroke="#E8B830" stroke-width="2.2"/>
+            <circle cx="32" cy="32" r="20.5" fill="none" stroke="#F7D56A" stroke-width="1.2" opacity="0.9"/>
+            <circle cx="32" cy="32" r="7.5" fill="#FFD54F"/>
+            <circle cx="32" cy="32" r="7.5" fill="none" stroke="#D4A020" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4.2" fill="#FFE082"/>
+            <circle cx="32" cy="32" r="30" fill="url(#gCoinShine)"/>
+          </svg>
+          <span id="header-coins" class="header-coin-balance">0</span>
+          <span id="header-coins-unit" class="hidden">coins</span>
+          <i data-lucide="chevron-down" class="header-coin-chevron"></i>
+        </button>
+        <!-- Right: Purple Wallet Button (seamlessly attached) -->
+        <button type="button" onclick="navigate('shop')" class="header-wallet-btn" title="Wallet" aria-label="Wallet">
+          <svg class="header-wallet-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path fill="#FFFFFF" d="M19.5 6.5h-13A2.5 2.5 0 0 0 4 9v8.5A2.5 2.5 0 0 0 6.5 20h13a2.5 2.5 0 0 0 2.5-2.5v-8A2.5 2.5 0 0 0 19.5 6.5Z"/>
+            <path fill="#6C40EE" d="M17.25 12.25a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/>
+            <path fill="#FFFFFF" d="M6.75 5.25h11.5a.75.75 0 0 0 0-1.5H6.75a2.25 2.25 0 0 0-2.25 2.25V8a.75.75 0 0 0 1.5 0V6a.75.75 0 0 1 .75-.75Z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 3. Profile & DYNAMIC Notification Wrapper — pill (reference.png) -->
+      <div class="relative shrink-0 flex items-center gap-1">
+        <button type="button" id="header-profile-pill" onclick="toggleProfileDropdown(event)" class="header-profile-pill" aria-label="Open profile menu">
+          <div id="header-avatar-slot" class="global-avatar-wrapper ga-navbar" data-ga-role="header">
+            <svg class="global-avatar-svg" viewBox="0 0 40 40" aria-hidden="true">
+              <circle class="ga-track" cx="20" cy="20" r="18" fill="none"></circle>
+              <circle class="ga-progress" cx="20" cy="20" r="18" fill="none" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" data-ga-pct="0"></circle>
+            </svg>
+            <img id="header-avatar-img" src="assets/avatars/01%20(1).png" class="global-avatar-img" alt="" onerror="this.onerror=null;this.src='assets/avatars/01 (1).png'" />
+            <span id="header-notif-badge" class="header-notif-badge absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[#ED1E4C] text-white text-[10px] font-black px-1 rounded-full border-2 border-[#0e1620] items-center justify-center shadow hidden">0</span>
+          </div>
+          <svg class="header-profile-chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M6.5 9.5 L12 15 L17.5 9.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div id="profile-dropdown" class="hidden flex flex-col">
+          <!-- Spacious profile header — scaled for large card -->
+          <div class="px-5 pt-7 pb-5 flex flex-col items-center text-center shrink-0">
+            <div id="dropdown-avatar-slot" class="global-avatar-wrapper ga-lg mb-3" data-ga-role="dropdown">
+              <img id="dropdown-avatar-img" src="assets/avatars/01%20(1).png" class="global-avatar-img" alt="" onerror="this.onerror=null;this.src='assets/avatars/01 (1).png'" />
+              <span id="profile-level-badge" class="global-avatar-level">1</span>
+            </div>
+            <span id="profile-username-display" class="font-bold text-white text-[16px] tracking-tight truncate max-w-[280px]">Guest</span>
+            <span id="profile-email-display" class="hidden">guest@gollah.top</span>
+            <span id="profile-country-badge" class="hidden">🌐 GLOBAL</span>
+            <!-- UID pill -->
+            <button type="button" onclick="copyUserId()" class="mt-2.5 inline-flex items-center gap-1.5 max-w-[220px] text-[11px] font-mono text-slate-400 hover:text-slate-200 transition bg-[#161C27] px-3 py-[5px] rounded-full border border-[#2A3344] shadow-inner">
+              <span id="profile-user-id-snippet" class="truncate">guest</span>
+              <i data-lucide="copy" class="w-3 h-3 shrink-0 opacity-50"></i>
+            </button>
+            <!-- XP bar (NET-RING progress; label is read-only display) -->
+            <div class="w-full mt-4 px-1">
+              <div class="flex justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+                <span id="xp-text">Lvl 1</span>
+                <span id="xp-next-level">Lvl 2</span>
+              </div>
+              <div class="w-full bg-[#161C27] h-[6px] rounded-full overflow-hidden border border-[#1e2433]">
+                <div id="xp-progress-bar" class="bg-[#00d672] h-full w-0 transition-all duration-500 rounded-full"></div>
+              </div>
+              <p id="xp-needed" class="mt-1.5 text-[10px] font-medium tracking-wide text-slate-500 tabular-nums leading-none">
+                <span class="text-[#00d672]/0</span><span class="text-slate-600"> / 1,000 XP</span>
+                <span class="text-slate-600 mx-1">·</span>
+                <span class="text-slate-400">0 XP to Lvl 2</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Menu fills remaining height of the large card -->
+          <div class="px-3 py-3 flex flex-col gap-1 border-t border-[#2A3344] flex-1 min-h-0">
+            <button type="button" onclick="event.stopPropagation(); openNotificationsModal(); closeProfileDropdown()" class="flex items-center justify-between w-full py-3.5 px-3.5 hover:bg-[#252D3C] rounded-xl text-slate-200 text-left transition">
+              <span class="flex items-center gap-3 text-[14px] font-medium">
+                <i data-lucide="bell" class="w-5 h-5 text-slate-400"></i>
+                Notifications
+              </span>
+              <span id="dropdown-notif-pill" class="hidden min-w-[18px] h-[18px] bg-[#ED1E4C] text-white font-bold text-[9px] px-1 rounded-full flex items-center justify-center">0</span>
+            </button>
+            <button type="button" onclick="navigate('profile')" class="flex items-center gap-3 w-full py-3.5 px-3.5 hover:bg-[#252D3C] rounded-xl text-slate-200 text-left transition text-[14px] font-medium">
+              <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+              Profile
+            </button>
+            <button type="button" id="dropdown-daily-btn" onclick="event.stopPropagation(); openDailyClaim(); closeProfileDropdown()" class="flex items-center gap-3 w-full py-3.5 px-3.5 hover:bg-[#252D3C] rounded-xl text-slate-200 text-left transition text-[14px] font-medium">
+              <i data-lucide="gamepad-2" class="w-5 h-5 text-slate-400"></i>
+              Daily
+              <span class="daily-claim-badge" data-daily-badge>0</span>
+            </button>
+            <button type="button" onclick="event.stopPropagation(); openReferralModal(); closeProfileDropdown()" class="flex items-center gap-3 w-full py-3.5 px-3.5 hover:bg-[#252D3C] rounded-xl text-slate-200 text-left transition text-[14px] font-medium">
+              <i data-lucide="users" class="w-5 h-5 text-slate-400"></i>
+              Referrals
+            </button>
+          </div>
+
+          <div id="auth-button-slot" class="px-3 pb-4 pt-2 border-t border-[#2A3344] shrink-0 mt-auto"></div>
+        </div>
+      </div>
+      <!-- desktop-notif-bell removed: notification badge now lives on avatar (header-notif-badge) -->
+      </div>
+    </div>
+    </div><!-- /#header-inner -->
+  </header>
+
+
+  <script>
+  (function(){
+    try {
+      if (!document.body.classList.contains('layout-logged-in')) {
+        var t = document.getElementById('global-live-ticker');
+        if (t) {
+          var h = Math.ceil(t.getBoundingClientRect().height) || 48;
+          document.documentElement.style.setProperty('--guest-ticker-h', h + 'px');
+        }
+        return;
+      }
+      var ticker = document.getElementById('global-live-ticker');
+      var slot = document.getElementById('live-ticker-slot');
+      if (ticker && slot && slot.parentNode) {
+        slot.parentNode.insertBefore(ticker, slot);
+      }
+    } catch (e) {}
+  })();
+  </script>
+  <!-- 3-COLUMN DESKTOP LAYOUT WRAPPER -->
+  <div class="flex-1 flex w-full overflow-hidden">
+    <aside id="left-sidebar" class="w-56 shrink-0 bg-[#151A23] p-3 flex flex-col justify-between hidden lg:flex select-none relative">
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1">
+          <button type="button" onclick="navigateHome()" id="nav-home" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition">
+            <i data-lucide="home" class="w-4 h-4"></i> Home
+          </button>
+          <button onclick="navigate('premium')" id="nav-premium" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 transition">
+            <i data-lucide="gem" class="w-4 h-4"></i> Premium
+          </button>
+          <button onclick="navigate('shop')" id="nav-shop" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 transition">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Shop
+          </button>
+          <button onclick="navigate('ranking')" id="nav-ranking" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 transition">
+            <i data-lucide="trophy" class="w-4 h-4"></i>
+            <span class="text-sm font-semibold">Ranking</span>
+          </button>
+<button onclick="navigate('profile')" id="nav-profile" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 transition">
+            <i data-lucide="user" class="w-4 h-4"></i> Profile
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-1 text-xs">
+          <hr class="sidebar-divider" />
+          <button onclick="filterCategory('featured')" id="cat-featured" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Featured</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">11</span>
+          </button>
+          <button onclick="filterCategory('all')" id="cat-all" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="grid" class="w-3.5 h-3.5"></i> All</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">1406</span>
+          </button>
+          <button onclick="filterCategory('apps')" id="cat-apps" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Apps</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">16</span>
+          </button>
+          <button onclick="filterCategory('games')" id="cat-games" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i> Games</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">138</span>
+          </button>
+          <button onclick="filterCategory('surveys')" id="cat-surveys" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Surveys</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">101</span>
+          </button>
+          <button onclick="filterCategory('gpt')" id="cat-gpt" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="bot" class="w-3.5 h-3.5"></i> GPT</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">61</span>
+          </button>
+          <button onclick="filterCategory('signups')" id="cat-signups" class="sidebar-nav-item w-full flex items-center justify-between px-3 py-2.5 text-slate-400 rounded-lg transition text-left">
+            <span class="flex items-center gap-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign ups</span>
+            <span class="cat-badge text-[10px] bg-[#1E2532] text-slate-400 px-1.5 py-0.5 rounded font-bold">353</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER FLUID STREAM -->
+    <div class="flex-1 flex flex-col overflow-y-auto custom-scroll relative">
+      
+      <!-- Quality Assurance banner permanently removed -->
+
+      <!-- LIVE TICKER SLOT (logged-in: ticker moved here by JS) -->
+      <div id="live-ticker-slot" class="contents"></div>
+
+      <main id="app-content" class="p-4 lg:p-6 flex flex-col gap-6 flex-1"></main>
+
+      <footer class="gollah-site-footer mt-auto shrink-0 select-none relative overflow-hidden">
+        <!-- Ambient flowing glow (emerald / cyan / violet, Gollah palette) -->
+        <div class="gollah-footer-glow" aria-hidden="true"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-5 lg:px-8 pt-12 sm:pt-14 pb-0">
+          <!-- Main columns — matches reference structure -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-8 lg:gap-6 pb-10 sm:pb-12">
+            <!-- Brand block -->
+            <div class="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col gap-3.5 pr-0 lg:pr-6">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-[#00d672] flex items-center justify-center text-white font-black text-sm shadow-md shadow-emerald-500/25 shrink-0">G</div>
+                <span class="text-[17px] font-black text-white tracking-tight">Gollah</span>
+              </div>
+              <p class="text-[12px] sm:text-[13px] text-slate-500 leading-relaxed max-w-[280px]">
+                Earn coins by completing tasks, offers and surveys. Cash out to crypto wallets. Min cashout 300 coins.
+              </p>
+            </div>
+
+            <!-- Earn -->
+            <div class="col-span-1 lg:col-span-2 flex flex-col gap-3">
+              <span class="text-[12px] font-bold text-white tracking-tight">Earn</span>
+              <div class="flex flex-col gap-2">
+                <button type="button" onclick="navigate('home')" class="gollah-footer-link">Earn</button>
+                <button type="button" onclick="filterCategory('featured'); navigate('home')" class="gollah-footer-link">Offers</button>
+                <button type="button" onclick="filterCategory('all'); navigate('home')" class="gollah-footer-link">Partners</button>
+                <button type="button" onclick="filterCategory('surveys'); navigate('home')" class="gollah-footer-link">Surveys</button>
+                <button type="button" onclick="navigate('premium')" class="gollah-footer-link">Ranking</button>
+              </div>
+            </div>
+
+            <!-- Account -->
+            <div class="col-span-1 lg:col-span-2 flex flex-col gap-3">
+              <span class="text-[12px] font-bold text-white tracking-tight">Account</span>
+              <div class="flex flex-col gap-2">
+                <button type="button" onclick="navigate('profile')" class="gollah-footer-link">Profile</button>
+                <button type="button" onclick="navigate('shop')" class="gollah-footer-link">Cash out</button>
+                <button type="button" onclick="openReferralModal()" class="gollah-footer-link">Invite friends</button>
+                <button type="button" onclick="openNotificationsModal()" class="gollah-footer-link">Notifications</button>
+              </div>
+            </div>
+
+            <!-- Support -->
+            <div class="col-span-1 lg:col-span-2 flex flex-col gap-3">
+              <span class="text-[12px] font-bold text-white tracking-tight">Support</span>
+              <div class="flex flex-col gap-2">
+                <button type="button" onclick="openHelpSupportChat()" class="gollah-footer-link">Help centre</button>
+                <button type="button" onclick="openHelpSupportChat()" class="gollah-footer-link">How cash-outs work</button>
+                <button type="button" onclick="openLegalModal('terms')" class="gollah-footer-link">Terms of service</button>
+                <button type="button" onclick="openLegalModal('privacy')" class="gollah-footer-link">Privacy policy</button>
+              </div>
+            </div>
+
+            <!-- Follow / community -->
+            <div class="col-span-1 lg:col-span-2 flex flex-col gap-3">
+              <span class="text-[12px] font-bold text-white tracking-tight">Follow Gollah</span>
+              <div class="flex items-center gap-2.5 mt-0.5">
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="gollah-footer-social" title="X / Twitter" aria-label="X">
+                  <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+                </a>
+                <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="gollah-footer-social" title="Discord" aria-label="Discord">
+                  <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.548-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom bar under thin divider -->
+          <div class="gollah-footer-bottom border-t border-[#1e2a38]/90 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <p class="text-[11px] text-slate-600 order-2 sm:order-1">© 2026 Gollah. All rights reserved.</p>
+            <p class="text-[11px] text-slate-600 leading-relaxed max-w-xl order-1 sm:order-2 text-left sm:text-center flex-1">
+              Offers are provided by third-party partners. Rewards depend on partner confirmation. 18+ only.
+              <a href="mailto:admin@gollah.top" class="text-slate-500 hover:text-[#00d672] transition ml-0.5">admin@gollah.top</a>
+            </p>
+            <a href="mailto:admin@gollah.top" class="gollah-footer-made order-3 shrink-0" title="Support">
+              <span class="gollah-footer-made-dot"></span>
+              Support
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- RIGHT CHAT SIDEBAR — toggle via floating button (popup / slide-over) -->
+    <aside id="right-chat-sidebar" class="hidden fixed xl:static top-0 right-0 z-[45] h-full xl:h-auto w-[min(100%,320px)] xl:w-72 shrink-0 bg-[#161C27] border-l border-[#2A3344] flex-col justify-between shadow-2xl xl:shadow-none">
+      <!-- TOP TABS: General / Help -->
+      <div class="chat-top-bar p-2.5 border-b border-[#2A3344] flex items-center justify-between shrink-0">
+        <div class="chat-tab-toggle" role="tablist" aria-label="Chat sections">
+          <button type="button" id="chat-tab-general" class="chat-tab-toggle-btn active" role="tab" aria-selected="true" onclick="switchChatTab('general')">General</button>
+          <button type="button" id="chat-tab-help" class="chat-tab-toggle-btn" role="tab" aria-selected="false" onclick="switchChatTab('help')">Help</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="realtime-online-badge" title="Users online right now">
+            <span class="realtime-online-dot" aria-hidden="true"></span>
+            <span id="realtime-online-count" class="realtime-online-count">0</span>
+            <span class="realtime-online-label">online</span>
+          </div>
+          <button type="button" onclick="setChatPanelOpen(false)" class="ml-0.5 w-7 h-7 rounded-lg bg-[#252D3C] hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition" title="Close chat">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Boost banner (General only) -->
+      <div id="chat-boost-banner" class="bg-[#1E2532] border-b border-[#2A3344] px-3 py-2 text-[11px] flex items-center justify-between text-slate-400 cursor-pointer shrink-0" onclick="filterCategory('featured'); navigateHome();">
+        <span class="flex items-center gap-1.5 text-slate-200"><i data-lucide="pin" class="w-3 h-3 text-amber-400"></i> 50% XP Boost Active</span>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+      </div>
+
+      <!-- GENERAL: Live chat messages -->
+      <div id="chat-general-view" class="flex flex-col flex-1 min-h-0">
+        <div id="chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-3 text-xs"></div>
+        <div class="px-3 pt-1 pb-0 shrink-0">
+          <p id="chat-lock-hint" class="hidden text-[10px] text-amber-400/90 mb-1.5 leading-snug">🔒 Earn at least <b>50 coins</b> from offers to unlock chat.</p>
+        </div>
+        <div class="chat-input-area shrink-0">
+          <div class="chat-input-wrap">
+            <input id="chat-input" type="text" maxlength="200" placeholder="Write a message..." class="chat-input-field" onkeydown="if(event.key==='Enter') sendLiveChat()" autocomplete="off" />
+            <button type="button" class="chat-emoji-btn" title="Emoji" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M8.2 14.2s1.6 2.2 3.8 2.2 3.8-2.2 3.8-2.2"/><circle cx="9" cy="9.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+            </button>
+          </div>
+          <button id="chat-send-btn" type="button" onclick="sendLiveChat()" class="chat-send-btn">Send</button>
+        </div>
+      </div>
+
+      <!-- HELP: 1-to-1 private support chat (user ↔ Main Admin / Co-Admins) -->
+      <div id="chat-help-view" class="hidden flex-col flex-1 min-h-0">
+        <!-- Staff-only: user thread list -->
+        <div id="support-admin-rail" class="hidden shrink-0 border-b border-[#2A3344] max-h-[38%] overflow-y-auto custom-scroll">
+          <div class="px-3 py-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wide">Support threads</span>
+              <span id="support-staff-badge" class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#00d672]/15 text-[#00d672] border border-[#00d672]/25">Staff</span>
+            </div>
+            <button type="button" id="support-manage-admins-btn" onclick="toggleSupportCoAdminPanel()" class="text-[10px] font-semibold text-[#00d672] hover:underline hidden shrink-0">Co-Admins</button>
+          </div>
+          <div id="support-coadmin-panel" class="hidden px-3 pb-2 border-b border-[#2A3344]">
+            <p class="text-[10px] text-slate-500 mb-1.5">Main Admin can assign up to 2 Co-Admin user IDs.</p>
+            <div class="flex gap-1.5 mb-1.5">
+              <input id="support-coadmin-input" type="text" maxlength="80" placeholder="User UUID…" class="flex-1 min-w-0 bg-[#0c131d] border border-[#2A3344] rounded-lg px-2 py-1.5 text-[11px] text-slate-200 outline-none focus:border-[#00d672]" />
+              <button type="button" onclick="addSupportCoAdmin()" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-[#00d672] text-white text-[10px] font-bold">Add</button>
+            </div>
+            <div id="support-coadmin-list" class="flex flex-col gap-1"></div>
+          </div>
+          <div id="support-thread-list" class="px-2 pb-2 flex flex-col gap-1"></div>
+        </div>
+
+        <!-- Conversation header -->
+        <div id="support-chat-header" class="shrink-0 px-3 py-2 border-b border-[#2A3344] flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-[#1E2532] border border-[#2A3344] flex items-center justify-center shrink-0">
+            <i data-lucide="life-buoy" class="w-4 h-4 text-[#00d672]"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p id="support-chat-title" class="text-[12px] font-bold text-white truncate">Help & Support</p>
+            <p id="support-chat-subtitle" class="text-[10px] text-slate-500 truncate">Private 1-to-1 with Gollah staff</p>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="support-chat-stream" class="flex-1 p-3 overflow-y-auto custom-scroll flex flex-col gap-2.5 text-xs min-h-0"></div>
+
+        <!-- Empty / gate state (guest or not started) -->
+        <div id="support-chat-empty" class="hidden flex-1 p-4 overflow-y-auto custom-scroll flex flex-col items-center justify-center gap-3 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-[#1E2532] border border-[#2A3344] flex items-center justify-center">
+            <i data-lucide="life-buoy" class="w-7 h-7 text-[#00d672]"></i>
+          </div>
+          <h3 class="text-sm font-bold text-white">Help & Support</h3>
+          <p id="support-empty-copy" class="text-[11px] text-slate-400 leading-relaxed max-w-[220px]">Start a private conversation with the Gollah support team. Only you and staff can see this thread.</p>
+          <button type="button" id="support-start-btn" onclick="startSupportConversation()" class="mt-1 px-4 py-2 rounded-xl bg-[#00d672] hover:bg-[#00be64] text-white text-xs font-bold transition">Open Support Chat</button>
+        </div>
+
+        <!-- Input -->
+        <div class="px-3 pt-1 pb-0 shrink-0">
+          <p id="support-lock-hint" class="hidden text-[10px] text-amber-400/90 mb-1.5 leading-snug">🔒 Earn at least <b>200 coins</b> to message Support.</p>
+        </div>
+        <div id="support-input-area" class="chat-input-area shrink-0">
+          <div class="chat-input-wrap">
+            <input id="support-chat-input" type="text" maxlength="500" placeholder="Message support…" class="chat-input-field" onkeydown="if(event.key==='Enter') sendSupportChat()" autocomplete="off" />
+          </div>
+          <button id="support-send-btn" type="button" onclick="sendSupportChat()" class="chat-send-btn">Send</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ACCOUNT BANNED OVERLAY -->
+  <div id="banned-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(6,10,14,0.92);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-md rounded-2xl px-6 py-10 text-center shadow-2xl" style="background:linear-gradient(160deg,#ED1E4C 0%,#ED1E4C 55%,#c41840 100%);">
+      <h2 class="text-white text-xl sm:text-2xl font-black mb-5 tracking-tight">Account banned due to:</h2>
+      <div id="banned-reason-pill" class="inline-block bg-white text-[#ED1E4C] font-extrabold text-sm sm:text-base px-5 py-2 rounded-full shadow mb-6">Multiple Accounts</div>
+      <p class="text-white/90 text-[13px] sm:text-sm leading-relaxed max-w-sm mx-auto">
+        For account support &amp; appeals contact
+        <a href="mailto:admin@gollah.top" class="font-bold underline text-white">admin@gollah.top</a>
+        <br/>(Please allow 2–3 business days for a reply).
+      </p>
+      <button type="button" onclick="handleLogout()" class="mt-8 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
+        Sign out
+      </button>
+    </div>
+  </div>
+
+
+  <!-- MOBILE BOTTOM NAV (≤767px) — Ranking · Shop · Home · Daily · Chat -->
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Primary">
+    <button type="button" class="mbn-item" data-mbn="ranking" onclick="navigate('ranking')">
+      <i data-lucide="trophy" class="mbn-icon"></i>
+      <span class="mbn-label">Ranking</span>
+    </button>
+    <button type="button" class="mbn-item" data-mbn="shop" onclick="navigate('shop')">
+      <i data-lucide="shopping-bag" class="mbn-icon"></i>
+      <span class="mbn-label">Shop</span>
+    </button>
+    <button type="button" class="mbn-item mbn-home" data-mbn="home" onclick="navigateHome()">
+      <span class="mbn-home-orb"><i data-lucide="home" class="mbn-icon"></i></span>
+      <span class="mbn-label">Home</span>
+    </button>
+    <button type="button" class="mbn-item" data-mbn="daily" onclick="openDailyClaim()">
+      <i data-lucide="gamepad-2" class="mbn-icon"></i>
+      <span class="mbn-label">Daily</span>
+      <span class="daily-claim-badge" data-daily-badge>0</span>
+    </button>
+    <button type="button" class="mbn-item" data-mbn="chat" onclick="toggleChatPanel()">
+      <i data-lucide="message-circle" class="mbn-icon"></i>
+      <span class="mbn-label">Chat</span>
+    </button>
+  </nav>
+
+  <!-- Chat open toggle (logged-in only) — pops chat from the right -->
+  <button type="button" id="chat-float-btn" onclick="toggleChatPanel()" class="hidden !hidden fixed bottom-6 right-5 z-[46] pointer-events-none items-center gap-2 bg-[#00d672] hover:bg-[#00be64] text-white font-bold text-xs pl-3.5 pr-4 py-3 rounded-2xl shadow-lg shadow-emerald-900/40 transition hover:scale-[1.02] active:scale-[0.98]">
+    <i data-lucide="message-circle" class="w-4 h-4"></i>
+    <span>Chat</span>
+  </button>
+  <div id="chat-backdrop" onclick="setChatPanelOpen(false)" class="hidden fixed inset-0 z-[50] bg-black/45 xl:hidden"></div>
+
+  <!-- MINI TOAST (bottom-left — privacy & short notices) -->
+  <div id="mini-toast" class="toast-with-timer hidden fixed bottom-6 left-6 z-[70] bg-[#252D3C]/95 border border-[#343E50] backdrop-blur-md rounded-2xl px-4 py-3 shadow-2xl max-w-[280px]">
+    <div class="flex items-center gap-3">
+      <div id="mini-toast-icon-wrap" class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+        <i id="mini-toast-icon" data-lucide="eye-off" class="w-4 h-4 text-amber-400"></i>
+      </div>
+      <div class="min-w-0">
+        <p id="mini-toast-title" class="text-[13px] font-bold text-white leading-tight">Notice</p>
+        <p id="mini-toast-msg" class="text-[11px] text-slate-400 mt-0.5 leading-snug"></p>
+      </div>
+    </div>
+    <div class="toast-progress-track" aria-hidden="true">
+      <span id="mini-toast-progress" class="toast-progress-bar"></span>
+    </div>
+  </div>
+
+  <!-- STACKED FLOATING TOASTS — newest at bottom, older push up (max 7) -->
+  <div id="float-toast-stack" aria-live="polite" aria-relevant="additions"></div>
+
+  <!-- NOTIFICATIONS MODAL -->
+  <!-- Notifications: right drawer only — no full-screen blur -->
+  <div id="notifications-modal" class="hidden" role="dialog" aria-label="Notifications">
+    <div class="notif-drawer-panel">
+      <div class="relative flex items-center justify-between px-3 py-3 border-b border-[#2A3344] shrink-0">
+        <button type="button" id="notifBackBtn" onclick="closeNotificationsOrGoBack(event)" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors" title="Back" aria-label="Back">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <button type="button" onclick="closeNotificationsModal()" class="w-8 h-8 rounded-xl bg-[#252D3C]/80 hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition" title="Close">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="px-3 pt-2.5 pb-1.5 shrink-0">
+        <div class="flex items-center gap-1 p-1 rounded-full bg-[#151A23] border border-[#2A3344]">
+          <button type="button" id="notif-tab-site" onclick="setNotifTab('site')" class="flex-1 text-center text-[12px] font-bold py-1.5 rounded-full text-slate-400 hover:text-white transition">
+            Site
+          </button>
+          <button type="button" id="notif-tab-personal" onclick="setNotifTab('personal')" class="flex-1 text-center text-[12px] font-extrabold py-1.5 rounded-full bg-[#00d672] text-white shadow-md shadow-emerald-900/30 transition">
+            Personal
+          </button>
+        </div>
+      </div>
+
+      <div id="notifications-list" class="overflow-y-auto custom-scroll flex-1 flex flex-col p-3 min-h-0"></div>
+
+      <div class="px-4 py-3 border-t border-[#2A3344] flex items-center justify-between gap-3 bg-[#151A23]/95 shrink-0">
+        <button type="button" onclick="clearAllNotifications()" class="text-[12px] font-semibold text-slate-500 hover:text-slate-200 transition px-2 py-1.5 rounded-lg hover:bg-white/5">Clear all</button>
+        <button type="button" onclick="closeNotificationsModal()" class="auth-submit-btn text-black font-bold text-[13px] px-5 py-2 rounded-xl">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-APP CASHOUT MODAL -->
+  <div id="cashout-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#1E2532] border border-[#2A3344] w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-[#2A3344] pb-3">
+        <div class="flex items-center gap-3">
+          <div id="cashout-icon-box" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg" style="background:#9195a1;color:#ffffff;">
+            Ł
+          </div>
+          <div>
+            <h3 id="cashout-modal-title" class="font-bold text-white text-base">Withdraw Crypto</h3>
+            <span class="text-[11px] text-slate-400">Min 300 Coins • Fast Processing</span>
+          </div>
+        </div>
+        <button onclick="closeCashoutModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[11px] font-bold text-slate-200">Amount to Withdraw (Coins)</label>
+            <span class="text-[10px] text-slate-400 font-bold">Balance: <span id="cashout-current-balance" class="coin-amt">0</span></span>
+          </div>
+          <div class="relative">
+            <input id="cashout-amount-input" type="number" min="300" placeholder="Min 300" oninput="calculateEstimatedCrypto()" class="w-full bg-[#161C27] border border-[#2A3344] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+            <button onclick="setCashoutMax()" class="absolute right-2 top-2 bg-[#2A3344] hover:bg-[#252D3C] text-[#00d672] font-bold text-[10px] px-2 py-1 rounded-lg">MAX</button>
+          </div>
+          <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400">
+            <span>Estimated payout:</span>
+            <span id="cashout-estimated-crypto" class="font-mono text-emerald-400 font-bold">0.00 LTC</span>
+          </div>
+        </div>
+
+        <div>
+          <label id="cashout-address-label" class="text-[11px] font-bold text-slate-200 block mb-1">Destination Address / UID</label>
+          <input id="cashout-address-input" type="text" placeholder="Enter address or ID" class="w-full bg-[#161C27] border border-[#2A3344] rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#00d672]" />
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3 border-t border-[#2A3344]">
+        <button onclick="closeCashoutModal()" class="w-1/3 bg-[#2A3344] hover:bg-[#252D3C] text-slate-200 font-bold py-2.5 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="cashout-submit-btn" onclick="submitCustomWithdrawal()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40">
+          Cashout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROVIDER OFFERWALL IFRAME MODAL -->
+  <div id="provider-wall-modal" class="hidden fixed inset-0 z-[55] modal-backdrop flex items-center justify-center p-3 sm:p-5">
+    <div class="modal-card bg-[#151A23] border border-[#2A3344] w-full max-w-5xl h-[min(92vh,820px)] rounded-2xl sm:rounded-3xl flex flex-col overflow-hidden shadow-2xl">
+      <div class="relative flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b border-[#2A3344] bg-[#1E2532] shrink-0">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#00d672] via-cyan-400 to-violet-400 opacity-80"></div>
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="provider-wall-icon" class="w-10 h-10 rounded-xl bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center text-[#00d672] font-black text-sm shrink-0">W</div>
+          <div class="min-w-0">
+            <h3 id="provider-wall-title" class="font-bold text-white text-[15px] truncate leading-tight">Offer Wall</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">Complete offers · coins credit via postback</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="openProviderWallExternal()" class="hidden sm:flex w-9 h-9 rounded-xl bg-[#252D3C] hover:bg-[#2A3344] text-slate-400 hover:text-white items-center justify-center transition" title="Open in new tab">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="reloadProviderWall()" class="hidden sm:flex w-9 h-9 rounded-xl bg-[#252D3C] hover:bg-[#2A3344] text-slate-400 hover:text-white items-center justify-center transition" title="Reload">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="closeProviderWallModal()" class="w-9 h-9 rounded-xl bg-[#252D3C] hover:bg-[rgba(237,30,76,0.2)] text-slate-400 hover:text-[#ED1E4C] flex items-center justify-center transition" title="Close">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <div class="relative flex-1 min-h-0 bg-[#0D1117]">
+        <div id="provider-wall-loading" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[#0D1117]">
+          <div class="w-10 h-10 rounded-full border-2 border-[#2A3344] border-t-[#00d672] animate-spin"></div>
+          <p class="text-[12px] text-slate-500 font-medium">Loading offer wall…</p>
+        </div>
+        <iframe id="provider-wall-iframe" title="Offer Wall" class="w-full h-full border-0 bg-[#0D1117]" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation allow-modals" allow="clipboard-write"></iframe>
+      </div>
+      <div class="px-4 py-2.5 border-t border-[#2A3344] bg-[#1E2532] flex items-center justify-between gap-2 shrink-0">
+        <span class="text-[10px] text-slate-600 truncate">User ID attached for tracking</span>
+        <button type="button" onclick="closeProviderWallModal()" class="text-[12px] font-bold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFER DETAILS MODAL -->
+  <div id="offer-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#1E2532] border border-[#2A3344] w-full max-w-lg rounded-3xl p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex justify-between items-start border-b border-[#2A3344] pb-4">
+        <div class="flex items-center gap-3">
+          <div id="modal-offer-icon" class="w-12 h-12 rounded-2xl bg-[#2A3344] flex items-center justify-center font-black text-emerald-400 text-sm">
+            OFFER
+          </div>
+          <div>
+            <h3 id="modal-offer-title" class="font-bold text-base text-white">Offer Name</h3>
+            <span id="modal-offer-provider" class="text-xs text-slate-400">Provider</span>
+          </div>
+        </div>
+        <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="bg-[#151A23] border border-[#2A3344] rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] text-slate-400 block mb-0.5">Total Reward Payout</span>
+          <div class="flex items-center gap-2">
+            <span id="modal-offer-coins" class="coin-amt text-xl font-black">● 0</span>
+            <span id="modal-offer-xp" class="text-xs bg-[#00d672]/20 text-[#00d672] font-bold px-2 py-0.5 rounded">+0 XP</span>
+          </div>
+        </div>
+        <span class="text-[11px] bg-blue-500/20 text-blue-300 font-bold px-2.5 py-1 rounded-lg">VERIFIED OFFER</span>
+      </div>
+
+      <div class="flex flex-col gap-2 text-xs">
+        <span class="font-bold text-slate-200">Task Instructions:</span>
+        <div class="bg-[#1E2532] border border-[#2A3344] rounded-xl p-3 flex flex-col gap-2 text-slate-200">
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+            <span>Click <strong>"Start Offer Now"</strong> below to open the official advertiser tracking page.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+            <span id="modal-offer-instruction">Complete the required actions (install app, reach level, or answer survey questions).</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+            <span>Coins credit automatically once the advertiser confirms completion via postback.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3">
+        <button onclick="closeOfferModal()" class="w-1/3 bg-[#2A3344] hover:bg-[#252D3C] text-slate-200 font-bold py-3 rounded-xl text-xs transition">
+          Cancel
+        </button>
+        <button id="modal-offer-launch-btn" onclick="launchOfferTracking()" class="flex-1 bg-[#00d672] hover:bg-[#00be64] text-white font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
+          <span>Start Offer Now</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY CLAIM — right wizard panel (identical shell to Notifications) -->
+  <div id="daily-claim-modal" class="hidden" role="dialog" aria-label="Daily Claim">
+    <div class="notif-drawer-panel">
+      <div class="relative flex items-center justify-between px-3 py-3 border-b border-[#2A3344] shrink-0">
+        <button type="button" id="dailyClaimBackBtn" onclick="closeDailyClaimOrGoBack(event)" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors" title="Back" aria-label="Back">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <button type="button" onclick="closeDailyClaimModal()" class="w-8 h-8 rounded-xl bg-[#252D3C]/80 hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition" title="Close" aria-label="Close">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="px-4 pt-3 pb-2 shrink-0">
+        <h3 class="font-bold text-white text-[15px] tracking-tight">Daily Claim</h3>
+        <p id="daily-claim-reset-timer" class="text-[11px] text-slate-500 mt-0.5 font-medium">Resets in: --:--:--</p>
+      </div>
+
+      <div id="daily-claim-list" class="overflow-y-auto custom-scroll flex-1 flex flex-col p-3 min-h-0 gap-2.5">
+        <!-- rows rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-APP ALERT / WARNING MODAL -->
+  <div id="app-alert-modal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#1E2532] border border-[#2A3344] w-full max-w-[360px] rounded-2xl p-5 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-start gap-3">
+        <div id="app-alert-icon-wrap" class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+          <i id="app-alert-icon" data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div class="min-w-0 flex-1 pt-0.5">
+          <h3 id="app-alert-title" class="font-bold text-white text-[15px] leading-tight">Notice</h3>
+          <p id="app-alert-message" class="text-[13px] text-slate-400 mt-1.5 leading-relaxed"></p>
+        </div>
+        <button type="button" onclick="dismissAppAlert()" class="w-8 h-8 rounded-xl bg-[#252D3C]/80 hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button type="button" id="app-alert-secondary-btn" onclick="dismissAppAlert()" class="hidden text-[13px] font-semibold text-slate-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition">Cancel</button>
+        <button type="button" id="app-alert-ok-btn" onclick="confirmAppAlert()" class="auth-submit-btn text-black font-bold text-[13px] px-6 py-2.5 rounded-xl">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL (Login / Signup) -->
+  <!-- AUTH + 3-STEP ONBOARDING (Gollah) -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-card onboarding-card auth-tall-card bg-[#1E2532] border border-[#2A3344] w-full max-w-[400px] rounded-t-[22px] sm:rounded-[20px] relative max-h-[92vh] overflow-y-auto custom-scroll flex flex-col">
+      <div class="pointer-events-none absolute -top-24 -right-16 w-48 h-48 rounded-full bg-[#00d672]/10 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-20 -left-10 w-40 h-40 rounded-full bg-teal-500/10 blur-3xl"></div>
+
+      <div class="relative p-5 sm:p-7 flex flex-col gap-4">
+        <div class="flex justify-end">
+          <button type="button" onclick="closeAuthModal()" class="w-9 h-9 rounded-xl bg-[#252D3C]/90 hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Sign In / Sign Up pills -->
+        <div class="auth-mode-pills flex items-center gap-1 p-1 rounded-full bg-[#0D1117] border border-[#2A3344] w-full max-w-[280px] mx-auto">
+          <button type="button" id="auth-pill-signin" onclick="setAuthMode(false)" class="auth-mode-pill flex-1 py-2.5 rounded-full text-[13px] font-bold transition">Sign In</button>
+          <button type="button" id="auth-pill-signup" onclick="setAuthMode(true)" class="auth-mode-pill flex-1 py-2.5 rounded-full text-[13px] font-bold transition">Sign Up</button>
+        </div>
+
+        <div id="auth-error-banner" class="hidden bg-[rgba(237,30,76,0.1)] border border-[rgba(237,30,76,0.25)] rounded-xl px-3.5 py-2.5 text-[12px] text-[#ED1E4C] flex items-center gap-2.5">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-[#ED1E4C] shrink-0"></i>
+          <span id="auth-error-text">An error occurred</span>
+        </div>
+
+        <div class="flex flex-col gap-3.5">
+          <div class="relative">
+            <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+            <input id="auth-email-input" type="email" placeholder="Email" autocomplete="email" class="auth-input w-full bg-[#151A23] border border-[#2A3344] rounded-xl pl-10 pr-4 py-3.5 text-[13px] text-white placeholder:text-slate-500 focus:outline-none transition" />
+          </div>
+
+          <div class="relative flex items-center">
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+            <input id="auth-pass-input" type="password" autocomplete="current-password" data-lpignore="true" placeholder="Password" class="auth-input w-full bg-[#151A23] border border-[#2A3344] rounded-xl pl-10 pr-11 py-3.5 text-[13px] text-white placeholder:text-slate-500 focus:outline-none transition" />
+            <button type="button" onclick="togglePasswordVisibility('auth-pass-input','pass-toggle-icon')" class="absolute right-3.5 text-slate-500 hover:text-white focus:outline-none transition">
+              <i id="pass-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div id="auth-confirm-container" class="hidden relative flex items-center">
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+            <input id="auth-confirm-input" type="password" autocomplete="new-password" data-lpignore="true" placeholder="Confirm password" class="auth-input w-full bg-[#151A23] border border-[#2A3344] rounded-xl pl-10 pr-11 py-3.5 text-[13px] text-white placeholder:text-slate-500 focus:outline-none transition" />
+            <button type="button" onclick="togglePasswordVisibility('auth-confirm-input','confirm-toggle-icon')" class="absolute right-3.5 text-slate-500 hover:text-white focus:outline-none transition">
+              <i id="confirm-toggle-icon" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden legacy username field (filled in onboarding step 2) -->
+        <input id="auth-username-input" type="hidden" value="" />
+        <div id="auth-username-container" class="hidden"></div>
+
+        <label id="auth-agree-container" class="hidden flex items-start gap-2.5 cursor-pointer select-none group">
+          <input id="auth-agree-checkbox" type="checkbox" class="mt-0.5 w-4 h-4 shrink-0 rounded border-[#343E50] bg-[#151A23] text-[#00d672] accent-[#00d672] cursor-pointer" />
+          <span class="text-[12px] text-slate-400 leading-relaxed group-hover:text-slate-200 transition">
+            I agree to the
+            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('privacy')" class="text-[#00d672] font-semibold hover:underline">Privacy Policy</button>
+            and
+            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('terms')" class="text-[#00d672] font-semibold hover:underline">Terms of Service</button>
+          </span>
+        </label>
+
+        <button id="auth-submit-btn" type="button" onclick="submitAuthForm()" class="auth-submit-btn w-full font-bold py-3.5 rounded-xl text-[14px] tracking-wide">
+          Sign In
+        </button>
+
+        <div class="flex flex-col gap-2.5">
+          <p class="text-[11px] text-center text-slate-500 font-medium">Or sign up with</p>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" id="auth-google-btn" onclick="signInWithProvider('google')" class="auth-oauth-btn flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-[#0D1117] font-bold text-[13px] py-3 rounded-xl transition border-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.6h5.1c-.2 1.2-.9 2.3-1.9 3l3.1 2.4c1.8-1.7 2.9-4.1 2.9-7 0-.7-.1-1.3-.2-1.9H12z"/><path fill="#34A853" d="M6.6 14.3l-.5.4-2.1 1.6C5.6 19.1 8.6 21 12 21c2.3 0 4.3-.8 5.8-2.1l-3.1-2.4c-.8.5-1.9.9-2.7.9-2.1 0-3.9-1.4-4.5-3.3z"/><path fill="#4A90E2" d="M4 7.7C3.4 8.9 3 10.4 3 12s.4 3.1 1 4.3c0 .1 2.6-2 2.6-2-.3-.9-.5-1.6-.5-2.3s.2-1.4.5-2.3L4 7.7z"/><path fill="#FBBC05" d="M12 6.1c1.3 0 2.4.4 3.3 1.3l2.5-2.5C16.3 3.5 14.3 2.7 12 2.7 8.6 2.7 5.6 4.6 4 7.7l2.6 2c.6-1.9 2.4-3.6 5.4-3.6z"/></svg>
+              Google
+            </button>
+            <button type="button" id="auth-twitter-btn" onclick="signInWithProvider('twitter')" class="auth-oauth-btn flex items-center justify-center gap-2 bg-[#1D9BF0] hover:bg-[#1a8cd8] text-white font-bold text-[13px] py-3 rounded-xl transition border-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.849L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Twitter
+            </button>
+          </div>
+        </div>
+
+        <p id="auth-footer-agree-text" class="text-[10px] text-center text-slate-600 leading-relaxed hidden">
+          By continuing you agree to our Terms &amp; Privacy Policy.
+        </p>
+        <!-- legacy toggle hooks kept for compatibility -->
+        <span id="auth-toggle-msg" class="hidden"></span>
+        <button type="button" id="auth-toggle-btn" class="hidden" onclick="toggleAuthMode()"></button>
+        <span id="auth-modal-title" class="hidden">Welcome Back</span>
+        <span id="auth-modal-subtitle" class="hidden"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Set username + Choose avatar -->
+  <div id="onboard-profile-modal" class="hidden fixed inset-0 z-[55] modal-backdrop flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-card onboarding-card bg-[#1E2532] border border-[#2A3344] w-full max-w-[400px] rounded-t-[22px] sm:rounded-[20px] relative max-h-[92vh] overflow-hidden flex flex-col">
+      <div class="onboard-grad-top absolute inset-x-0 top-0 h-28 pointer-events-none"></div>
+      <div class="relative p-5 sm:p-6 flex flex-col gap-4 min-h-0 flex-1 overflow-hidden">
+        <h3 class="font-black text-[17px] text-white tracking-tight">Set username</h3>
+        <div class="flex items-center gap-2">
+          <input id="onboard-username-input" type="text" maxlength="24" placeholder="Username" class="auth-input flex-1 min-w-0 bg-[#151A23] border border-[#2A3344] rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-slate-500 focus:outline-none uppercase tracking-wide font-semibold" />
+          <button type="button" id="onboard-randomize-btn" onclick="randomizeOnboardUsername()" class="shrink-0 px-3.5 py-3 rounded-xl bg-[#252D3C] border border-[#343E50] text-[12px] font-bold text-slate-200 hover:border-[#00d672]/50 hover:text-white transition">Randomize</button>
+        </div>
+        <div id="onboard-username-error" class="hidden text-[12px] font-semibold text-white bg-[#ED1E4C]/90 rounded-lg px-3 py-2">Please set a username</div>
+
+        <h3 class="font-black text-[17px] text-white tracking-tight mt-1">Choose avatar</h3>
+        <div id="onboard-avatar-grid" class="onboard-avatar-grid flex-1 min-h-0 overflow-y-auto custom-scroll pr-1"></div>
+
+        <button type="button" id="onboard-continue-btn" onclick="submitOnboardProfile()" class="auth-submit-btn onboard-primary-btn w-full rounded-xl shrink-0 mt-1">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Welcome + confetti -->
+  <div id="onboard-welcome-modal" class="hidden fixed inset-0 z-[56] modal-backdrop flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-card onboarding-card onboard-welcome-card bg-[#1E2532] border border-[#2A3344] w-full max-w-[400px] rounded-t-[22px] sm:rounded-[20px] relative overflow-hidden flex flex-col">
+      <div class="onboard-welcome-hero relative flex-1 flex flex-col items-center justify-center text-center px-5 pt-12 pb-8">
+        <div class="onboard-confetti" id="onboard-confetti" aria-hidden="true"></div>
+        <div class="relative z-[1] w-[96px] h-[96px] rounded-full overflow-hidden border-[3px] border-[#00d672]/40 shadow-lg shadow-emerald-900/30 bg-[#151A23] mb-5">
+          <img id="onboard-welcome-avatar" src="assets/avatars/01 (1).png" alt="" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='assets/avatars/01 (1).png'" />
+        </div>
+        <h2 class="relative z-[1] text-[22px] font-black text-white tracking-tight">Welcome! 👋</h2>
+        <p id="onboard-welcome-msg" class="relative z-[1] text-[13px] text-slate-400 mt-2.5 max-w-[280px] leading-relaxed">Hey Member, welcome to Gollah. Start earning now!</p>
+      </div>
+      <div class="onboard-welcome-footer px-5 pt-2 pb-7 sm:pb-8 shrink-0">
+        <button type="button" id="onboard-get-started-btn" onclick="finishOnboarding()" class="auth-submit-btn onboard-primary-btn w-full rounded-xl">
+          Get Started
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ZXEARN-STYLE ADVANCED USER STATISTICS MODAL (rebuild)
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="user-advanced-stats-modal" class="hidden fixed inset-0 z-[70] uas-backdrop flex items-center justify-center p-3 sm:p-5" role="dialog" aria-modal="true" aria-label="User Statistics" onclick="if(event.target===this)closeAdvancedUserStats()">
+    <div class="uas-shell" role="document" onclick="event.stopPropagation()">
+
+      <!-- ── LEFT: Profile panel ── -->
+      <aside class="uas-left">
+        <div id="uas-avatar-slot" class="uas-avatar-wrap global-avatar-wrapper ga-xl" data-ga-role="uas">
+          <img id="uas-avatar" class="uas-avatar global-avatar-img" src="assets/avatars/01%20(1).png" alt="Avatar" onerror="this.onerror=null;this.src='assets/avatars/01 (1).png'" />
+          <span id="uas-flag" class="uas-flag" title="Country">🌐</span>
+        </div>
+        <h3 id="uas-username" class="uas-username">—</h3>
+
+        <div class="uas-level-row" aria-hidden="true">
+          <span class="uas-level-star">★</span>
+          <div class="uas-level-track"><div id="uas-level-fill" class="uas-level-fill" style="width:0%"></div></div>
+          <span class="uas-level-dstar">✦✦</span>
+        </div>
+        <p id="uas-level-label" class="uas-level-label">Lvl 1</p>
+        <p id="uas-xp-needed" class="text-[10px] font-medium tracking-wide text-slate-500 tabular-nums leading-none mt-1">
+          <span class="text-[#00d672]">0</span><span class="text-slate-600"> / 1,000 XP</span>
+          <span class="text-slate-600 mx-1">·</span>
+          <span class="text-slate-400">0 XP to Lvl 2</span>
+        </p>
+        <p id="uas-joined" class="uas-joined">Joined recently</p>
+
+        <button type="button" id="uas-mute-btn" class="uas-mute-btn" onclick="toggleMuteAdvancedUser()">
+          <i data-lucide="bell-off" class="w-4 h-4"></i>
+          <span>Mute user</span>
+        </button>
+      </aside>
+
+      <!-- ── RIGHT: Live data hub ── -->
+      <section class="uas-right">
+        <header class="uas-right-header">
+          <div class="uas-pills" role="tablist">
+            <button type="button" id="uas-tab-all" class="uas-pill uas-pill-active" role="tab" aria-selected="true" onclick="setAdvancedStatsTab('all')">All</button>
+            <button type="button" id="uas-tab-badges" class="uas-pill" role="tab" aria-selected="false" onclick="setAdvancedStatsTab('badges')">Badges</button>
+          </div>
+          <button type="button" class="uas-close" onclick="closeAdvancedUserStats()" aria-label="Close">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </header>
+
+        <!-- ALL panel -->
+        <div id="uas-panel-all" class="uas-panel" role="tabpanel">
+          <div class="uas-stats-grid">
+            <div class="uas-stat-card">
+              <div class="uas-stat-icon"><i data-lucide="clipboard-check" class="w-4 h-4"></i></div>
+              <div class="uas-stat-body">
+                <span id="uas-stat-offers" class="uas-stat-value">—</span>
+                <span class="uas-stat-label">Offers completed</span>
+              </div>
+            </div>
+            <div class="uas-stat-card">
+              <div class="uas-stat-icon uas-ico-gold"><i data-lucide="coins" class="w-4 h-4"></i></div>
+              <div class="uas-stat-body">
+                <span id="uas-stat-earnings" class="uas-stat-value">—</span>
+                <span class="uas-stat-label">Total earnings</span>
+              </div>
+            </div>
+            <div class="uas-stat-card">
+              <div class="uas-stat-icon"><i data-lucide="users" class="w-4 h-4"></i></div>
+              <div class="uas-stat-body">
+                <span id="uas-stat-referrals" class="uas-stat-value">0</span>
+                <span class="uas-stat-label">Users referred</span>
+              </div>
+            </div>
+            <div class="uas-stat-card">
+              <div class="uas-stat-icon"><i data-lucide="piggy-bank" class="w-4 h-4"></i></div>
+              <div class="uas-stat-body">
+                <span id="uas-stat-30d" class="uas-stat-value">—</span>
+                <span class="uas-stat-label">Last 30D earnings</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="uas-section">
+            <h4 class="uas-section-title"><i data-lucide="gift" class="w-3.5 h-3.5 text-[#FFC107]"></i> Offers</h4>
+            <div class="uas-table-wrap">
+              <table class="uas-table">
+                <thead>
+                  <tr><th>OFFER NAME</th><th>PROVIDER</th><th>REWARD</th><th>TIME</th></tr>
+                </thead>
+                <tbody id="uas-offers-tbody">
+                  <tr class="uas-skel-row"><td colspan="4"><div class="uas-skel"></div></td></tr>
+                  <tr class="uas-skel-row"><td colspan="4"><div class="uas-skel"></div></td></tr>
+                  <tr class="uas-skel-row"><td colspan="4"><div class="uas-skel"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="uas-section">
+            <h4 class="uas-section-title"><i data-lucide="wallet" class="w-3.5 h-3.5 text-[#FFC107]"></i> Cashouts</h4>
+            <div class="uas-table-wrap">
+              <table class="uas-table">
+                <thead>
+                  <tr><th>METHOD</th><th>AMOUNT</th><th>STATUS</th><th>TIME</th></tr>
+                </thead>
+                <tbody id="uas-cashouts-tbody">
+                  <tr class="uas-skel-row"><td colspan="4"><div class="uas-skel"></div></td></tr>
+                  <tr class="uas-skel-row"><td colspan="4"><div class="uas-skel"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- BADGES panel -->
+        <div id="uas-panel-badges" class="uas-panel hidden" role="tabpanel">
+          <div class="uas-badges-empty">
+            <i data-lucide="award" class="w-9 h-9 text-slate-600 mb-3"></i>
+            <p class="text-[14px] font-bold text-slate-300">Badges coming soon</p>
+            <p class="text-[12px] text-slate-600 mt-1.5 max-w-[240px]">Complete offers and cashouts to unlock achievement badges.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- LEGAL & SUPPORT MODAL -->
+  <div id="legal-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#1E2532] border border-[#2A3344] w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 shadow-2xl max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-[#2A3344] pb-3">
+        <h3 id="legal-modal-title" class="font-bold text-lg text-white flex items-center gap-2">Information</h3>
+        <button onclick="closeLegalModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="legal-modal-body" class="overflow-y-auto custom-scroll text-xs text-slate-200 leading-relaxed flex flex-col gap-4 pr-2 max-h-[60vh]"></div>
+      <div class="pt-3 border-t border-[#2A3344] flex justify-end">
+        <button onclick="closeLegalModal()" class="bg-[#00d672] hover:bg-[#00be64] text-white font-bold px-5 py-2 rounded-xl text-xs transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL VERIFICATION BAR (controlled by js/security.js) -->
+  <div id="email-verify-bar" class="hidden fixed bottom-0 left-0 right-0 z-[80] bg-[#ED1E4C] text-white">
+    <div class="max-w-screen-2xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3">
+      <p class="text-[13px] sm:text-[14px] font-semibold leading-snug">Check your inbox to verify your email</p>
+      <div class="flex items-center gap-2 shrink-0">
+        <button type="button" id="email-verify-resend-btn" class="bg-white text-[#ED1E4C] font-bold text-[12px] sm:text-[13px] px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition">Resend</button>
+        <button type="button" id="email-verify-close-btn" class="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center text-white text-lg leading-none" aria-label="Close">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERRAL MODAL (controlled by js/referral.js) -->
+  <div id="referral-modal" class="hidden fixed inset-0 z-[70] modal-backdrop flex items-center justify-center p-4">
+    <div class="modal-card bg-[#1E2532] border border-[#2A3344] w-full max-w-md rounded-2xl p-5 sm:p-6 flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-hidden">
+      <div class="flex items-center justify-between gap-3 border-b border-[#2A3344] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#00d672]/15 border border-[#00d672]/25 flex items-center justify-center">
+            <i data-lucide="users" class="w-4 h-4 text-[#00d672]"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-[15px] leading-tight">Referrals</h3>
+            <p class="text-[11px] text-slate-500">Earn 7% lifetime commission</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeReferralModal()" class="w-8 h-8 rounded-xl bg-[#252D3C] hover:bg-[#2A3344] text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="referral-modal-body" class="overflow-y-auto custom-scroll flex-1 min-h-0 flex flex-col gap-4"></div>
+    </div>
+  </div>
+
+  <!--
+    HELP & SUPPORT admin config
+    1) Main Admin: set UUID(s) below, or sign in with admin@gollah.top
+    2) Co-Admins: Main Admin → Help tab → Co-Admins (max 2 UUIDs, no code edit)
+    3) Optional bootstrap: window.GOLLAH_FORCE_MAIN_ADMIN = true
+  -->
+  <script>
+    window.GOLLAH_MAIN_ADMIN_IDS = window.GOLLAH_MAIN_ADMIN_IDS || [
+      // 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'  // Profile → UID
+    ];
+    window.GOLLAH_MAIN_ADMIN_EMAILS = window.GOLLAH_MAIN_ADMIN_EMAILS || ['admin@gollah.top'];
+    window.GOLLAH_CO_ADMIN_IDS = window.GOLLAH_CO_ADMIN_IDS || [];
+  </script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/live-ticker.js"></script>
+  <script src="js/offers.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui-core.js"></script>
+  <script src="js/ranking.js"></script>
+  <script src="js/security.js?v=2"></script>
+  <script src="js/referral.js"></script>
+</body>
+</html>
